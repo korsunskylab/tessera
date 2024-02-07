@@ -1,0 +1,28 @@
+Package: cygnus
+Title: Tiling for spatial clustering 
+Version: 0.1
+Authors@R: c(
+    person("Ilya", "Korsunsky", email = "ilya.korsunsky@gmail.com", 
+        role = c("cre", "aut"), comment = c(ORCID = "0000-0003-4848-3948")),
+    person("Daniel", "Stein", 
+        role = "aut")
+    )
+Description: Tiling package 
+License: GPL-3
+LazyData: true
+Encoding: UTF-8
+Depends: R (>= 3.4.0), Rcpp, data.table
+LinkingTo: Rcpp, RcppArmadillo
+biocViews:
+Imports: 
+    dplyr, 
+    methods,
+    tidyr, 
+    purrr,
+    tibble,
+    Matrix,
+    rlang,
+    stats, 
+    utils
+RoxygenNote: 7.2.3
+NeedsCompilation: yes
