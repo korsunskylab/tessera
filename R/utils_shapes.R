@@ -1,3 +1,4 @@
+#' @export
 trace_polygons = function(dmt, aggs) {
     res = trace_polygons_cpp(
         as.matrix(dmt$edges), 

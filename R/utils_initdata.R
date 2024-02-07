@@ -1,3 +1,4 @@
+#' @export
 init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     pts = cbind(X=X, Y=Y)
     
@@ -36,6 +37,7 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     return(data)
 }
 
+#' @export
 prune_graph = function(data, thresh_quantile = .95, mincells = 10) {    
     ## no cutting 
     if (thresh_quantile >= 1) {
@@ -149,6 +151,7 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     return(data)
 }
 
+#' @export
 add_exterior_triangles = function(data) {
     edges = data$edges
     tris = data$tris

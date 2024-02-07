@@ -1,3 +1,4 @@
+#' @export
 smooth_field = function(coords, field, adj, include_self=TRUE,
                         distance="euclidean", similarity="euclidean") {
     if (include_self) diag(adj) = 1
@@ -40,6 +41,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 }
 
 
+#' @export
 compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) {
     field = list()
 
@@ -82,6 +84,7 @@ compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) 
     return(field)
 }
 
+#' @export
 compress_gradients_svd = function(field) {
     ## compress gradients into 2D representations 
     field$pts_svd = compress_field_cpp(field$pts)
@@ -98,6 +101,7 @@ compress_gradients_svd = function(field) {
 }
 
 
+#' @export
 estimate_field = function(coords, adj, embeddings) {
     diag(adj) = 0 ## cannot include self by definition 
     res = estimate_field_cpp(

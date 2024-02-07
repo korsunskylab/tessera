@@ -1,3 +1,4 @@
+#' @export
 dmt_get_separatrices = function(dmt) {
     ## Reduce graphs with intersecting saddles
     dual_saddles = c(
@@ -11,7 +12,7 @@ dmt_get_separatrices = function(dmt) {
     return(e_sep)
 }
 
-## sum of singular values 
+#' @export
 dmt_set_f = function(dmt, field) {
     dmt$pts$f = rowSums(field$pts_svd[, 5:6])
     dmt$tris$f = rowSums(field$tris_svd[, 5:6])
@@ -21,6 +22,7 @@ dmt_set_f = function(dmt, field) {
 }
 
 
+#' @export
 do_primary_forest = function(dmt) {
     res = do_dmt_forest_cpp(
         -dmt$pts$f, 
@@ -36,6 +38,7 @@ do_primary_forest = function(dmt) {
     return(res)
 }
 
+#' @export
 do_dual_forest = function(dmt) {
     res = do_dmt_forest_cpp(
         dmt$tris$f, 
@@ -52,6 +55,7 @@ do_dual_forest = function(dmt) {
 }
 
 
+#' @export
 trace_paths = function(dmt, dual, saddles) {
     # saddles = intersect(prim$saddles, dual$saddles)    
     epaths = trace_epaths_cpp(
@@ -66,6 +70,7 @@ trace_paths = function(dmt, dual, saddles) {
 }
 
 
+#' @export
 get_boundary_shape = function(.SD, boundary) {
     ## Find endpoints of open line 
     i = as.integer(names(which(table(c(.SD$from_id, .SD$to_id)) == 1)))
@@ -125,6 +130,7 @@ get_boundary_shape = function(.SD, boundary) {
 }
     
 
+#' @export
 dmt_init_tiles = function(dmt) {
     aggs = list()
 
@@ -175,6 +181,7 @@ dmt_init_tiles = function(dmt) {
 }
 
 
+#' @export
 dmt_assign_tiles = function(dmt) {
     e = setdiff(seq_len(nrow(dmt$edges)), dmt$e_sep)
     # igraph::components(igraph::from_edgelist()$fun(as.matrix(dmt$edges)[e, c("from_pt", "to_pt")], FALSE))$membership

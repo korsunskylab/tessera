@@ -1,3 +1,4 @@
+#' @export
 GetTiles = function(
     X, Y, counts, 
     

@@ -1,5 +1,6 @@
 ## All functions for performing tile-based analysis on multiple samples 
 
+#' @export
 dmt_bind2 = function(dmt1, dmt2) {
     return(list(pts = bind_rows(dmt1$pts, dmt2$pts)))
     # return(list(
@@ -8,6 +9,7 @@ dmt_bind2 = function(dmt1, dmt2) {
     # ))
 }
 
+#' @export
 aggs_bind2 = function(aggs1, aggs2) {
     return(list(
         meta_data = bind_rows(aggs1$meta_data, aggs2$meta_data), 
@@ -17,6 +19,7 @@ aggs_bind2 = function(aggs1, aggs2) {
 
 }
 
+#' @export
 bind_objs = function(objs) {
     ## First, simplify and prepare objects for merging 
     objs = imap(objs, function(obj, sample_name) {

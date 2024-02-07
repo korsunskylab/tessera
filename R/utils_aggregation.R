@@ -1,3 +1,4 @@
+#' @export
 init_scores = function(aggs, agg_mode, ...) {
     ## (1) Gene expression Scores
     # aggs$edges$ll = as.numeric(get_edges_ll(
@@ -222,6 +223,7 @@ init_scores = function(aggs, agg_mode, ...) {
 
 
 
+#' @export
 pcs_to_rgb = function(V) {
     rgb = uwot::umap(as.matrix(V), min_dist=.05, spread=.2, n_components = 3L, fast_sgd = TRUE)
     rgb = sweep(rgb, 2, apply(rgb, 2, min), '-') 
@@ -234,6 +236,7 @@ pcs_to_rgb = function(V) {
     
 }
 
+#' @export
 color_aggs = function(aggs, seed=1) {
     set.seed(seed)
     ## First, color discrete components with different colors
@@ -273,6 +276,7 @@ color_aggs = function(aggs, seed=1) {
 }
 
 
+#' @export
 merge_aggs = function(
     aggs, agg_mode, 
     d_mu=NULL, d_sig=NULL, iter_max=NULL,
@@ -384,6 +388,7 @@ merge_aggs = function(
 }
 
     
+#' @export
 update_dmt_aggid = function(dmt, aggs) {    
     dmt$pts$agg_id = aggs$aggmap[dmt$pts$agg_id]
     dmt$edges$agg_from = dmt$pts$agg_id[dmt$edges$from_pt]
@@ -391,6 +396,7 @@ update_dmt_aggid = function(dmt, aggs) {
     return(dmt)
 }
 
+#' @export
 update_agg_shapes = function(dmt, aggs) {
     aggs$meta_data$shape = trace_polygons(dmt, aggs)
     xy = st_coordinates(st_centroid(aggs$meta_data$shape))
