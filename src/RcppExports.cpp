@@ -11,6 +11,22 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// scaleRows_dgc
+arma::mat scaleRows_dgc(const arma::vec& x, const arma::vec& p, const arma::vec& i, int ncol, int nrow, float thresh);
+RcppExport SEXP _cygnus_scaleRows_dgc(SEXP xSEXP, SEXP pSEXP, SEXP iSEXP, SEXP ncolSEXP, SEXP nrowSEXP, SEXP threshSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type ncol(ncolSEXP);
+    Rcpp::traits::input_parameter< int >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< float >::type thresh(threshSEXP);
+    rcpp_result_gen = Rcpp::wrap(scaleRows_dgc(x, p, i, ncol, nrow, thresh));
+    return rcpp_result_gen;
+END_RCPP
+}
 // st_mats_perimeter
 arma::vec st_mats_perimeter(std::vector<arma::mat>& Xvec);
 RcppExport SEXP _cygnus_st_mats_perimeter(SEXP XvecSEXP) {
@@ -427,6 +443,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_cygnus_scaleRows_dgc", (DL_FUNC) &_cygnus_scaleRows_dgc, 6},
     {"_cygnus_st_mats_perimeter", (DL_FUNC) &_cygnus_st_mats_perimeter, 1},
     {"_cygnus_get_e_minus_epaths_saddles", (DL_FUNC) &_cygnus_get_e_minus_epaths_saddles, 3},
     {"_cygnus_is_in_list", (DL_FUNC) &_cygnus_is_in_list, 2},
