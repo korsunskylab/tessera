@@ -261,7 +261,7 @@ color_aggs = function(aggs, seed=1) {
     aggs$meta_data$color = tableau_color_pal('Classic 20')(length(unique(y)))[y]
     
     ## Next, color by continuous scale from gene expression 
-    aggs$logcpx = normalizeData(aggs$counts, median(colSums(aggs$counts)), 'log')
+    aggs$logcpx = normalizeData(aggs$counts, median(Matrix::colSums(aggs$counts)), 'log')
     aggs$pca = weighted_pca(aggs$logcpx, rep(1, nrow(aggs$meta_data)), npc = 10, do_corr = TRUE)    
     aggs$meta_data$rgb = pcs_to_rgb(aggs$pca$embeddings)
     aggs$logcpx = NULL
@@ -364,9 +364,9 @@ merge_aggs = function(
         min_npts, 
         max_npts
     )
-    aggs_keep = which(map_int(memory, length) > 0)
+    aggs_keep = which(purrr::map_int(memory, length) > 0)
     memory = memory[aggs_keep]
-    memory = map(memory, `+`, 1)
+    memory = purrr::map(memory, `+`, 1)
     
     o = order(Reduce(c, memory))
     aggmap = rep(seq_len(length(memory)), map_int(memory, length))[o]                               

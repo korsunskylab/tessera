@@ -175,8 +175,8 @@ dmt_init_tiles = function(dmt) {
     aggs$edges = aggs$edges[edge_lens, on = c('from', 'to')]
     
     design = Matrix::sparse.model.matrix(~0+factor(agg_id), dmt$pts)
-    design = design %*% Matrix::Diagonal(x = 1/colSums(design)) 
-    aggs$pcs = as.matrix(t(design) %*% as.matrix(dmt$udv_cells$embeddings))
+    design = design %*% Matrix::Diagonal(x = 1/Matrix::colSums(design)) 
+    aggs$pcs = as.matrix(Matrix::t(design) %*% as.matrix(dmt$udv_cells$embeddings))
     return(aggs)
 }
 

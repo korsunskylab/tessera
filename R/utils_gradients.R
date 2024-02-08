@@ -60,9 +60,9 @@ compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) 
     ## Field on tris
     ## Now, we need to do some tensor math to derive fields for each triangle. 
     field$tris = array(dim = c(2, dim(field$pts)[2], nrow(dmt$tris)))
-    field$tris[1, , ] = as.matrix(field$pts[1, , ] %*% t(dmt$tri_to_pt))
-    field$tris[2, , ] = as.matrix(field$pts[2, , ] %*% t(dmt$tri_to_pt))
-    field$tris = sweep(field$tris, 3, rowSums(dmt$tri_to_pt), '/')
+    field$tris[1, , ] = as.matrix(field$pts[1, , ] %*% Matrix::t(dmt$tri_to_pt))
+    field$tris[2, , ] = as.matrix(field$pts[2, , ] %*% Matrix::t(dmt$tri_to_pt))
+    field$tris = sweep(field$tris, 3, Matrix::rowSums(dmt$tri_to_pt), '/')
 
     ## Finally on edges 
     # i_edges_prim = which(!is.na(dmt$edges$from_pt))
@@ -71,15 +71,15 @@ compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) 
     y1 = factor(dmt$edges$from_pt, levels=1:nrow(dmt$pts))
     y2 = factor(dmt$edges$to_pt, levels=1:nrow(dmt$pts))
     adj_edges_to_pts = Matrix::sparse.model.matrix(~0+y1) + Matrix::sparse.model.matrix(~0+y2)
-    field$edges_pts[1, , ] = as.matrix(field$pts[1, , ] %*% t(adj_edges_to_pts))
-    field$edges_pts[2, , ] = as.matrix(field$pts[2, , ] %*% t(adj_edges_to_pts))
+    field$edges_pts[1, , ] = as.matrix(field$pts[1, , ] %*% Matrix::t(adj_edges_to_pts))
+    field$edges_pts[2, , ] = as.matrix(field$pts[2, , ] %*% Matrix::t(adj_edges_to_pts))
 
     field$edges_tris = array(dim = c(2, dim(field$pts)[2], nrow(dmt$edges)))
     y1 = factor(dmt$edges$from_tri, levels=1:nrow(dmt$tris))
     y2 = factor(dmt$edges$to_tri, levels=1:nrow(dmt$tris))
     adj_edges_to_tris = Matrix::sparse.model.matrix(~0+y1) + Matrix::sparse.model.matrix(~0+y2)
-    field$edges_tris[1, , ] = as.matrix(field$tris[1, , ] %*% t(adj_edges_to_tris))
-    field$edges_tris[2, , ] = as.matrix(field$tris[2, , ] %*% t(adj_edges_to_tris))
+    field$edges_tris[1, , ] = as.matrix(field$tris[1, , ] %*% Matrix::t(adj_edges_to_tris))
+    field$edges_tris[2, , ] = as.matrix(field$tris[2, , ] %*% Matrix::t(adj_edges_to_tris))
     
     return(field)
 }

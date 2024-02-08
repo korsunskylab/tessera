@@ -29,13 +29,12 @@ GetTiles = function(
     ## STEP 0: PREPARE DATA STRUCTURES
     if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
     dmt = init_data(X, Y, counts, meta_data, meta_vars_include)
-    # dmt = init_data(meta_data$X, meta_data$Y, counts, meta_data, meta_vars_include)
     dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile, mincells = prune_min_cells) 
     dmt = add_exterior_triangles(dmt)
     
     if (is.null(pca_weight_by)) {
         dmt$udv_cells = dmt$counts %>% 
-            normalizeData(median(colSums(dmt$counts)), 'log') %>% 
+            normalizeData(median(Matrix::colSums(dmt$counts)), 'log') %>% 
             weighted_pca(rep(1, ncol(dmt$counts)), npc = npcs, do_corr = FALSE)
     } else {
         stopifnot(pca_weight_by %in% colnames(dmt$pts))
@@ -44,7 +43,7 @@ GetTiles = function(
         w = w * (length(y) / sum(w))
 
         dmt$udv_cells = dmt$counts %>% 
-            normalizeData(median(colSums(dmt$counts)), 'log') %>% 
+            normalizeData(median(Matrix::colSums(dmt$counts)), 'log') %>% 
             weighted_pca(w, npc = npcs, do_corr = FALSE)
     }
 

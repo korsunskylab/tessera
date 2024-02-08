@@ -91,7 +91,7 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     pts_by_comps = Matrix::t(tri_to_pt) %*% Matrix::sparse.model.matrix(~0+comp, tris)
     colnames(pts_by_comps) = gsub('^comp', '', colnames(pts_by_comps))
     pts_by_comps@x = rep(1, length(pts_by_comps@x)) ## count each cell once 
-    pts_per_comp = colSums(pts_by_comps)
+    pts_per_comp = Matrix::colSums(pts_by_comps)
     comps_keep = as.integer(names(which(pts_per_comp >= mincells)))
     
     ## keep triangles in good components 
@@ -102,7 +102,7 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     ##     >0 means you belong to at least one good component
     ##     ==1 means that you cannot bridge between two components 
     ##     ==1 does not prevent weakly connected holes in the same component 
-    pts$qc = pts$qc & (rowSums(pts_by_comps[, comps_keep]) > 0)
+    pts$qc = pts$qc & (Matrix::rowSums(pts_by_comps[, comps_keep]) > 0)
     # pts$qc = pts$qc & (rowSums(pts_by_comps[, comps_keep]) == 1) 
     
     ## Propagate it down to edges 
