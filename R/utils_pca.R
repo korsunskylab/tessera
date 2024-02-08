@@ -26,12 +26,11 @@ do_pca = function(counts, npcs) {
     logcpx = normalize_data(counts)
     Z = scale_data(logcpx)
     Z = Z[which(is.na(Matrix::rowSums(Z)) == 0), ]
-    pres = RSpectra::svds(X, npcs)
-    V = (Matrix::Diagonal(x = 1 / sqrt(weights)) %*% pres$v) %*% diag(pres$d)
-    V = as.matrix(V)
-    colnames(V) = paste0('PC', 1:npc)
-    row.names(V) = colnames(X)
-    colnames(pres$u) = paste0('PC', 1:npc)
-    row.names(pres$u) = row.names(X)
+    pres = RSpectra::svds(Z, npcs)
+    V = sweep(pres$v, 2, pres$d, '*')
+    colnames(V) = paste0('PC', 1:npcs)
+    row.names(V) = colnames(Z)
+    colnames(pres$u) = paste0('PC', 1:npcs)
+    row.names(pres$u) = row.names(Z)
     return(list(loadings = pres$u, embeddings = V))
 }
