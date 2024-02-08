@@ -1,5 +1,4 @@
 inst/doc
-*.ipynb
 .DS_Store
 .ipynb_checkpoints
 **/.ipynb_checkpoints
