@@ -32,21 +32,6 @@ GetTiles = function(
     dmt = add_exterior_triangles(dmt)
 
     dmt$udv_cells = do_pca(dmt$counts, npcs)
-    
-#     if (is.null(pca_weight_by)) {
-#         dmt$udv_cells = dmt$counts %>% 
-#             normalizeData(median(Matrix::colSums(dmt$counts)), 'log') %>% 
-#             weighted_pca(rep(1, ncol(dmt$counts)), npc = npcs, do_corr = FALSE)
-#     } else {
-#         stopifnot(pca_weight_by %in% colnames(dmt$pts))
-#         y = dmt$pts[[pca_weight_by]]
-#         w = as.numeric(1 / table(y)[y])
-#         w = w * (length(y) / sum(w))
-
-#         dmt$udv_cells = dmt$counts %>% 
-#             normalizeData(median(Matrix::colSums(dmt$counts)), 'log') %>% 
-#             weighted_pca(w, npc = npcs, do_corr = FALSE)
-#     }
 
     ## STEP 1: GRADIENTS 
     if (verbose) message('STEP 1: GRADIENTS ')
