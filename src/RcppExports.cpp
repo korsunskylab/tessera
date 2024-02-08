@@ -251,18 +251,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// nn_touches_2_vertices
-std::vector<std::list<unsigned> > nn_touches_2_vertices(std::vector<std::list<unsigned> > nn_touches, arma::imat triplets);
-RcppExport SEXP _cygnus_nn_touches_2_vertices(SEXP nn_touchesSEXP, SEXP tripletsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<std::list<unsigned> > >::type nn_touches(nn_touchesSEXP);
-    Rcpp::traits::input_parameter< arma::imat >::type triplets(tripletsSEXP);
-    rcpp_result_gen = Rcpp::wrap(nn_touches_2_vertices(nn_touches, triplets));
-    return rcpp_result_gen;
-END_RCPP
-}
 // smooth_field_cpp
 arma::cube smooth_field_cpp(arma::uvec& pvec, arma::uvec& adj_i, arma::uvec& adj_p, arma::cube& field, arma::mat& coords, unsigned distance, unsigned similarity);
 RcppExport SEXP _cygnus_smooth_field_cpp(SEXP pvecSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP, SEXP fieldSEXP, SEXP coordsSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
@@ -458,7 +446,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_cygnus_trace_epaths_cpp", (DL_FUNC) &_cygnus_trace_epaths_cpp, 6},
     {"_cygnus_get_e_sep", (DL_FUNC) &_cygnus_get_e_sep, 3},
     {"_cygnus_prune_e_sep", (DL_FUNC) &_cygnus_prune_e_sep, 4},
-    {"_cygnus_nn_touches_2_vertices", (DL_FUNC) &_cygnus_nn_touches_2_vertices, 2},
     {"_cygnus_smooth_field_cpp", (DL_FUNC) &_cygnus_smooth_field_cpp, 7},
     {"_cygnus_compress_field_cpp", (DL_FUNC) &_cygnus_compress_field_cpp, 1},
     {"_cygnus_estimate_field_cpp", (DL_FUNC) &_cygnus_estimate_field_cpp, 4},

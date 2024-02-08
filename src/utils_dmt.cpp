@@ -94,8 +94,6 @@ Rcpp::List do_dmt_forest_cpp(
                 parent_edge(p1) = e; 
                 parent(p1) = p2; 
             }
-            // labels(p1) = critpts.size(); 
-            // labels(p2) = critpts.size(); 
             // label is the index of critical point (1-indexed)
             labels(p1) = critpts.back(); 
             labels(p2) = critpts.back(); 
@@ -181,44 +179,6 @@ std::vector<std::list<unsigned> > trace_epaths_cpp(
 }
 
 
-/* Copy and Pasted from utils_shape.cpp */
-arma::uvec arma_setdiff2(const arma::uvec& vec1, const arma::uvec& vec2) {
-    // Create a temporary vector to store the result
-    arma::uvec diff;
-    
-    // Sort the input vectors to prepare for set difference
-    arma::uvec sorted_vec1 = arma::sort(vec1);
-    arma::uvec sorted_vec2 = arma::sort(vec2);
-
-    // Indices for iterating over the vectors
-    size_t i = 0, j = 0;
-
-    // Iterate through sorted vectors to find the set difference
-    while (i < sorted_vec1.n_elem && j < sorted_vec2.n_elem) {
-        if (sorted_vec1(i) < sorted_vec2(j)) {
-            // Add element to the difference vector if it's in vec1 but not in vec2
-            diff.resize(diff.n_elem + 1);
-            diff(diff.n_elem - 1) = sorted_vec1(i);
-            ++i;
-        } else if (sorted_vec1(i) == sorted_vec2(j)) {
-            // If the elements are equal, move to the next elements in both vectors
-            ++i;
-            ++j;
-        } else {
-            // If the element in vec2 is smaller, move to the next element in vec2
-            ++j;
-        }
-    }
-
-    // Add remaining elements of vec1 (if any) to the difference vector
-    while (i < sorted_vec1.n_elem) {
-        diff.resize(diff.n_elem + 1);
-        diff(diff.n_elem - 1) = sorted_vec1(i);
-        ++i;
-    }
-
-    return diff;
-}
 
 // [[Rcpp::export]]
 arma::uvec get_e_sep(
@@ -240,6 +200,7 @@ arma::uvec get_e_sep(
 }
 
 
+extern arma::uvec arma_setdiff(const arma::uvec& vec1, const arma::uvec& vec2); 
 
 
 // [[Rcpp::export]]
@@ -249,8 +210,6 @@ arma::uvec prune_e_sep(
     std::vector<bool>  is_tri_external, // 0-indexed
     arma::uvec e_sep // 0-indexed
 ) {
-    // unsigned IDX_FROM_TRI = 2; 
-    // unsigned IDX_TO_TRI = 3; 
     int u, v, e; 
     
     // get all separatrices
@@ -314,9 +273,8 @@ arma::uvec prune_e_sep(
         
         // remove e from separatrix
         e_sep_remove(n_remove++) = e; 
-        // e_sep = e_sep(arma::find(e_sep != e)); 
     }
-    e_sep = arma_setdiff2(e_sep, e_sep_remove.rows(0, n_remove-1)); 
+    e_sep = arma_setdiff(e_sep, e_sep_remove.rows(0, n_remove-1)); 
     return e_sep; 
 }
 

@@ -61,10 +61,6 @@ prune_e_sep <- function(edges, ntris, is_tri_external, e_sep) {
     .Call('_cygnus_prune_e_sep', PACKAGE = 'cygnus', edges, ntris, is_tri_external, e_sep)
 }
 
-nn_touches_2_vertices <- function(nn_touches, triplets) {
-    .Call('_cygnus_nn_touches_2_vertices', PACKAGE = 'cygnus', nn_touches, triplets)
-}
-
 smooth_field_cpp <- function(pvec, adj_i, adj_p, field, coords, distance, similarity) {
     .Call('_cygnus_smooth_field_cpp', PACKAGE = 'cygnus', pvec, adj_i, adj_p, field, coords, distance, similarity)
 }

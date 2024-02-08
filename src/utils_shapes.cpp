@@ -10,26 +10,25 @@
 #include <boost/graph/connected_components.hpp>
 
 
-unsigned IDX_FROM_PT = 0;
-unsigned IDX_TO_PT = 1;
-unsigned IDX_FROM_TRI = 2;
-unsigned IDX_TO_TRI = 3;
-unsigned IDX_X0_PT = 4;
-unsigned IDX_X1_PT = 5;
-unsigned IDX_Y0_PT = 6;
-unsigned IDX_Y1_PT = 7;
-unsigned IDX_X0_TRI = 8;
-unsigned IDX_X1_TRI = 9;
-unsigned IDX_Y0_TRI = 10;
-unsigned IDX_Y1_TRI = 11;
-unsigned IDX_LENGTH_PT = 12;
-unsigned IDX_LENGTH_TRI = 13;
-// unsigned IDX_QC = 14;
-unsigned IDX_BOUNDARY = 14;
-unsigned IDX_F_PRIM = 15;
-unsigned IDX_F_DUAL = 16;
-unsigned IDX_AGG_FROM = 17;
-unsigned IDX_AGG_TO = 18;
+extern unsigned IDX_FROM_PT;
+extern unsigned IDX_TO_PT; 
+extern unsigned IDX_FROM_TRI; 
+extern unsigned IDX_TO_TRI; 
+extern unsigned IDX_X0_PT; 
+extern unsigned IDX_X1_PT; 
+extern unsigned IDX_Y0_PT; 
+extern unsigned IDX_Y1_PT; 
+extern unsigned IDX_X0_TRI; 
+extern unsigned IDX_X1_TRI; 
+extern unsigned IDX_Y0_TRI; 
+extern unsigned IDX_Y1_TRI; 
+extern unsigned IDX_LENGTH_PT; 
+extern unsigned IDX_LENGTH_TRI; 
+extern unsigned IDX_BOUNDARY; 
+extern unsigned IDX_F_PRIM; 
+extern unsigned IDX_F_DUAL; 
+extern unsigned IDX_AGG_FROM; 
+extern unsigned IDX_AGG_TO;
 
 
 using namespace Rcpp;
@@ -300,48 +299,10 @@ std::vector<arma::uvec> get_agg_to_edge(
 }
 
 
-arma::uvec arma_setdiff1(const arma::uvec& vec1, const arma::uvec& vec2) {
-    // Create a temporary vector to store the result
-    arma::uvec diff;
-    
-    // Sort the input vectors to prepare for set difference
-    arma::uvec sorted_vec1 = arma::sort(vec1);
-    arma::uvec sorted_vec2 = arma::sort(vec2);
-
-    // Indices for iterating over the vectors
-    size_t i = 0, j = 0;
-
-    // Iterate through sorted vectors to find the set difference
-    while (i < sorted_vec1.n_elem && j < sorted_vec2.n_elem) {
-        if (sorted_vec1(i) < sorted_vec2(j)) {
-            // Add element to the difference vector if it's in vec1 but not in vec2
-            diff.resize(diff.n_elem + 1);
-            diff(diff.n_elem - 1) = sorted_vec1(i);
-            ++i;
-        } else if (sorted_vec1(i) == sorted_vec2(j)) {
-            // If the elements are equal, move to the next elements in both vectors
-            ++i;
-            ++j;
-        } else {
-            // If the element in vec2 is smaller, move to the next element in vec2
-            ++j;
-        }
-    }
-
-    // Add remaining elements of vec1 (if any) to the difference vector
-    while (i < sorted_vec1.n_elem) {
-        diff.resize(diff.n_elem + 1);
-        diff(diff.n_elem - 1) = sorted_vec1(i);
-        ++i;
-    }
-
-    return diff;
-}
+extern arma::uvec arma_setdiff(const arma::uvec& vec1, const arma::uvec& vec2); 
 
 
 
-
-// CAREFUL: everything is 1-indexed 
 // [[Rcpp::export]]
 arma::mat get_boundary_graph_cpp(
     arma::uvec e_dual, 
@@ -351,32 +312,21 @@ arma::mat get_boundary_graph_cpp(
     
     double ntris
 ) {
-    // Rcout << 1 << endl;
+    // CAREFUL: everything is 1-indexed 
+
     // (0) find edges and points of this aggid 
     arma::uvec e_bridge = arma::intersect(e_dual, e_prim); // 1-indexed
-    e_prim = arma_setdiff1(e_prim, e_bridge); 
+    e_prim = arma_setdiff(e_prim, e_bridge); 
     unsigned ndual = e_dual.n_elem; 
     unsigned nprim = e_prim.n_elem; 
     unsigned nbridge = e_bridge.n_elem; 
     arma::mat res = arma::zeros<arma::mat>(ndual + nprim + nbridge, 6); 
 
-    // Rcout << 2 << endl;
     // (1) re-index points to avoid collision with triangles
     // dual edges
-
-    
-    // arma::uvec i_cols_dual = {2, 3, 8, 10, 9, 11}; // 0-indexed
     arma::uvec i_cols_dual = {IDX_FROM_TRI, IDX_TO_TRI, IDX_X0_TRI, IDX_Y0_TRI, IDX_X1_TRI, IDX_Y1_TRI}; 
     res.rows(0, ndual-1) = E.submat(e_dual, i_cols_dual); 
 
-    // Rcout << 3 << endl;
-    // primary edges 
-    // e_prim.print("e_prim:");
-    // e_bridge.print("e_bridge:");
-    // e_dual.print("e_dual:");
-    // Rcout << "E dim: " << E.n_rows << "x" << E.n_cols << endl;
-    // Rcout << "ntris:" << ntris << endl;
-    // arma::uvec i_cols_prim = {0, 1, 4, 6, 5, 7}; // 0-indexed
     arma::uvec i_cols_prim = {IDX_FROM_PT, IDX_TO_PT, IDX_X0_PT, IDX_Y0_PT, IDX_X1_PT, IDX_Y1_PT}; 
     if (nprim > 0) {        
         // some shapes may only have primal edges that are also boundaries
@@ -385,12 +335,10 @@ arma::mat get_boundary_graph_cpp(
         res.submat(ndual, 0, ndual+nprim-1, 1) += ntris; 
     }
 
-    // Rcout << 4 << endl;
     // (2) create new edges to connect overlapping edges: 
     //     always connects external triangle (to_tri) with one point (to_pt or from_pt)    
     unsigned e, j;
     arma::uvec indices; 
-    // Rcout << 5 << endl;
     for (unsigned i = 0; i < nbridge; i++) {
         j = ndual+nprim+i; 
         e = e_bridge(i); 
@@ -408,23 +356,10 @@ arma::mat get_boundary_graph_cpp(
             res(j, 4) = E(e, IDX_X1_PT); 
             res(j, 5) = E(e, IDX_Y1_PT); 
         }
-    
-        // res(j, 6) = std::sqrt(
-        //     (res(j, 4) - res(j, 2)) * (res(j, 4) - res(j, 2)) + 
-        //     (res(j, 5) - res(j, 3)) * (res(j, 5) - res(j, 3))
-        // ); 
     }
 
-    // Rcout << 6 << endl;
     // map indices to consecutive numbers 
     reindex_cols(res, 0, 1);
-    // arma::vec vals = arma::zeros<arma::vec>(2 * res.n_rows); 
-    // vals.rows(0, res.n_rows-1) = res.col(0); 
-    // vals.rows(res.n_rows, 2*res.n_rows - 1) = res.col(1); 
-    // vals = mapToConsecutivePositions(vals); 
-    // res.col(0) = vals.rows(0, res.n_rows-1); 
-    // res.col(1) = vals.rows(res.n_rows, 2*res.n_rows - 1); 
-    
     return res; 
 
     
@@ -435,15 +370,10 @@ bool has_euler_cycle(
     Graph & g
 ) {
     arma::uvec degrees(boost::num_vertices(g), arma::fill::zeros);
-    // int odd_degree_count = 0;
     for (auto v : boost::make_iterator_range(boost::vertices(g))) {
         degrees[v] = boost::degree(v, g);
         if (degrees[v] % 2 != 0) {
-            return false; 
-            
-            // odd_degree_count++;
-            // if (odd_degree_count > 2) 
-                // return false; 
+            return false;             
         }
     }
     return true; 
@@ -457,9 +387,7 @@ arma::mat path_to_xymat(
     arma::uvec idx2 // to x1 y1 
 ) {
     arma::mat m = arma::zeros<arma::mat>(2 * edges.n_rows, 3); 
-    // arma::uvec idx = {0, 4, 6}; // from_pt x0_pt y0_pt
     m.rows(0, edges.n_rows-1) = edges.cols(idx1); 
-    // idx = {1, 5, 7}; // to_pt x1_pt y1_pt
     m.rows(edges.n_rows, 2*edges.n_rows-1) = edges.cols(idx2); 
     arma::uvec idx = arma::find_unique(m.col(0)); 
     m = m.rows(idx); 
@@ -479,16 +407,11 @@ Rcpp::List trace_polygons_cpp(
 ) {
     // NOTE: edges are 1-indexed
     // Create maps for fast indexing 
-    // Rcout << 1 << endl;
     std::vector<arma::uvec> agg_to_pt = splitSequence(pts_dmt_component); // i_pts, 0-indexed
-    // Rcout << 2 << endl;
     std::vector<arma::uvec> agg_to_boundary_edge = get_agg_to_boundary_edge(edges, naggs); // e_boundary 0-indexed
-    // Rcout << 3 << endl;
     std::vector<arma::uvec> agg_to_edge = get_agg_to_edge(edges, naggs, false); // e_dual 0-indexed
 
-    // Rcout << 4 << endl;
     
-    // std::vector<arma::mat> res(naggs); 
     Rcpp::List res(naggs); 
     arma::uvec path; 
     for (int aggid = 0; aggid < naggs; aggid++) {
@@ -540,9 +463,6 @@ Rcpp::List trace_polygons_cpp(
         } else {
             // Case III: Boundary mix of dual and primal graphs
             // Rcout << "III: " << aggid << endl;
-            // agg_to_edge[aggid].print("e_dual:");
-            // agg_to_pt[aggid].print("i_pts:");
-            // agg_to_boundary_edge[aggid].print("e_prim:");
             arma::mat edges_merged = get_boundary_graph_cpp(
                 agg_to_edge[aggid],  // e_dual
                 agg_to_pt[aggid], // i_pts
@@ -551,10 +471,8 @@ Rcpp::List trace_polygons_cpp(
                 ntris
             ); 
             
-            // edges_merged.print("edges_merged:"); 
             
             path = findLargestComponentEulerCycle(edges_merged); 
-            // path.print("path:"); 
             res[aggid] = path_to_xymat(
                 edges_merged,
                 path, 
@@ -562,8 +480,6 @@ Rcpp::List trace_polygons_cpp(
                 arma::uvec {1, 4, 5} // local indices
             );   
         } 
-    // return res; 
-        
     }
     return res; 
 }
