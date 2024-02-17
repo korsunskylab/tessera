@@ -169,7 +169,7 @@ arma::mat init_tris_cpp(
     arma::umat & triplets, 
     arma::mat & pts
 ) {
-    arma::mat tris = arma::zeros<arma::mat>(triplets.n_rows, 3); 
+    arma::mat tris = arma::zeros<arma::mat>(triplets.n_rows, 4); 
     // mean X 
     tris.col(0) = (
         pts.submat(triplets.col(0)-1, arma::uvec {0}) + 
@@ -180,7 +180,7 @@ arma::mat init_tris_cpp(
     tris.col(1) = (
         pts.submat(triplets.col(0)-1, arma::uvec {1}) + 
         pts.submat(triplets.col(1)-1, arma::uvec {1}) + 
-        pts.submat(triplets.col(2)-1, arma::uvec {1})         
+        pts.submat(triplets.col(2)-1, arma::uvec {1})   
     );
     tris /= 3; 
 
@@ -201,8 +201,11 @@ arma::mat init_tris_cpp(
         );
         
         s = .5 * (a + b + c);
-        tris(i, 2) = std::sqrt(s * (s-a) * (s-b) * (s-c));
+        tris(i, 2) = std::sqrt(s * (s-a) * (s-b) * (s-c)); // A
+        tris(i, 3) = (2 * tris(i, 2)) / std::min({a, b, c}); // A = .5 * b * h
     }
+
+    
     return tris; 
 }
 

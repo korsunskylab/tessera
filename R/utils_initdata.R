@@ -4,7 +4,7 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     
     triplets = geometry::delaunayn(pts)
     tris = init_tris_cpp(triplets, pts)
-    colnames(tris) = c('X', 'Y', 'area')
+    colnames(tris) = c('X', 'Y', 'area', 'height')
     tri_to_pt = sparseMatrix(i = rep(seq_len(nrow(triplets)), each = 3), j = c(t(triplets)), x = 1)
     
     edges = init_edges_cpp(triplets, as.matrix(pts), as.matrix(tris))
@@ -176,7 +176,7 @@ add_exterior_triangles = function(data) {
     edges[boundary==TRUE, `:=`(x0_tri = .5 * (x0_pt + x1_pt), y0_tri = .5 * (y0_pt + y1_pt))]
     tris = rbindlist(list(
         tris[, external := FALSE], 
-        edges[boundary == TRUE][, .(X=x0_tri, Y=y0_tri, area=0, external=TRUE)]
+        edges[boundary == TRUE][, .(X=x0_tri, Y=y0_tri, area=0, height=0, external=TRUE)]
     ))
     
     ## Add map from external tris to their points 
