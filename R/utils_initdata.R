@@ -102,7 +102,7 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     ##     >0 means you belong to at least one good component
     ##     ==1 means that you cannot bridge between two components 
     ##     ==1 does not prevent weakly connected holes in the same component 
-    pts$qc = pts$qc & (Matrix::rowSums(pts_by_comps[, comps_keep]) > 0)
+    pts$qc = pts$qc & (Matrix::rowSums(pts_by_comps[, comps_keep, drop=F]) > 0)
     # pts$qc = pts$qc & (rowSums(pts_by_comps[, comps_keep]) == 1) 
     
     ## Propagate it down to edges 
