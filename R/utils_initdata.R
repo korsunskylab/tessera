@@ -38,18 +38,21 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
 }
 
 #' @export
-prune_graph = function(data, thresh_quantile = .95, mincells = 10) {    
-    ## no cutting 
-    if (thresh_quantile >= 1) {
-        return(data)
-    } 
+prune_graph = function(data, thresh_quantile = .95, mincells = 10, thresh = NA) {    
+    if (is.na(thresh)) {
+        ## no cutting 
+        if (thresh_quantile >= 1) {
+            return(data)
+        } else {
+            thresh = quantile(data$edges$length_pt, thresh_quantile)
+        }
+    }
     
     pts = data$pts
     edges = data$edges 
     tris = data$tris
     tri_to_pt = data$tri_to_pt
 
-    thresh = quantile(data$edges$length_pt, thresh_quantile)
     edges[, qc := length_pt <= thresh]
     pts_keep = edges[qc == TRUE] %>% with(union(from_pt, to_pt))
     pts$qc = FALSE
