@@ -1,3 +1,32 @@
+#' Generate mesh data structure from coordinates, for input to DMT analysis
+#' 
+#' Creates a mesh from point coordinates using Delauney triangulation.
+#' Stores the points, triangles, and edges for the mesh, as well
+#' as a mapping from each triangle to its associated vertices.
+#' A gene-by-cell matrix can also be included, as well as additional
+#' metadata for each point.
+#' 
+#' @param X,Y A pair of numeric vectors with the coordinates for each of V points.
+#' @param counts A G x V gene-by-cell matrix of transcript counts.
+#' @param meta_data A data frame with additional cell metadata to include.
+#' @param meta_vars_include Names of columns in meta_data to include.
+#' 
+#' @returns A list containing the mesh data structures:
+#' * `pts` is a V-by-M data table with columns `X` and `Y` containing the
+#'   coordinates of cells and additional metadata.
+#' * `tris` is a F-by-4 data table containing the X,Y coordinates of each
+#'    triangle's centroid in the first two columns, and area and
+#'    largest height of each triangle in the last two columns.
+#' * `edges` is a E-by-14 data table with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
+#'   `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
+#'   `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
+#'   `x0_tri`, and `y0_tri` fields will contain NaN values.
+#' * `tri_to_pt` is a F-by-V sparse matrix with value 1 at (i,j) if
+#'   triangle i uses point j as a vertex.
+#' * `counts` is a G x V gene-by-cell matrix of transcript counts.
+#' 
+#' Note that all indices stored in these data structures are 1-indexed.
+#' 
 #' @export
 init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     pts = cbind(X=X, Y=Y)
@@ -37,6 +66,40 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     return(data)
 }
 
+#' Prunes mesh by eliminating long edges and small connected components
+#' 
+#' Pruning works in three steps:
+#' 1. Any triangle with an edge longer than a threshold length is removed.
+#'    Afterwards, any edge that no longer belongs to a triangle is removed.
+#'    Then any point that no longer belongs to an edge is removed.
+#' 2. Connected components of triangles with a shared edge are computed.
+#'    If everything is connected, then nothing is pruned.
+#' 3. Otherwise, components (and corresponding triangles) that contain less
+#'    than `mincells` points are removed. Afterwards, any edge that no
+#'    longer belongs to a triangle is removed. Then any point that no longer
+#'    belongs to an edge is removed.
+#' 
+#' @param data A list containing the mesh data structures:
+#' * `pts` is a V-by-M data table with columns `X` and `Y` containing the
+#'   coordinates of cells and additional metadata.
+#' * `tris` is a F-by-4 data table containing the X,Y coordinates of each
+#'    triangle's centroid in the first two columns, and area and
+#'    largest height of each triangle in the last two columns.
+#' * `edges` is a E-by-14 data table with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
+#'   `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
+#'   `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
+#'   `x0_tri`, and `y0_tri` fields will contain NaN values.
+#' * `tri_to_pt` is a F-by-V sparse matrix with value 1 at (i,j) if
+#'   triangle i uses point j as a vertex.
+#' @param thresh_quantile Floating point value between 0 and 1, inclusive.
+#'   Quantile of edge length above which edges are pruned. Defaults to 0.95.
+#' @param mincells Minimum number of cells required for a connected
+#'   component of triangles to be kept. Defaults to 10.
+#' 
+#' @returns A list containing the mesh data structures with (possibly)
+#'   fewer points, edges, and triangles. Indices have been updated since
+#'   some objects might have been removed.
+#' 
 #' @export
 prune_graph = function(data, thresh_quantile = .95, mincells = 10) {    
     ## no cutting 
@@ -151,6 +214,35 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     return(data)
 }
 
+#' For every edge on the boundary, adds a second degenerate triangle
+#' 
+#' Edges at the boundary will only border a single triangle.
+#' In order to deal with boundary conditions properly, this step
+#' ensures that every edge has two associated triangles (which use
+#' the edge) as well as two associated points (endpoints). The
+#' triangles that are added are degenerate triangles centered at
+#' the midpoint of each boundary edge.
+#' 
+#' @param data A list containing the mesh data structures:
+#' * `pts` is a V-by-M data table with columns `X` and `Y` containing the
+#'   coordinates of cells and additional metadata.
+#' * `tris` is a F-by-4 data table containing the X,Y coordinates of each
+#'    triangle's centroid in the first two columns, and area and
+#'    largest height of each triangle in the last two columns.
+#' * `edges` is a E-by-14 data table with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
+#'   `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
+#'   `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
+#'   `x0_tri`, and `y0_tri` fields will contain NaN values.
+#' * `tri_to_pt` is a F-by-V sparse matrix with value 1 at (i,j) if
+#'   triangle i uses point j as a vertex.
+#' 
+#' @returns A list containing the mesh data structures with (possibly)
+#'   additional triangles. The `tris` table is updated to include the added
+#'   external triangles. The `edge` table is updated so that boundary edges
+#'   point to the newly added triangles. Also `pts` is unchanged, `tri_to_pt`
+#'   is updated. Because new external triangles only have 2 associated points,
+#'   `tri_to_pt` has rows that sum to either 2 or 3.
+#' 
 #' @export
 add_exterior_triangles = function(data) {
     edges = data$edges
