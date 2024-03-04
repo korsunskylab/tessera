@@ -11,4 +11,4 @@ config.status
 *.swp
 ..Rcheck
 /Meta/
-
+src/*.dylib
