@@ -101,18 +101,21 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
 #'   some objects might have been removed.
 #' 
 #' @export
-prune_graph = function(data, thresh_quantile = .95, mincells = 10) {    
-    ## no cutting 
-    if (thresh_quantile >= 1) {
-        return(data)
-    } 
+prune_graph = function(data, thresh_quantile = .95, mincells = 10, thresh = NA) {    
+    if (is.na(thresh)) {
+        ## no cutting 
+        if (thresh_quantile >= 1) {
+            return(data)
+        } else {
+            thresh = quantile(data$edges$length_pt, thresh_quantile)
+        }
+    }
     
     pts = data$pts
     edges = data$edges 
     tris = data$tris
     tri_to_pt = data$tri_to_pt
 
-    thresh = quantile(data$edges$length_pt, thresh_quantile)
     edges[, qc := length_pt <= thresh]
     pts_keep = edges[qc == TRUE] %>% with(union(from_pt, to_pt))
     pts$qc = FALSE
@@ -165,7 +168,7 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10) {
     ##     >0 means you belong to at least one good component
     ##     ==1 means that you cannot bridge between two components 
     ##     ==1 does not prevent weakly connected holes in the same component 
-    pts$qc = pts$qc & (Matrix::rowSums(pts_by_comps[, comps_keep]) > 0)
+    pts$qc = pts$qc & (Matrix::rowSums(pts_by_comps[, comps_keep, drop=F]) > 0)
     # pts$qc = pts$qc & (rowSums(pts_by_comps[, comps_keep]) == 1) 
     
     ## Propagate it down to edges 
