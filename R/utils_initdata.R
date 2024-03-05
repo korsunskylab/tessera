@@ -95,6 +95,10 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
 #'   Quantile of edge length above which edges are pruned. Defaults to 0.95.
 #' @param mincells Minimum number of cells required for a connected
 #'   component of triangles to be kept. Defaults to 10.
+#' @param thresh Edge length above which edges are pruned. If equal to NA,
+#'   then this value is ignored and `thresh_quantile` is used to compute
+#'   the threshold. Otherwise, if `thresh` is set, then `thresh_quantile`
+#'   is ignored. Defaults to NA.
 #' 
 #' @returns A list containing the mesh data structures with (possibly)
 #'   fewer points, edges, and triangles. Indices have been updated since
