@@ -15,8 +15,8 @@ each point.}
 }
 \value{
 A M-by-4 matrix containing the X,Y coordinates of each
-  triangle's centroid in the first two columns, and area and
-  largest height of each triangle in the last two columns.
+triangle's centroid in the first two columns, and area and
+largest height of each triangle in the last two columns.
 }
 \description{
 Calculates triangles' centroids, areas, and heights from vertices

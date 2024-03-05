@@ -9,26 +9,26 @@ add_exterior_triangles(data)
 \arguments{
 \item{data}{A list containing the mesh data structures:
 \itemize{
-  \item{`pts`}{A V-by-M data table with columns `X` and `Y` containing the
-  coordinates of cells and additional metadata.}
-  \item{`tris`}{A F-by-4 data table containing the X,Y coordinates of each
-   triangle's centroid in the first two columns, and area and
-   largest height of each triangle in the last two columns.}
-  \item{`edges`}{A E-by-14 data table with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
-  `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
-  `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
-  `x0_tri`, and `y0_tri` fields will contain NaN values.}
-  \item{`tri_to_pt`}{A F-by-V sparse matrix with value 1 at (i,j) if
-  triangle i uses point j as a vertex.}
+\item \code{pts} is a V-by-M data table with columns \code{X} and \code{Y} containing the
+coordinates of cells and additional metadata.
+\item \code{tris} is a F-by-4 data table containing the X,Y coordinates of each
+triangle's centroid in the first two columns, and area and
+largest height of each triangle in the last two columns.
+\item \code{edges} is a E-by-14 data table with columns \code{from_pt}, \code{to_pt}, \code{from_tri}, \code{to_tri},
+\code{x0_pt}, \code{x1_pt}, \code{y0_pt}, \code{y1_pt}, \code{x0_tri}, \code{x1_tri}, \code{y0_tri}, \code{y1_tri},
+\code{length_pt}, \code{length_tri}. If only one triangle uses an edge, then the \code{from_tri},
+\code{x0_tri}, and \code{y0_tri} fields will contain NaN values.
+\item \code{tri_to_pt} is a F-by-V sparse matrix with value 1 at (i,j) if
+triangle i uses point j as a vertex.
 }}
 }
 \value{
 A list containing the mesh data structures with (possibly)
-  additional triangles. The `tris` table is updated to include the added
-  external triangles. The `edge` table is updated so that boundary edges
-  point to the newly added triangles. Also `pts` is unchanged, `tri_to_pt`
-  is updated. Because new external triangles only have 2 associated points,
-  `tri_to_pt` has rows that sum to either 2 or 3.
+additional triangles. The \code{tris} table is updated to include the added
+external triangles. The \code{edge} table is updated so that boundary edges
+point to the newly added triangles. Also \code{pts} is unchanged, \code{tri_to_pt}
+is updated. Because new external triangles only have 2 associated points,
+\code{tri_to_pt} has rows that sum to either 2 or 3.
 }
 \description{
 Edges at the boundary will only border a single triangle.

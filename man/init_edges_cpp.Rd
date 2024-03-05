@@ -18,12 +18,12 @@ triangle's centroid in the first two columns, and area and
 largest height of each triangle in the last two columns.}
 }
 \value{
-A E-by-14 matrix with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
-  `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
-  `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
-  `x0_tri`, and `y0_tri` fields will contain NaN values.
+A E-by-14 matrix with columns \code{from_pt}, \code{to_pt}, \code{from_tri}, \code{to_tri},
+\code{x0_pt}, \code{x1_pt}, \code{y0_pt}, \code{y1_pt}, \code{x0_tri}, \code{x1_tri}, \code{y0_tri}, \code{y1_tri},
+\code{length_pt}, \code{length_tri}. If only one triangle uses an edge, then the \code{from_tri},
+\code{x0_tri}, and \code{y0_tri} fields will contain NaN values.
 
-  Note that indices that reference the `pts` and `tris` tables are 1-indexed.
+Note that indices that reference the \code{pts} and \code{tris} tables are 1-indexed.
 }
 \description{
 Calculates triangles' centroids, areas, and heights from vertices
