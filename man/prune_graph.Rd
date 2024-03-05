@@ -27,6 +27,11 @@ Quantile of edge length above which edges are pruned. Defaults to 0.95.}
 
 \item{mincells}{Minimum number of cells required for a connected
 component of triangles to be kept. Defaults to 10.}
+
+\item{thresh}{Edge length above which edges are pruned. If equal to NA,
+then this value is ignored and \code{thresh_quantile} is used to compute
+the threshold. Otherwise, if \code{thresh} is set, then \code{thresh_quantile}
+is ignored. Defaults to NA.}
 }
 \value{
 A list containing the mesh data structures with (possibly)
