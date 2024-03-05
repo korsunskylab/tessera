@@ -7,6 +7,17 @@ using namespace std;
 // [[Rcpp::depends(Rcpp]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
+//' Z-score a sparse matrix across each row
+//'
+//' @param x,p,i Internal data structures from a
+//'   sparse matrix in dgCMatrix format.
+//' @param ncol,nrow Dimensions of sparse matrix input.
+//' @param thresh Z-scores above `thresh` and below
+//'   `-thresh` are clipped to `thresh` and `-thresh`,
+//'   respectively.
+//'
+//' @returns A dense matrix in column-major ordering
+//'   with dimensions `nrow` x `ncol`.
 // [[Rcpp::export]]
 arma::mat scaleRows_dgc(const arma::vec& x, const arma::vec& p, const arma::vec& i, 
                         int ncol, int nrow, float thresh) {
