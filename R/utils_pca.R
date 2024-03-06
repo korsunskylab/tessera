@@ -12,7 +12,7 @@
 #' @returns Normalized genes x cells matrix in
 #'   dgCMatrix sparse matrix format.
 #' 
-#' @noRd
+#' @export
 normalize_data = function(A, scaling_factor = NULL) {
     if (is.null(scaling_factor)) {
         scaling_factor = median(Matrix::colSums(A))
@@ -35,7 +35,7 @@ normalize_data = function(A, scaling_factor = NULL) {
 #' @returns Z-scored genes x cells matrix in
 #'   dgCMatrix sparse matrix format.
 #' 
-#' @noRd
+#' @export
 scale_data = function (A, margin = 1, thresh = 10) {
     A <- as(A, "dgCMatrix")
     if (margin != 1) 
