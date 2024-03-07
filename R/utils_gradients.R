@@ -42,7 +42,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 
 
 #' @export
-compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) {
+compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='none') {
     field = list()
 
     ## First on points 
@@ -53,7 +53,6 @@ compute_gradients = function(dmt, smooth_distance=NULL, smooth_similarity=NULL) 
     field$pts = estimate_field(coords, adj, embeddings)
 
     ## Smooth pt gradient first
-    # if (!is.null(smooth_distance) & !is.null(smooth_similarity))
     if (smooth_distance != 'none' & smooth_similarity != 'none')
         field$pts = smooth_field(coords, field=field$pts, adj, include_self=TRUE, distance=smooth_distance, similarity=smooth_similarity) 
     
