@@ -1,7 +1,11 @@
 #' @export
 smooth_field = function(coords, field, adj, include_self=TRUE,
                         distance="euclidean", similarity="euclidean") {
-    if (include_self) diag(adj) = 1
+    if (include_self) {
+        diag(adj) = 1
+    } else {
+        diag(adj) = 0
+    }
 
     ## method to compute distance between points 
     if (distance == "euclidean") {
