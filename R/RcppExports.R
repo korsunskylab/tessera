@@ -72,6 +72,29 @@ prune_e_sep <- function(edges, ntris, is_tri_external, e_sep) {
     .Call('_cygnus_prune_e_sep', PACKAGE = 'cygnus', edges, ntris, is_tri_external, e_sep)
 }
 
+#' Bilateral / anisotropic filtering of gradient field
+#' 
+#' Gradient fields are smoothed using bilateral filtering,
+#' in which the smoothed gradient of each point is computed as
+#' the weighted average of the neighbors' gradients, considering
+#' both distance in space and also similarity in gradients.
+#' 
+#' @param pvec,adj_i,adj_p A `N` x `N` sparse adjacency matrix
+#'   in dgCMatrix format: `pvec = diff(adj@p)`, `adj_i = adj@i`,
+#'   and `adj_p = adj@p`
+#' @param field A `2` x `D` x `N` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` latent variables at every point in space.
+#' @param coords A `N` x `2` matrix of cell coordinates.
+#' @param distance Method for computing distance score in weighted average.
+#'   See description for details. Defaults to `'euclidean'`.
+#' @param similarity Method for computing similarity score in weighted average.
+#'   See description for details. Defaults to `'euclidean'`.
+#' 
+#' @returns A `2` x `D` x `N` array in column-major ordering
+#'   containing the smoothed spatial gradient in expression for each of
+#'   `D` latent variables at every point in space.
+#' 
 smooth_field_cpp <- function(pvec, adj_i, adj_p, field, coords, distance, similarity) {
     .Call('_cygnus_smooth_field_cpp', PACKAGE = 'cygnus', pvec, adj_i, adj_p, field, coords, distance, similarity)
 }
@@ -80,6 +103,22 @@ compress_field_cpp <- function(field) {
     .Call('_cygnus_compress_field_cpp', PACKAGE = 'cygnus', field)
 }
 
+#' Compute a spatial gradient field at each point (cell)
+#'
+#' Distance between neighboring cells is normalized to unit distance
+#' so that only the direction from each cell to its neighbors matters.
+#' The gradient is then the average gradient in expression of each
+#' embedding dimension between the index cell and its neighbors.
+#'
+#' @param coords A `N` x `2` matrix of cell coordinates.
+#' @param embeddings A `N` x `D` matrix of cell embeddings.
+#' @param adj_i,adj_p A `N` x `N` sparse adjacency matrix
+#'   in dgCMatrix format.
+#'
+#' @returns A `2` x `D` x `N` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` embedding dimensions at every point in space.
+#'
 estimate_field_cpp <- function(coords, embeddings, adj_i, adj_p) {
     .Call('_cygnus_estimate_field_cpp', PACKAGE = 'cygnus', coords, embeddings, adj_i, adj_p)
 }
