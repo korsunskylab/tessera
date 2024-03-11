@@ -12,3 +12,4 @@ config.status
 ..Rcheck
 /Meta/
 src/*.dylib
+.vscode/*
