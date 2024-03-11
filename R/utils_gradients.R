@@ -130,11 +130,11 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #' \item{edges_pts}{A `2` x `D` x `E` array in column-major ordering
 #'   containing the spatial gradient in expression for each of
 #'   `D` latent variables at every primal edge (point-to-point) in the mesh.
-#'   Sum of the two endpoints.}
+#'   Average of the two endpoints.}
 #' \item{edges_tris}{A `2` x `D` x `E` array in column-major ordering
 #'   containing the spatial gradient in expression for each of
 #'   `D` latent variables at every dual edge (triangle-to-triangle) in the mesh.
-#'   Sum of the two adjacent triangles.}
+#'   Average of the two adjacent triangles.}
 #' 
 #' @export
 compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='none') {
@@ -167,6 +167,7 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
     adj_edges_to_pts = Matrix::sparse.model.matrix(~0+y1) + Matrix::sparse.model.matrix(~0+y2)
     field$edges_pts[1, , ] = as.matrix(field$pts[1, , ] %*% Matrix::t(adj_edges_to_pts))
     field$edges_pts[2, , ] = as.matrix(field$pts[2, , ] %*% Matrix::t(adj_edges_to_pts))
+    field$edges_pts = field$edges_pts / 2   # divide by 2 to keep same units as points and triangles
 
     field$edges_tris = array(dim = c(2, dim(field$pts)[2], nrow(dmt$edges)))
     y1 = factor(dmt$edges$from_tri, levels=1:nrow(dmt$tris))
@@ -174,6 +175,7 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
     adj_edges_to_tris = Matrix::sparse.model.matrix(~0+y1) + Matrix::sparse.model.matrix(~0+y2)
     field$edges_tris[1, , ] = as.matrix(field$tris[1, , ] %*% Matrix::t(adj_edges_to_tris))
     field$edges_tris[2, , ] = as.matrix(field$tris[2, , ] %*% Matrix::t(adj_edges_to_tris))
+    field$edges_tris = field$edges_tris / 2   # divide by 2 to keep same units as points and triangles
     
     return(field)
 }

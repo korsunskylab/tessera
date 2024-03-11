@@ -45,11 +45,11 @@ Average of the vertices (3 for full triangles, 2 for degenerate triangles).}
 \item{edges_pts}{A \code{2} x \code{D} x \code{E} array in column-major ordering
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every primal edge (point-to-point) in the mesh.
-Sum of the two endpoints.}
+Average of the two endpoints.}
 \item{edges_tris}{A \code{2} x \code{D} x \code{E} array in column-major ordering
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every dual edge (triangle-to-triangle) in the mesh.
-Sum of the two adjacent triangles.}
+Average of the two adjacent triangles.}
 }
 \description{
 First, spatial gradients for each embedding dimension are computed for every
