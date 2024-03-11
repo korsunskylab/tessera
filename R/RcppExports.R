@@ -276,8 +276,16 @@ get_boundary_graph_cpp <- function(e_dual, i_pts, e_prim, E, ntris) {
     .Call('_cygnus_get_boundary_graph_cpp', PACKAGE = 'cygnus', e_dual, i_pts, e_prim, E, ntris)
 }
 
-#' 
+#' Contruct shapes that outline each tile
 #'
+#' @param edges A matrix with `num_edges` rows with mesh edge information.
+#' @param naggs Number of tiles.
+#' @param ntrix Number of triangles in the mesh.
+#' @pts_dmt_component A length `num_points` vector with the unique ID for the
+#'   tile that each point belongs to.
+#'
+#' @returns A list of length `naggs` matrices that contain coordinates of the
+#'   polygons that trace the outline of each tile.
 #'
 trace_polygons_cpp <- function(edges, naggs, ntris, pts_dmt_component) {
     .Call('_cygnus_trace_polygons_cpp', PACKAGE = 'cygnus', edges, naggs, ntris, pts_dmt_component)
