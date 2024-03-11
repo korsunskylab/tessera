@@ -10,9 +10,9 @@
 #' included as possible saddle edges.
 #'
 #' @param dmt A DMT data structure with the following attributes:
-#'  \item{edges}{Data structure of edges in the mesh.}
-#'  \item{prim}{Data structure of primal minimum spanning forest.}
-#'  \item{dual}{Data structure of dual maximum spanning forest.}
+#'  * `edges`: Data structure of edges in the mesh.
+#'  * `prim`: Data structure of primal minimum spanning forest.
+#'  * `dual`: Data structure of dual maximum spanning forest.
 #'
 #' @returns A length `num_sep_edges` vector of edges (1-indexed) that make up the separatrices
 #' that separate points into different components.
@@ -36,12 +36,12 @@ dmt_get_separatrices = function(dmt) {
 #' @param field A gradient field with the compressed representations `pts_svd`,
 #'   `tris_svd`, `edges_pts_svd`, and `edges_tris_svd`. Each of these
 #'   is a `N` x `6` matrix with the following columns for each location:
-#'   \item{dx_grad,dy_grad}{x,y directions of unit vector in the
-#'     direction of greatest change (first singular vector).}
-#'   \item{dx_ortho,dy_ortho}{x,y directions of unit vector orthogonal
-#'     to the direction of greatest change (second singular vector).}
-#'   \item{len_grad,len_ortho}{Magnitude of directional derivative in the
-#'     gradient and orthogonal directions (singular values).} 
+#'   * `dx_grad,dy_grad`: x,y directions of unit vector in the
+#'     direction of greatest change (first singular vector).
+#'   * `dx_ortho,dy_ortho`: x,y directions of unit vector orthogonal
+#'     to the direction of greatest change (second singular vector).
+#'   * `len_grad,len_ortho`: Magnitude of directional derivative in the
+#'     gradient and orthogonal directions (singular values).
 #' 
 #' @returns `dmt` with the following additional attributes:
 #'   `dmt$pts$f`, `dmt$tris$f`, `dmt$edges$f_prim`, and `dmt$edges$f_dual`
@@ -64,25 +64,25 @@ dmt_set_f = function(dmt, field) {
 #' marked as possible saddle edges.
 #'
 #' @param dmt A DMT data structure with the following attributes:
-#'  \item{pts$f}{Scalar field values defined for each point.}
-#'  \item{edges$from_pt}{Index of first point joined by each edge.}
-#'  \item{edges$to_pt}{Index of second point joined by each edge.}
-#'  \item{edges$f_prim}{Scalar field values defined for each edge that connects two points.}
+#'  * `pts$f`: Scalar field values defined for each point.
+#'  * `edges$from_pt`: Index of first point joined by each edge.
+#'  * `edges$to_pt`: Index of second point joined by each edge.
+#'  * `edges$f_prim`: Scalar field values defined for each edge that connects two points.
 #'
 #' @returns A List with the following attributes (all indices are 1-indexed):
-#'  \item{edges}{A data.table with `forest_size` rows, where each row is a directed edge
+#'  * `edges`: A data.table with `forest_size` rows, where each row is a directed edge
 #'    in the minimum spanning forest. There are six columns:
-#'      \item{from,to}{Index of source and target points for each edge.}
-#'      \item{x0,y0}{Coordinates of source point for each edge.}
-#'      \item{x1,y1}{Coordinates of target point for each edge.}}
-#'  \item{saddles}{A length `num_saddles` vector with edge indices for possible saddle edges.}
-#'  \item{labels}{A length `num_points` vector of labels for the connected components in the
-#'    minimum spanning tree. Each connected component is labeled by the index of its critical point.}
-#'  \item{minima}{A length `num_critpts` vector of critical points (minima).}
-#'  \item{parent}{A length `num_points` vector containing the parent (source) point for each
-#'    point in the directed spanning forest. Critical points have no parent, so the value should be ignored.}
-#'  \item{parent_edge}{A length `num_points` vector containing the directed edge that has
-#'    each point as a target node. Critical points have no parent edge, so the value should be ignored.}
+#'      * `from,to`: Index of source and target points for each edge.
+#'      * `x0,y0`: Coordinates of source point for each edge.
+#'      * `x1,y1`: Coordinates of target point for each edge.
+#'  * `saddles`: A length `num_saddles` vector with edge indices for possible saddle edges.
+#'  * `labels`: A length `num_points` vector of labels for the connected components in the
+#'    minimum spanning tree. Each connected component is labeled by the index of its critical point.
+#'  * `minima`: A length `num_critpts` vector of critical points (minima).
+#'  * `parent`: A length `num_points` vector containing the parent (source) point for each
+#'    point in the directed spanning forest. Critical points have no parent, so the value should be ignored.
+#'  * `parent_edge`: A length `num_points` vector containing the directed edge that has
+#'    each point as a target node. Critical points have no parent edge, so the value should be ignored.
 #'
 #' @export
 do_primary_forest = function(dmt) {
@@ -109,25 +109,25 @@ do_primary_forest = function(dmt) {
 #' marked as possible saddle edges.
 #'
 #' @param dmt A DMT data structure with the following attributes:
-#'  \item{tris$f}{Scalar field values defined for each triangle.}
-#'  \item{edges$from_tri}{Index of first triangle joined by each edge.}
-#'  \item{edges$to_tri}{Index of second triangle joined by each edge.}
-#'  \item{edges$f_dual}{Scalar field values defined for each edge that connects two triangles.}
+#'  * `tris$f`: Scalar field values defined for each triangle.
+#'  * `edges$from_tri`: Index of first triangle joined by each edge.
+#'  * `edges$to_tri`: Index of second triangle joined by each edge.
+#'  * `edges$f_dual`: Scalar field values defined for each edge that connects two triangles.
 #'
 #' @returns A List with the following attributes (all indices are 1-indexed):
-#'  \item{edges}{A data.table with `forest_size` rows, where each row is a directed edge
+#'  * `edges`: A data.table with `forest_size` rows, where each row is a directed edge
 #'    in the maximum spanning forest. There are six columns:
-#'      \item{from,to}{Index of source and target triangles for each edge.}
-#'      \item{x0,y0}{Coordinates of source triangle for each edge.}
-#'      \item{x1,y1}{Coordinates of target triangle for each edge.}}
-#'  \item{saddles}{A length `num_saddles` vector with edge indices for possible saddle edges.}
-#'  \item{labels}{A length `num_triangles` vector of labels for the connected components in the
-#'    maximum spanning tree. Each connected component is labeled by the index of its critical triangle.}
-#'  \item{maxima}{A length `num_critpts` vector of critical triangles (maxima).}
-#'  \item{parent}{A length `num_triangles` vector containing the parent (source) triangle for each
-#'    triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.}
-#'  \item{parent_edge}{A length `num_triangles` vector containing the directed edge that has
-#'    each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.}
+#'      * `from,to`: Index of source and target triangles for each edge.
+#'      * `x0,y0`: Coordinates of source triangle for each edge.
+#'      * `x1,y1`: Coordinates of target triangle for each edge.
+#'  * `saddles`: A length `num_saddles` vector with edge indices for possible saddle edges.
+#'  * `labels`: A length `num_triangles` vector of labels for the connected components in the
+#'    maximum spanning tree. Each connected component is labeled by the index of its critical triangle.
+#'  * `maxima`: A length `num_critpts` vector of critical triangles (maxima).
+#'  * `parent`: A length `num_triangles` vector containing the parent (source) triangle for each
+#'    triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.
+#'  * `parent_edge`: A length `num_triangles` vector containing the directed edge that has
+#'    each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
 #'
 #' @export
 do_dual_forest = function(dmt) {
@@ -152,15 +152,15 @@ do_dual_forest = function(dmt) {
 #' ridges, separating points into components with the strongest boundaries.
 #' 
 #' @param dmt A DMT data structure with the following attributes:
-#'  \item{edges$from_tri}{Index of first triangle joined by each edge (1-indexed).}
-#'  \item{edges$to_tri}{Index of second triangle joined by each edge (1-indexed).}
+#'  * `edges$from_tri`: Index of first triangle joined by each edge (1-indexed).
+#'  * `edges$to_tri`: Index of second triangle joined by each edge (1-indexed).
 #' @param dual A dual maximum spanning forest on triangles:
-#'  \item{labels}{A length `num_triangles` vector of labels for the connected components in the
-#'    maximum spanning tree. Each connected component is labeled by the index of its critical triangle.}
-#'  \item{parent}{A length `num_triangles` vector containing the parent (source) triangle for each
-#'    triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.}
-#'  \item{parent_edge}{A length `num_triangles` vector containing the directed edge that has
-#'    each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.}
+#'  * `labels`: A length `num_triangles` vector of labels for the connected components in the
+#'    maximum spanning tree. Each connected component is labeled by the index of its critical triangle.
+#'  * `parent`: A length `num_triangles` vector containing the parent (source) triangle for each
+#'    triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.
+#'  * `parent_edge`: A length `num_triangles` vector containing the directed edge that has
+#'    each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
 #' @param saddles A length `num_saddles` vector with edge indices for saddle edges (1-indexed).
 #'
 #' @returns A list of length `2*num_saddles` containing the two paths from each saddle edge to the
@@ -246,20 +246,18 @@ get_boundary_shape = function(.SD, boundary) {
 #'   and `dmt$edges$agg_to`.
 #' 
 #' @returns A list data structure for tiles and their adjacencies. Includes the following attributes:
-#'   \item{meta_data}{A data table with attributes for tiles:
-#'     \item{X,Y}{Centroid of each tile.}
-#'     \item{npts}{Number of points in each tile.}
-#'     \item{shape}{A `sfc` list-column with the geometries for each tile.}
-#'     \item{area,perimeter}{Area and perimeter of each tile.}
-#'   }
-#'   \item{edges}{A data table with attributes for edges between adjacent tiles:
-#'     \item{from,to}{Tile IDs for the two tiles bordering this edge.}
-#'     \item{x0,y0,x1,y1}{Centroid coordinates for the two tiles bordering this edge.}
-#'     \item{area,npts}{Sum of areas and numbers of points in the two tiles bordering this edge.}
-#'     \item{edge_length}{Total length of the border between the `from` and `to` tiles.}
-#'   }
-#'   \item{pcs}{A `num_tiles` x `npcs` matrix with the average embedding value over all cells
-#'     in each tile.}
+#'   * `meta_data`: A data table with attributes for tiles:
+#'     * `X,Y`: Centroid of each tile.
+#'     * `npts`: Number of points in each tile.
+#'     * `shape`: A `sfc` list-column with the geometries for each tile.
+#'     * `area,perimeter`: Area and perimeter of each tile.
+#'   * `edges`: A data table with attributes for edges between adjacent tiles:
+#'     * `from,to`: Tile IDs for the two tiles bordering this edge.
+#'     * `x0,y0,x1,y1`: Centroid coordinates for the two tiles bordering this edge.
+#'     * `area,npts`: Sum of areas and numbers of points in the two tiles bordering this edge.
+#'     * `edge_length`: Total length of the border between the `from` and `to` tiles.
+#'   * `pcs`: A `num_tiles` x `npcs` matrix with the average embedding value over all cells
+#'     in each tile.
 #' 
 #' @export
 dmt_init_tiles = function(dmt) {
@@ -319,9 +317,9 @@ dmt_init_tiles = function(dmt) {
 #' @param dmt A DMT data structure with `edges`, `pts`, and `e_sep` attributes.
 #' 
 #' @returns A DMT data structure with the following additional attributes:
-#'   \item{pts$agg_id}{Unique ID for the tile that each point belongs to.}
-#'   \item{edges$agg_from}{Unique ID for the tile that `edges$from_pt` belongs to.}
-#'   \item{edges$agg_to}{Unique ID for the tile that `edges$to_pt` belongs to.}
+#'   * `pts$agg_id`: Unique ID for the tile that each point belongs to.
+#'   * `edges$agg_from`: Unique ID for the tile that `edges$from_pt` belongs to.
+#'   * `edges$agg_to`: Unique ID for the tile that `edges$to_pt` belongs to.
 #' @export
 dmt_assign_tiles = function(dmt) {
     e = setdiff(seq_len(nrow(dmt$edges)), dmt$e_sep)

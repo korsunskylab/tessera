@@ -8,26 +8,32 @@ do_primary_forest(dmt)
 }
 \arguments{
 \item{dmt}{A DMT data structure with the following attributes:
-\item{pts$f}{Scalar field values defined for each point.}
-\item{edges$from_pt}{Index of first point joined by each edge.}
-\item{edges$to_pt}{Index of second point joined by each edge.}
-\item{edges$f_prim}{Scalar field values defined for each edge that connects two points.}}
+\itemize{
+\item \code{pts$f}: Scalar field values defined for each point.
+\item \code{edges$from_pt}: Index of first point joined by each edge.
+\item \code{edges$to_pt}: Index of second point joined by each edge.
+\item \code{edges$f_prim}: Scalar field values defined for each edge that connects two points.
+}}
 }
 \value{
 A List with the following attributes (all indices are 1-indexed):
-\item{edges}{A data.table with \code{forest_size} rows, where each row is a directed edge
+\itemize{
+\item \code{edges}: A data.table with \code{forest_size} rows, where each row is a directed edge
 in the minimum spanning forest. There are six columns:
-\item{from,to}{Index of source and target points for each edge.}
-\item{x0,y0}{Coordinates of source point for each edge.}
-\item{x1,y1}{Coordinates of target point for each edge.}}
-\item{saddles}{A length \code{num_saddles} vector with edge indices for possible saddle edges.}
-\item{labels}{A length \code{num_points} vector of labels for the connected components in the
-minimum spanning tree. Each connected component is labeled by the index of its critical point.}
-\item{minima}{A length \code{num_critpts} vector of critical points (minima).}
-\item{parent}{A length \code{num_points} vector containing the parent (source) point for each
-point in the directed spanning forest. Critical points have no parent, so the value should be ignored.}
-\item{parent_edge}{A length \code{num_points} vector containing the directed edge that has
-each point as a target node. Critical points have no parent edge, so the value should be ignored.}
+\itemize{
+\item \verb{from,to}: Index of source and target points for each edge.
+\item \verb{x0,y0}: Coordinates of source point for each edge.
+\item \verb{x1,y1}: Coordinates of target point for each edge.
+}
+\item \code{saddles}: A length \code{num_saddles} vector with edge indices for possible saddle edges.
+\item \code{labels}: A length \code{num_points} vector of labels for the connected components in the
+minimum spanning tree. Each connected component is labeled by the index of its critical point.
+\item \code{minima}: A length \code{num_critpts} vector of critical points (minima).
+\item \code{parent}: A length \code{num_points} vector containing the parent (source) point for each
+point in the directed spanning forest. Critical points have no parent, so the value should be ignored.
+\item \code{parent_edge}: A length \code{num_points} vector containing the directed edge that has
+each point as a target node. Critical points have no parent edge, so the value should be ignored.
+}
 }
 \description{
 Constructs a directed minimum spanning forest from point and edge scalar values

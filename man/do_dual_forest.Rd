@@ -8,26 +8,32 @@ do_dual_forest(dmt)
 }
 \arguments{
 \item{dmt}{A DMT data structure with the following attributes:
-\item{tris$f}{Scalar field values defined for each triangle.}
-\item{edges$from_tri}{Index of first triangle joined by each edge.}
-\item{edges$to_tri}{Index of second triangle joined by each edge.}
-\item{edges$f_dual}{Scalar field values defined for each edge that connects two triangles.}}
+\itemize{
+\item \code{tris$f}: Scalar field values defined for each triangle.
+\item \code{edges$from_tri}: Index of first triangle joined by each edge.
+\item \code{edges$to_tri}: Index of second triangle joined by each edge.
+\item \code{edges$f_dual}: Scalar field values defined for each edge that connects two triangles.
+}}
 }
 \value{
 A List with the following attributes (all indices are 1-indexed):
-\item{edges}{A data.table with \code{forest_size} rows, where each row is a directed edge
+\itemize{
+\item \code{edges}: A data.table with \code{forest_size} rows, where each row is a directed edge
 in the maximum spanning forest. There are six columns:
-\item{from,to}{Index of source and target triangles for each edge.}
-\item{x0,y0}{Coordinates of source triangle for each edge.}
-\item{x1,y1}{Coordinates of target triangle for each edge.}}
-\item{saddles}{A length \code{num_saddles} vector with edge indices for possible saddle edges.}
-\item{labels}{A length \code{num_triangles} vector of labels for the connected components in the
-maximum spanning tree. Each connected component is labeled by the index of its critical triangle.}
-\item{maxima}{A length \code{num_critpts} vector of critical triangles (maxima).}
-\item{parent}{A length \code{num_triangles} vector containing the parent (source) triangle for each
-triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.}
-\item{parent_edge}{A length \code{num_triangles} vector containing the directed edge that has
-each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.}
+\itemize{
+\item \verb{from,to}: Index of source and target triangles for each edge.
+\item \verb{x0,y0}: Coordinates of source triangle for each edge.
+\item \verb{x1,y1}: Coordinates of target triangle for each edge.
+}
+\item \code{saddles}: A length \code{num_saddles} vector with edge indices for possible saddle edges.
+\item \code{labels}: A length \code{num_triangles} vector of labels for the connected components in the
+maximum spanning tree. Each connected component is labeled by the index of its critical triangle.
+\item \code{maxima}: A length \code{num_critpts} vector of critical triangles (maxima).
+\item \code{parent}: A length \code{num_triangles} vector containing the parent (source) triangle for each
+triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.
+\item \code{parent_edge}: A length \code{num_triangles} vector containing the directed edge that has
+each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
+}
 }
 \description{
 Constructs a directed maximum spanning forest from triangle and edge scalar values

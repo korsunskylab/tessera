@@ -8,16 +8,20 @@ trace_paths(dmt, dual, saddles)
 }
 \arguments{
 \item{dmt}{A DMT data structure with the following attributes:
-\item{edges$from_tri}{Index of first triangle joined by each edge (1-indexed).}
-\item{edges$to_tri}{Index of second triangle joined by each edge (1-indexed).}}
+\itemize{
+\item \code{edges$from_tri}: Index of first triangle joined by each edge (1-indexed).
+\item \code{edges$to_tri}: Index of second triangle joined by each edge (1-indexed).
+}}
 
 \item{dual}{A dual maximum spanning forest on triangles:
-\item{labels}{A length \code{num_triangles} vector of labels for the connected components in the
-maximum spanning tree. Each connected component is labeled by the index of its critical triangle.}
-\item{parent}{A length \code{num_triangles} vector containing the parent (source) triangle for each
-triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.}
-\item{parent_edge}{A length \code{num_triangles} vector containing the directed edge that has
-each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.}}
+\itemize{
+\item \code{labels}: A length \code{num_triangles} vector of labels for the connected components in the
+maximum spanning tree. Each connected component is labeled by the index of its critical triangle.
+\item \code{parent}: A length \code{num_triangles} vector containing the parent (source) triangle for each
+triangle in the directed spanning forest. Critical triangles have no parent, so the value should be ignored.
+\item \code{parent_edge}: A length \code{num_triangles} vector containing the directed edge that has
+each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
+}}
 
 \item{saddles}{A length \code{num_saddles} vector with edge indices for saddle edges (1-indexed).}
 }

@@ -17,17 +17,19 @@ do_dmt_forest_cpp(f, edges_from, edges_to, edges_f)
 }
 \value{
 A List with the following attributes (all indices are 1-indexed):
-\item{edges}{A \code{forest_size} x \code{2} matrix where each row is a directed edge
+\itemize{
+\item \code{edges}: A \code{forest_size} x \code{2} matrix where each row is a directed edge
 in the maximum spanning forest. The first column has the source point for
-each edge and the second column has the target point.}
-\item{saddles}{A length \code{num_saddles} vector with edge indices for possible saddle edges.}
-\item{labels}{A length \code{num_points} vector of labels for the connected components in the
-maximum spanning tree. Each connected component is labeled by the index of its critical point.}
-\item{critpts}{A length \code{num_critpts} vector of critical points (maxima).}
-\item{parent}{A length \code{num_points} vector containing the parent (source) point for each
-point in the directed spanning forest. Critical points have no parent, so the value should be ignored.}
-\item{parent_edge}{A length \code{num_points} vector containing the directed edge that has
-each point as a target node. Critical points have no parent edge, so the value should be ignored.}
+each edge and the second column has the target point.
+\item \code{saddles}: A length \code{num_saddles} vector with edge indices for possible saddle edges.
+\item \code{labels}: A length \code{num_points} vector of labels for the connected components in the
+maximum spanning tree. Each connected component is labeled by the index of its critical point.
+\item \code{critpts}: A length \code{num_critpts} vector of critical points (maxima).
+\item \code{parent}: A length \code{num_points} vector containing the parent (source) point for each
+point in the directed spanning forest. Critical points have no parent, so the value should be ignored.
+\item \code{parent_edge}: A length \code{num_points} vector containing the directed edge that has
+each point as a target node. Critical points have no parent edge, so the value should be ignored.
+}
 }
 \description{
 Constructs a directed maximum spanning forest from point and edge scalar values

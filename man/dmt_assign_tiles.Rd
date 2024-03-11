@@ -11,9 +11,11 @@ dmt_assign_tiles(dmt)
 }
 \value{
 A DMT data structure with the following additional attributes:
-\item{pts$agg_id}{Unique ID for the tile that each point belongs to.}
-\item{edges$agg_from}{Unique ID for the tile that \code{edges$from_pt} belongs to.}
-\item{edges$agg_to}{Unique ID for the tile that \code{edges$to_pt} belongs to.}
+\itemize{
+\item \code{pts$agg_id}: Unique ID for the tile that each point belongs to.
+\item \code{edges$agg_from}: Unique ID for the tile that \code{edges$from_pt} belongs to.
+\item \code{edges$agg_to}: Unique ID for the tile that \code{edges$to_pt} belongs to.
+}
 }
 \description{
 Tiles are defined as points that are in the same connected component

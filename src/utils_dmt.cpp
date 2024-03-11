@@ -61,17 +61,17 @@ arma::umat foo_triplets_edges(
 //' @param edges_f Vector of `num_edges` scalar values defined along each edge.
 //'
 //' @returns A List with the following attributes (all indices are 1-indexed):
-//'  \item{edges}{A `forest_size` x `2` matrix where each row is a directed edge
+//'  * `edges`: A `forest_size` x `2` matrix where each row is a directed edge
 //'    in the maximum spanning forest. The first column has the source point for
-//'    each edge and the second column has the target point.}
-//'  \item{saddles}{A length `num_saddles` vector with edge indices for possible saddle edges.}
-//'  \item{labels}{A length `num_points` vector of labels for the connected components in the
-//'    maximum spanning tree. Each connected component is labeled by the index of its critical point.}
-//'  \item{critpts}{A length `num_critpts` vector of critical points (maxima).}
-//'  \item{parent}{A length `num_points` vector containing the parent (source) point for each
-//'    point in the directed spanning forest. Critical points have no parent, so the value should be ignored.}
-//'  \item{parent_edge}{A length `num_points` vector containing the directed edge that has
-//'    each point as a target node. Critical points have no parent edge, so the value should be ignored.}
+//'    each edge and the second column has the target point.
+//'  * `saddles`: A length `num_saddles` vector with edge indices for possible saddle edges.
+//'  * `labels`: A length `num_points` vector of labels for the connected components in the
+//'    maximum spanning tree. Each connected component is labeled by the index of its critical point.
+//'  * `critpts`: A length `num_critpts` vector of critical points (maxima).
+//'  * `parent`: A length `num_points` vector containing the parent (source) point for each
+//'    point in the directed spanning forest. Critical points have no parent, so the value should be ignored.
+//'  * `parent_edge`: A length `num_points` vector containing the directed edge that has
+//'    each point as a target node. Critical points have no parent edge, so the value should be ignored.
 //'
 // [[Rcpp::export]]
 Rcpp::List do_dmt_forest_cpp(

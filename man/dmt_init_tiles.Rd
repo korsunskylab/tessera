@@ -13,20 +13,24 @@ and \code{dmt$edges$agg_to}.}
 }
 \value{
 A list data structure for tiles and their adjacencies. Includes the following attributes:
-\item{meta_data}{A data table with attributes for tiles:
-\item{X,Y}{Centroid of each tile.}
-\item{npts}{Number of points in each tile.}
-\item{shape}{A \code{sfc} list-column with the geometries for each tile.}
-\item{area,perimeter}{Area and perimeter of each tile.}
+\itemize{
+\item \code{meta_data}: A data table with attributes for tiles:
+\itemize{
+\item \verb{X,Y}: Centroid of each tile.
+\item \code{npts}: Number of points in each tile.
+\item \code{shape}: A \code{sfc} list-column with the geometries for each tile.
+\item \verb{area,perimeter}: Area and perimeter of each tile.
 }
-\item{edges}{A data table with attributes for edges between adjacent tiles:
-\item{from,to}{Tile IDs for the two tiles bordering this edge.}
-\item{x0,y0,x1,y1}{Centroid coordinates for the two tiles bordering this edge.}
-\item{area,npts}{Sum of areas and numbers of points in the two tiles bordering this edge.}
-\item{edge_length}{Total length of the border between the \code{from} and \code{to} tiles.}
+\item \code{edges}: A data table with attributes for edges between adjacent tiles:
+\itemize{
+\item \verb{from,to}: Tile IDs for the two tiles bordering this edge.
+\item \verb{x0,y0,x1,y1}: Centroid coordinates for the two tiles bordering this edge.
+\item \verb{area,npts}: Sum of areas and numbers of points in the two tiles bordering this edge.
+\item \code{edge_length}: Total length of the border between the \code{from} and \code{to} tiles.
 }
-\item{pcs}{A \code{num_tiles} x \code{npcs} matrix with the average embedding value over all cells
-in each tile.}
+\item \code{pcs}: A \code{num_tiles} x \code{npcs} matrix with the average embedding value over all cells
+in each tile.
+}
 }
 \description{
 Initialize tiles with shapes and other properties

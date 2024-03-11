@@ -28,12 +28,14 @@ and \code{loadings} (a \code{G} x \code{D} matrix with gene loadings for each la
 \item{field}{A gradient field with the compressed representations \code{pts_svd},
 \code{tris_svd}, \code{edges_pts_svd}, and \code{edges_tris_svd}. Each of these
 is a \code{N} x \code{6} matrix with the following columns for each location:
-\item{dx_grad,dy_grad}{x,y directions of unit vector in the
-direction of greatest change (first singular vector).}
-\item{dx_ortho,dy_ortho}{x,y directions of unit vector orthogonal
-to the direction of greatest change (second singular vector).}
-\item{len_grad,len_ortho}{Magnitude of directional derivative in the
-gradient and orthogonal directions (singular values).}}
+\itemize{
+\item \verb{dx_grad,dy_grad}: x,y directions of unit vector in the
+direction of greatest change (first singular vector).
+\item \verb{dx_ortho,dy_ortho}: x,y directions of unit vector orthogonal
+to the direction of greatest change (second singular vector).
+\item \verb{len_grad,len_ortho}: Magnitude of directional derivative in the
+gradient and orthogonal directions (singular values).
+}}
 }
 \value{
 \code{dmt} with the following additional attributes:

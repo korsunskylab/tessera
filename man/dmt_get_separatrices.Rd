@@ -8,9 +8,11 @@ dmt_get_separatrices(dmt)
 }
 \arguments{
 \item{dmt}{A DMT data structure with the following attributes:
-\item{edges}{Data structure of edges in the mesh.}
-\item{prim}{Data structure of primal minimum spanning forest.}
-\item{dual}{Data structure of dual maximum spanning forest.}}
+\itemize{
+\item \code{edges}: Data structure of edges in the mesh.
+\item \code{prim}: Data structure of primal minimum spanning forest.
+\item \code{dual}: Data structure of dual maximum spanning forest.
+}}
 }
 \value{
 A length \code{num_sep_edges} vector of edges (1-indexed) that make up the separatrices
