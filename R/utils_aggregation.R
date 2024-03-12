@@ -1,3 +1,41 @@
+#' Initialize tile scores for aggregation
+#' 
+#' Higher scores favor merging.
+#' 
+#' Methods for different modes of aggregation:
+#'  1. `dscore` has already been manually calculated and stored in `aggs$edges$dscore`.
+#'     Will set the `score`, `score_size`, and `compactness` attributes of `aggs$meta_data` to 0.
+#'  2. `dscore` is the product of three factors:
+#'     * `w`: A 2-cluster GMM is used to determine the mean `mu` and standard deviation `sig` of the distance
+#'       between tiles that have similar gene expression (Euclidean distance `d` in PC space).
+#'       Then we define `d_mu = mu + sig` and `d_sig = alpha * sig`, and calculate `w` as
+#'       `w = 0.5 - 1 / (1 + exp(-(d - d_mu) / d_sig))`. Ranges from -0.5 to 0.5. If adjacent tiles
+#'       are very dissimilar (`d >> d_mu`), then `d` is large, and `w` is close to `-0.5`. If adjacent
+#'       tiles are very similar (`d < d_mu`), then `d` is small, and `w` is positive. 
+#'     * `score_size`: `(1 - npts_from/max_npts) * (1 - npts_to/max_npts)`. Ranges from 0 to 1.
+#'       If merging the two tiles would have a total number of points ≥`max_npts`, then `score_size` is `-Inf`,
+#'       which prevents merging.
+#'     * `dC`: `.5 * (C_merge - C_from - C_to + 1)`. Ranges from 0 to 1.
+#'  3. `dscore` is the product of same three factors as mode 2, but `score_size` has already been precomputed.
+#'     Additionally, `dscore` is set to -1 if both adjacent tiles have at least `min_npts` cells.
+#' 
+#' @param aggs A tile data structure.
+#' @param agg_mode Method to use to calculate aggregation scores (1, 2, or 3).
+#' @param ... Additional parameters for different modes:
+#'  1. No additional parameters.
+#'  2. Requires `alpha` and `max_npts`. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
+#'  3. Requires `alpha` and `min_npts`. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
+#' 
+#' @returns `aggs` with scores for aggregation stored in attributes:
+#'   \item{edges}{Additional attributes are calculated:
+#'     * `dscore`: Overall score for merging two tiles. Product of `w`, `score_size`, and `dC`.
+#'     * `w`: Gene expression similarity score.
+#'     * `score_size`: Penalizes tiles with many points.
+#'     * `perimeter_merge`: Perimeter of merged tile.
+#'   }
+#'   \item{d_mu,d_sig}{Parameters used to calculate `w`.}
+#'   \item{pcs_merged}{Average PCs for merged tile.}
+#' 
 #' @export
 init_scores = function(aggs, agg_mode, ...) {
     ## (1) Gene expression Scores
@@ -47,7 +85,7 @@ init_scores = function(aggs, agg_mode, ...) {
 
 
         ## w is designed so that all d < d_mu will be kept and all d > d_mu will be cut. 
-        ## w := probability that edge is a good internal edge
+        ## w := probability that edge is a good internal edge (between -0.5 [large d] and 0.5 [small d])
         aggs$edges$w = 1 / (1 + exp(-(d - d_mu) / d_sig)) 
         aggs$edges$w = 0.5 - aggs$edges$w ## high distance = low probability 
 
@@ -78,6 +116,8 @@ init_scores = function(aggs, agg_mode, ...) {
         aggs$d_mu = d_mu
         aggs$d_sig = d_sig
         aggs$edges$dscore = aggs$edges$w * aggs$edges$score_size * dC
+        # set dscore to -Inf if merge agg exceeds size thresholds
+        aggs$edges$dscore[aggs$edges$npts >= max_npts] = -Inf
     } else if (agg_mode == 3) {
         alpha = list(...)[['alpha']]
         min_npts = list(...)[['min_npts']]
@@ -114,7 +154,7 @@ init_scores = function(aggs, agg_mode, ...) {
         aggs$d_mu = d_mu
         aggs$d_sig = d_sig
         ## Delete edges between aggs of good size 
-        aggs$edges$dscore[aggs$meta_data$npts[aggs$edges$from] >= min_npts & aggs$meta_data$npts[aggs$edges$to] >= min_npts] = -1
+        aggs$edges$dscore[aggs$meta_data$npts[aggs$edges$from] >= min_npts & aggs$meta_data$npts[aggs$edges$to] >= min_npts] = -Inf
     } else {
         stop(glue('agg mode {agg_mode} not implemented yet'))
     }
@@ -275,7 +315,37 @@ color_aggs = function(aggs, seed=1) {
     return(aggs)
 }
 
-
+#' Merges tiles using single-linkage agglomerative clustering
+#' 
+#' Note that this function mutates many of the input values to keep
+#' track of updated values for tiles and their borders after
+#' each successive merge. Every merge of adjacent tiles has an
+#' associated score (higher means merging is more favorable).
+#' Merging is conducted greedily, one step of a time, updating
+#' the score associated with pair of tiles at each step.
+#' 
+#' @returns The `aggs` data structure with updated values for
+#'   \item{meta_data}{A data table with attributes for the new merged tiles:
+#'     * `X,Y`: Centroid of each tile. (NOT updated)
+#'     * `npts`: Number of points in each tile. (Updated)
+#'     * `shape`: A `sfc` list-column with the geometries for each tile. (NOT updated)
+#'     * `area,perimeter`: Area and perimeter of each tile. (Updated)}
+#'   \item{edges}{A data table with attributes for edges between adjacent merged tiles,
+#'     where edges with infinite `dscore` are removed:
+#'     * `from,to`: Tile IDs for the two tiles bordering this edge. (Updated for new merged tiles)
+#'     * `x0,y0,x1,y1`: Centroid coordinates for the two tiles bordering this edge. (NOT updated)
+#'     * `area,npts`: Sum of areas and numbers of points in the two tiles bordering this edge. (Updated)
+#'     * `edge_length`: Total length of the border between the `from` and `to` tiles. (Updated)
+#'     * `dscore`: Overall score for merging two tiles. Product of `w`, `score_size`, and `dC`. (Updated)
+#'     * `w`: Gene expression similarity score. (Updated)
+#'     * `score_size`: Penalizes tiles with many points. (Updated)
+#'     * `perimeter_merge`: Perimeter of merged tile. (Updated)}
+#'   \item{pcs}{A `num_tiles` x `npcs` matrix with the average embedding value over all cells
+#'     in each tile. (Updated)}
+#'   \item{pcs_merged}{A `num_edges` x `npcs` matrix with average PCs for merged tiles. (Updated)}
+#'   \item{d_mu,d_sig}{Parameters used to calculate `w`.}
+#'   \item{aggmap}{A length `orig_num_tiles` vector mapping each original tile ID to the new
+#'     tile IDs after merging.}
 #' @export
 merge_aggs = function(
     aggs, agg_mode, 
@@ -303,12 +373,6 @@ merge_aggs = function(
     ## memory is a list of lists 
     ##   disjoint sets 
     ##   that results from iterative aggregation    
-    
-    
-
-
-
-    
     memory = merge_aggs_cpp(
         V_pcs = aggs$pcs, 
         V_area = aggs$meta_data$area,
@@ -387,7 +451,16 @@ merge_aggs = function(
 
 }
 
-    
+#' Update tile IDs in the DMT data structure after merging
+#' 
+#' @param dmt DMT data structure
+#' @param agg Tile data structure after merging, with `aggmap` attribute
+#'   mapping original tile IDs to new IDs for the merged tiles.
+#' 
+#' @returns DMT data structure with updated values for these attributes:
+#'   * `pts$agg_id`: Unique ID for the tile that each point belongs to.
+#'   * `edges$agg_from`: Unique ID for the tile that `edges$from_pt` belongs to.
+#'   * `edges$agg_to`: Unique ID for the tile that `edges$to_pt` belongs to.
 #' @export
 update_dmt_aggid = function(dmt, aggs) {    
     dmt$pts$agg_id = aggs$aggmap[dmt$pts$agg_id]
@@ -396,6 +469,16 @@ update_dmt_aggid = function(dmt, aggs) {
     return(dmt)
 }
 
+#' Update shapes and counts matrix for tiles after merging
+#' 
+#' @param dmt DMT data structure
+#' @param agg Tile data structure after merging
+#' 
+#' @returns `aggs` tile data structure with updated values for:
+#'   \item{meta_data$shape}{Retraces the polygons for tiles using the new point assignments.}
+#'   \item{meta_data$X,meta_data$Y}{Recomputes the centroid of each tile from the polygon shape.}
+#'   \item{edges}{Ensures that `aggs$edges` always has `from` < `to`.}
+#'   \item{counts}{A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.}
 #' @export
 update_agg_shapes = function(dmt, aggs) {
     aggs$meta_data$shape = trace_polygons(dmt, aggs)

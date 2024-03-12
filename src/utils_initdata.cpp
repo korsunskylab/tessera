@@ -10,6 +10,13 @@ using namespace std;
 // [[Rcpp::depends(Rcpp]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
+//' Assigns a unique ID to each point with distinct X,Y coordinates
+//'
+//' @param X,Y A pair of numeric vectors with the coordinates for each point.
+//'
+//' @returns A vector with the same length as `X` and `Y` containing
+//'   IDs that range from 0 to N where N is the number of unique points.
+//' 
 // [[Rcpp::export]]
 arma::uvec assign_unique_rowid_cpp(
     arma::vec X, 
@@ -61,6 +68,23 @@ arma::uvec assign_unique_rowid_cpp(
     
 }
 
+//' Calculates triangles' centroids, areas, and heights from vertices
+//'
+//' @param triplets A M-by-3 matrix with indices for the points that
+//'   correspond each triangle's vertices, where M is the number of triangles.
+//' @param pts A N-by-2 matrix with indices for the X,Y coordinates of
+//'   each point.
+//' @param tris A M-by-4 matrix containing the X,Y coordinates of each
+//'   triangle's centroid in the first two columns, and area and
+//'   largest height of each triangle in the last two columns.
+//'
+//' @returns A E-by-14 matrix with columns `from_pt`, `to_pt`, `from_tri`, `to_tri`,
+//'   `x0_pt`, `x1_pt`, `y0_pt`, `y1_pt`, `x0_tri`, `x1_tri`, `y0_tri`, `y1_tri`,
+//'   `length_pt`, `length_tri`. If only one triangle uses an edge, then the `from_tri`,
+//'   `x0_tri`, and `y0_tri` fields will contain NaN values.
+//'
+//'   Note that indices that reference the `pts` and `tris` tables are 1-indexed.
+//' 
 // [[Rcpp::export]]
 arma::mat init_edges_cpp(
     arma::mat & triplets, 
@@ -163,7 +187,17 @@ arma::mat init_edges_cpp(
 }
     
 
-
+//' Calculates triangles' centroids, areas, and heights from vertices
+//'
+//' @param triplets A M-by-3 matrix with indices for the points that
+//'   correspond each triangle's vertices, where M is the number of triangles.
+//' @param pts A N-by-2 matrix with indices for the X,Y coordinates of
+//'   each point.
+//' 
+//' @returns A M-by-4 matrix containing the X,Y coordinates of each
+//'   triangle's centroid in the first two columns, and area and
+//'   largest height of each triangle in the last two columns.
+//' 
 // [[Rcpp::export]]
 arma::mat init_tris_cpp(
     arma::umat & triplets, 

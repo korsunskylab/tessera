@@ -9,6 +9,7 @@ GetTiles = function(
     ## Graph pruning
     prune_thresh_quantile = 0.95, 
     prune_min_cells = 10, 
+    prune_thresh = NA,
 
     ###### STEP 1: GRADIENTS ######
     smooth_distance = c('none', 'euclidean', 'projected', 'constant')[1], 
@@ -28,7 +29,8 @@ GetTiles = function(
     ## STEP 0: PREPARE DATA STRUCTURES
     if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
     dmt = init_data(X, Y, counts, meta_data, meta_vars_include)
-    dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile, mincells = prune_min_cells) 
+    dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
+                      mincells = prune_min_cells, thresh = prune_thresh) 
     dmt = add_exterior_triangles(dmt)
 
     dmt$udv_cells = do_pca(dmt$counts, npcs)

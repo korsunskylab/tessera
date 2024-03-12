@@ -1,3 +1,11 @@
+#' Contruct shapes that outline each tile
+#' 
+#' @param dmt A DMT mesh data structure with `pts`, `edges`, and `tris` attributes.
+#'   Assignment of points to tiles is provided in `dmt$pts$agg_id`.
+#' @param aggs A tile data structure used to specify the total number of tiles.
+#' 
+#' @returns A `sfc` list-column with the geometries for each tile.
+#' 
 #' @export
 trace_polygons = function(dmt, aggs) {
     res = trace_polygons_cpp(

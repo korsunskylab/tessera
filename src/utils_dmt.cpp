@@ -47,7 +47,32 @@ arma::umat foo_triplets_edges(
     return res; 
 }
     
-
+//' Construct maximum spanning forest
+//'
+//' Constructs a directed maximum spanning forest from point and edge scalar values
+//' using a version of Prim's algorithm. Critical points (local maxima; or, more precisely,
+//' an endpoint of an edge that is a local maxima) are used as roots for each tree in the
+//' forest, and edges that would bridge two trees with different critical point roots are
+//' marked as possible saddle edges.
+//'
+//' @param f Vector of `num_points` scalar values defined at each point.
+//' @param edges_from Vector of `num_edges` indices for first end-point of each edge (0-indexed).
+//' @param edges_to Vector of `num_edges` indices for second end-point of each edge (0-indexed).
+//' @param edges_f Vector of `num_edges` scalar values defined along each edge.
+//'
+//' @returns A List with the following attributes (all indices are 1-indexed):
+//'  * `edges`: A `forest_size` x `2` matrix where each row is a directed edge
+//'    in the maximum spanning forest. The first column has the source point for
+//'    each edge and the second column has the target point.
+//'  * `saddles`: A length `num_saddles` vector with edge indices for possible saddle edges.
+//'  * `labels`: A length `num_points` vector of labels for the connected components in the
+//'    maximum spanning tree. Each connected component is labeled by the index of its critical point.
+//'  * `critpts`: A length `num_critpts` vector of critical points (maxima).
+//'  * `parent`: A length `num_points` vector containing the parent (source) point for each
+//'    point in the directed spanning forest. Critical points have no parent, so the value should be ignored.
+//'  * `parent_edge`: A length `num_points` vector containing the directed edge that has
+//'    each point as a target node. Critical points have no parent edge, so the value should be ignored.
+//'
 // [[Rcpp::export]]
 Rcpp::List do_dmt_forest_cpp(
     const arma::vec & f, 
@@ -133,7 +158,17 @@ Rcpp::List do_dmt_forest_cpp(
     ); 
 }
 
-
+//' Trace back from a point to its root in the spanning forest
+//'
+//' @param v0 Index of starting point (0-indexed).
+//' @param vcrit Index of critical point associated with the tree that `v0` belongs to (0-indexed).
+//' @param parent_edge A length `num_points` vector containing the directed edge that has
+//'    each point as a target node. Critical points have no parent edge, so the value is ignored.
+//' @param parent A length `num_points` vector containing the parent (source) point for each
+//'    point in the directed spanning forest. Critical points have no parent, so the value is ignored.
+//'
+//' @returns Vector of edge indices along the path from `v0` to its root `vcrit` in the tree (1-indexed).
+//'
 // [[Rcpp::export]]
 std::list<unsigned> trace_back_cpp(
     unsigned v0, 
@@ -149,7 +184,22 @@ std::list<unsigned> trace_back_cpp(
     return epath; 
 }
 
-
+//' Trace all paths from saddles to critical points in the spanning forest
+//'
+//' @param saddles A length `num_saddles` vector with edge indices for saddle edges (0-indexed).
+//' @param vcrits A length `num_critpts` vector of critical points.
+//' @param edges_from A length `num_edges` vector with indices for the first end-point of each edge
+//'   in the mesh (0-indexed).
+//' @param edges_to A length `num_edges` vector with indices for the second end-point of each edge
+//'   in the mesh (0-indexed).
+//' @param parent_edge A length `num_points` vector containing the directed edge that has
+//'    each point as a target node in the directed spanning forest. Critical points have
+//'    no parent edge, so the value is ignored.
+//' @param parent A length `num_points` vector containing the parent (source) point for each
+//'    point in the directed spanning forest. Critical points have no parent, so the value is ignored.
+//'
+//' @returns A list of length `2*num_saddles` containing the two paths from each saddle edge to the
+//'   two critical points that it joins. Each path is a numeric vector of edge indices (1-indexed).
 // [[Rcpp::export]]
 std::vector<std::list<unsigned> > trace_epaths_cpp(
     const arma::uvec & saddles, 
@@ -178,8 +228,16 @@ std::vector<std::list<unsigned> > trace_epaths_cpp(
     return epaths; 
 }
 
-
-
+//' Get the collection of edges that lie along separatrices
+//'
+//' @param epaths A list of length `2*num_saddles` containing the two paths from each saddle edge to the
+//'   two critical points that it joins. Each path is a numeric vector of edge indices (1-indexed).
+//' @param saddles A length `num_saddles` vector with edge indices for saddle edges (1-indexed).
+//' @param nedges Total number of edges in the mesh.
+//'
+//' @returns A length `num_sep_edges` vector of edges (0-indexed) that are saddle edges in `saddles` or
+//'   lie along the paths in `epaths`. These edges make up the separatrices that separate points into
+//'   different components.
 // [[Rcpp::export]]
 arma::uvec get_e_sep(
     std::vector<arma::uvec> epaths, // 1-indexed

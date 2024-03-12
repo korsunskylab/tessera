@@ -11,7 +11,29 @@ using namespace std;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 
-
+//' Bilateral / anisotropic filtering of gradient field
+//' 
+//' Gradient fields are smoothed using bilateral filtering,
+//' in which the smoothed gradient of each point is computed as
+//' the weighted average of the neighbors' gradients, considering
+//' both distance in space and also similarity in gradients.
+//' 
+//' @param pvec,adj_i,adj_p A `N` x `N` sparse adjacency matrix
+//'   in dgCMatrix format: `pvec = diff(adj@p)`, `adj_i = adj@i`,
+//'   and `adj_p = adj@p`
+//' @param field A `2` x `D` x `N` array in column-major ordering
+//'   containing the spatial gradient in expression for each of
+//'   `D` latent variables at every point in space.
+//' @param coords A `N` x `2` matrix of cell coordinates.
+//' @param distance Method for computing distance score in weighted average.
+//'   See description for details. Defaults to `'euclidean'`.
+//' @param similarity Method for computing similarity score in weighted average.
+//'   See description for details. Defaults to `'euclidean'`.
+//' 
+//' @returns A `2` x `D` x `N` array in column-major ordering
+//'   containing the smoothed spatial gradient in expression for each of
+//'   `D` latent variables at every point in space.
+//' 
 // [[Rcpp::export]]
 arma::cube smooth_field_cpp(
     arma::uvec & pvec, // diff(adj@p)
@@ -84,6 +106,25 @@ arma::cube smooth_field_cpp(
     return field_smooth;
 }
 
+//' Compress a gradient field using SVD
+//'
+//' Expresses the `2` x `D` total derivative at each location as
+//' a pair of `2`-dimensional vectors in the gradient and orthogonal
+//' directions.
+//'
+//' @param field A `2` x `D` x `N` array in column-major ordering
+//'   containing the spatial gradient in expression for each of
+//'   `D` latent variables at every point, edge, or triangle.
+//'
+//' @returns A `N` x `6` matrix with the following attributes for
+//'   each location:
+//'   \item{dx grad,dy grad}{x,y directions of unit vector in the
+//'     direction of greatest change (first singular vector).}
+//'   \item{dx ortho,dy ortho}{x,y directions of unit vector orthogonal
+//'     to the direction of greatest change (second singular vector).}
+//'   \item{|grad|,|ortho|}{Magnitude of directional derivative in the
+//'     gradient and orthogonal directions (singular values).}
+//'
 // [[Rcpp::export]]
 arma::mat compress_field_cpp(
     arma::cube & field    
@@ -105,6 +146,22 @@ arma::mat compress_field_cpp(
     
 }
 
+//' Compute a spatial gradient field at each point (cell)
+//'
+//' Distance between neighboring cells is normalized to unit distance
+//' so that only the direction from each cell to its neighbors matters.
+//' The gradient is then the average gradient in expression of each
+//' embedding dimension between the index cell and its neighbors.
+//'
+//' @param coords A `N` x `2` matrix of cell coordinates.
+//' @param embeddings A `N` x `D` matrix of cell embeddings.
+//' @param adj_i,adj_p A `N` x `N` sparse adjacency matrix
+//'   in dgCMatrix format.
+//'
+//' @returns A `2` x `D` x `N` array in column-major ordering
+//'   containing the spatial gradient in expression for each of
+//'   `D` embedding dimensions at every point in space.
+//'
 // [[Rcpp::export]]
 arma::cube estimate_field_cpp(
     arma::mat & coords, 
