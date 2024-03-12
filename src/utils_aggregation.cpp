@@ -56,7 +56,13 @@ bool is_in_list(
     return std::find(mylist.begin(), mylist.end(), target) != mylist.end(); 
 }
 
-
+//' Copies elements from two lists an Armadillo uvec
+//'
+//' Concatenates the values from `list1` and `list2`.
+//'
+//' @param list1,list2 Lists of unsigned values.
+//'
+//' @returns An Armadillo uvec that concatenates `list1` and `list2`.
 // [[Rcpp::export]]
 arma::uvec mergeListsToArmaUVec(const std::list<unsigned>& list1, const std::list<unsigned>& list2) {
     // Calculate the total size needed for the Armadillo uvec
@@ -86,6 +92,12 @@ arma::uvec mergeListsToArmaUVec(const std::list<unsigned>& list1, const std::lis
     return result;
 }
 
+//' Find duplicates within a vector
+//'
+//' @param input Vector of values.
+//' 
+//' @returns Vector of values from `input` that appear at least twice.
+//'   Each value that appears N times in `input` will appear N-1 times in the output.
 // [[Rcpp::export]]
 arma::uvec findDuplicates(const arma::uvec& input) {
     std::unordered_map<unsigned int, int> seen;
@@ -108,6 +120,12 @@ arma::uvec findDuplicates(const arma::uvec& input) {
     return duplicates_uvec;
 }
 
+//' Updates information for tiles after merging two tiles
+//'
+//' Uses the information from the shared edge to update the merged PCs,
+//' area, number of points, and perimeter. Mutates the `e_merge_from`th value
+//' within the `V_pcs`, `V_npts`, `V_perimeter`, `V_area` input data structures.
+//'
 // [[Rcpp::export]]
 void update_V_cpp(
     arma::mat & V_pcs, 
@@ -171,7 +189,19 @@ void update_V_cpp(
 
 }
 
-
+//' Updates information for boundaries after merging two tiles
+//'
+//' For every boundary that exists between the new merged tile and other tiles,
+//' the following values must be updated:
+//'  * `E_pcs_merge[e_update,]`: PCs that would result from future merging.
+//'  * `E_perimeter_merge[e_update]`: Perimeters that would result from future merging.
+//'  * `E_w[e_update]`: Expression similarity score.
+//'  * `E_score_size[e_update]`: Size of merged tile score.
+//'  * `dC[e_update]`: Delta shape compactness score for merged tile.
+//'  * `E_dscore[e_update]`: Overall merging score (product of `w`, `score_size`, `dC`)
+//' Note that `E_npts` and `E_area` should already have been previously updated.
+//'
+//' @param e_update Edges that should be updated.
 // [[Rcpp::export]]
 void update_E_cpp(
     arma::mat & V_pcs, 
@@ -301,7 +331,27 @@ void update_E_cpp(
 
 
 
-
+//' Merges tiles using single-linkage agglomerative clustering
+//'
+//' Note that this function mutates many of the inputs to keep
+//' track of updated values for tiles and their borders after
+//' each successive merge. Every merge of adjacent tiles has an
+//' associated score (higher means merging is more favorable).
+//' Merging is conducted greedily, one step of a time, updating
+//' the score associated with pair of tiles at each step. 
+//'
+//' @param V_pcs,V_area,V_perimeter,V_npts Metadata associated with each each tile.
+//'   (Updated)
+//' @param E_from,E_to Length `num_edges` vectors associated with each pair of
+//'   adjacent tiles. Specifies the two tiles that each border (0-indexed). (Updated)
+//' @param E_npts,E_area,E_edge_length,E_pcs_merge Metadata associated with each pair of
+//'   adjacent tiles. (Updated)
+//' @param E_w,E_perimeter_merge,E_score_size,E_dscore Scores associated with merging
+//'   each pair of adjacent tiles. (Updated)
+//'
+//' @returns A list of `orig_num_tiles` vectors, disjoint sets specifying the IDs for which
+//'   of the original tiles have been merged together. Some vectors will have length 0.
+//'
 // [[Rcpp::export]]
 std::vector<std::list<unsigned> > merge_aggs_cpp(
     arma::mat & V_pcs, 
