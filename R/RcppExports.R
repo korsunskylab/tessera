@@ -334,7 +334,7 @@ get_boundary_graph_cpp <- function(e_dual, i_pts, e_prim, E, ntris) {
 #' @param edges A matrix with `num_edges` rows with mesh edge information.
 #' @param naggs Number of tiles.
 #' @param ntrix Number of triangles in the mesh.
-#' @pts_dmt_component A length `num_points` vector with the unique ID for the
+#' @param pts_dmt_component A length `num_points` vector with the unique ID for the
 #'   tile that each point belongs to.
 #'
 #' @returns A list of length `naggs` matrices that contain coordinates of the

@@ -11,6 +11,9 @@ trace_polygons_cpp(edges, naggs, ntris, pts_dmt_component)
 
 \item{naggs}{Number of tiles.}
 
+\item{pts_dmt_component}{A length \code{num_points} vector with the unique ID for the
+tile that each point belongs to.}
+
 \item{ntrix}{Number of triangles in the mesh.}
 }
 \value{
