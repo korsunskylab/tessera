@@ -157,10 +157,10 @@ triangle in the directed spanning forest. Critical triangles have no parent, so 
 each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
 }
 \item \code{e_sep}: A length \code{num_sep_edges} vector of edge indices that make up the separatrices,
-which separate points into different components.
-}
+which separate points into different components.}}
 \item{aggs}{The tiles that result from DMT-based segmentation and agglomeration.
 A List data structure stores the tiles and their adjacencies using the following attributes:
+\itemize{
 \item \code{meta_data}: A data table with \code{num_tiles} rows with metadata for each tile:
 \itemize{
 \item \code{ID}: Unique ID for each tile.
@@ -187,8 +187,7 @@ the two adjacent tiles connected by the edge were merged.
 \item \code{d_mu},\code{d_sig}: Parameters used to calculate \code{w} in the edge score \code{dscore}.
 \item \code{aggmap}: A length \code{orig_num_tiles} vector mapping each original tile ID to the new
 tile IDs after merging.
-\item \code{counts}: A \code{num_genes} x \code{num_tiles} gene-by-tile matrix of aggregated transcript counts.
-}
+\item \code{counts}: A \code{num_genes} x \code{num_tiles} gene-by-tile matrix of aggregated transcript counts.}
 }
 }
 \description{

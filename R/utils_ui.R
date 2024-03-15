@@ -158,9 +158,9 @@
 #'   * `dual`: The dual maximum spanning forest on triangles. A List with the following attributes:
 #'     * `edges`: A data.table with `forest_size` rows, where each row is a directed edge
 #'       in the maximum spanning forest. There are six columns:
-#'         * `from,to`: Index of source and target triangles for each edge.
-#'         * `x0,y0`: Coordinates of source triangle for each edge.
-#'         * `x1,y1`: Coordinates of target triangle for each edge.
+#'       * `from,to`: Index of source and target triangles for each edge.
+#'       * `x0,y0`: Coordinates of source triangle for each edge.
+#'       * `x1,y1`: Coordinates of target triangle for each edge.
 #'     * `saddles`: A length `num_saddles` vector with edge indices for possible saddle edges.
 #'     * `labels`: A length `num_triangles` vector of labels for the connected components in the
 #'       maximum spanning tree. Each connected component is labeled by the index of its critical triangle.
@@ -170,10 +170,10 @@
 #'     * `parent_edge`: A length `num_triangles` vector containing the directed edge that has
 #'       each triangle as a target node. Critical triangles have no parent edge, so the value should be ignored.
 #'   * `e_sep`: A length `num_sep_edges` vector of edge indices that make up the separatrices,
-#'     which separate points into different components.
-#' }
+#'     which separate points into different components.}}
 #' \item{aggs}{The tiles that result from DMT-based segmentation and agglomeration.
 #'   A List data structure stores the tiles and their adjacencies using the following attributes:
+#'   \itemize{
 #'   * `meta_data`: A data table with `num_tiles` rows with metadata for each tile:
 #'     * `ID`: Unique ID for each tile. 
 #'     * `X`,`Y`: Centroid of each tile.
@@ -196,8 +196,7 @@
 #'   * `d_mu`,`d_sig`: Parameters used to calculate `w` in the edge score `dscore`.
 #'   * `aggmap`: A length `orig_num_tiles` vector mapping each original tile ID to the new
 #'     tile IDs after merging.
-#'   * `counts`: A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.
-#' }
+#'   * `counts`: A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.}
 #' 
 #' @export
 GetTiles = function(
