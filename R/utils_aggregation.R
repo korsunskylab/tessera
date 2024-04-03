@@ -117,7 +117,8 @@ init_scores = function(aggs, agg_mode, ...) {
         aggs$d_sig = d_sig
         aggs$edges$dscore = aggs$edges$w * aggs$edges$score_size * dC
         # set dscore to -Inf if merge agg exceeds size thresholds
-        aggs$edges$dscore[aggs$edges$npts >= max_npts] = -Inf
+        # (-1 is lower than the lowest possible dscore, and allows the edge to be preserved in output)
+        aggs$edges$dscore[aggs$edges$npts >= max_npts] = -1
     } else if (agg_mode == 3) {
         alpha = list(...)[['alpha']]
         min_npts = list(...)[['min_npts']]
@@ -154,7 +155,8 @@ init_scores = function(aggs, agg_mode, ...) {
         aggs$d_mu = d_mu
         aggs$d_sig = d_sig
         ## Delete edges between aggs of good size 
-        aggs$edges$dscore[aggs$meta_data$npts[aggs$edges$from] >= min_npts & aggs$meta_data$npts[aggs$edges$to] >= min_npts] = -Inf
+        # (-1 is lower than the lowest possible dscore, and allows the edge to be preserved in output)
+        aggs$edges$dscore[aggs$meta_data$npts[aggs$edges$from] >= min_npts & aggs$meta_data$npts[aggs$edges$to] >= min_npts] = -1
     } else {
         stop(glue('agg mode {agg_mode} not implemented yet'))
     }

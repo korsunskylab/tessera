@@ -288,8 +288,9 @@ void update_E_cpp(
             E_dscore(e_update) = E_w(e_update) % E_score_size(e_update) % dC; 
             
             // set dscore to -Inf if merge agg exceeds size thresholds
+            // (-1 is lower than the lowest possible dscore, and allows the edge to be preserved in output)
             for (i = 0; i < e_update.n_elem; i++) {
-                if (E_npts(e_update(i)) >= max_npts) E_dscore(e_update(i)) = -arma::datum::inf; 
+                if (E_npts(e_update(i)) >= max_npts) E_dscore(e_update(i)) = -1; 
             }
 
             break; 
@@ -314,10 +315,11 @@ void update_E_cpp(
             E_dscore(e_update) = E_w(e_update) % E_score_size(e_update) % dC; 
 
             // set dscore to -Inf if merge agg exceeds size thresholds
+            // (-1 is lower than the lowest possible dscore, and allows the edge to be preserved in output)
             for (i = 0; i < e_update.n_elem; i++) {
                 // Delete this edge if both aggs are already of min size 
                 if (V_npts(E_from(e_update(i))) >= min_npts && V_npts(E_to(e_update(i))) >= min_npts) {
-                    E_dscore(e_update(i)) = -arma::datum::inf; 
+                    E_dscore(e_update(i)) = -1; 
                 }
                 // Do nothing if at least one agg is too small 
             }
