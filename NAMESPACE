@@ -2,6 +2,7 @@
 
 export(GetTiles)
 export(add_exterior_triangles)
+export(aggs_bind)
 export(aggs_bind2)
 export(bind_objs)
 export(color_aggs)
