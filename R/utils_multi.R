@@ -57,7 +57,7 @@ bind_objs = function(objs) {
         dmt$pts$agg_id = paste0(sample_name, '_', dmt$pts$agg_id)
 
         return(list(
-            aggs = aggs[c('meta_data', 'edges', 'counts')], 
+            aggs = aggs[c('meta_data', 'edges', 'counts', 'pcs')], 
             dmt = dmt[c('pts', 'edges')]
             # dmt = dmt[c('pts', 'counts')]
         ))
