@@ -15,7 +15,8 @@ aggs_bind2 = function(aggs1, aggs2) {
     return(list(
         meta_data = rbindlist(list(aggs1$meta_data, aggs2$meta_data)), 
         edges = rbindlist(list(aggs1$edges, aggs2$edges)), 
-        counts = Matrix::cbind2(aggs1$counts, aggs2$counts)
+        counts = Matrix::cbind2(aggs1$counts, aggs2$counts), 
+        pcs = Matrix::rbind2(aggs1$pcs, aggs2$pcs)
     ))
 }
 
@@ -82,6 +83,6 @@ bind_objs = function(objs) {
     # aggs$pt_edges$to_tri = match(paste0(aggs$pt_edges$sample_id, '_', aggs$pt_edges$to_tri), aggs$pts$id)
     
     
-    return(aggs)
-    # return(list(aggs=aggs, dmt=dmt))
+    # return(aggs)
+    return(list(aggs=aggs, dmt=dmt))
 }
