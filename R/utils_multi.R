@@ -4,7 +4,8 @@
 dmt_bind2 = function(dmt1, dmt2) {
     return(list(
         pts = rbindlist(list(dmt1$pts, dmt2$pts)),
-        edges = rbindlist(list(dmt1$edges, dmt2$edges))
+        edges = rbindlist(list(dmt1$edges, dmt2$edges)),
+        embeddings = Matrix::rbind2(dmt1$embeddings, dmt2$embeddings)        
     ))
 }
 
@@ -68,9 +69,11 @@ bind_objs = function(objs) {
 
     ## Only save meta_data from points
     ## Assume that counts should be saved elsewhere
+    objs = purrr::map(objs, function(.obj) {
+        .obj$dmt$embeddings = .obj$dmt$udv_cells$embeddings ## For ease of joining downstream 
+        return(.obj)
+    })
     dmt = objs %>% purrr::map('dmt') %>% purrr::reduce(dmt_bind2)# %>% with(pts)
-    aggs$pts = dmt$pts
-    aggs$pt_edges = dmt$edges
     
     ## Re-index edges between aggs
     aggs$edges$from = match(paste0(aggs$edges$sample_id, '_', aggs$edges$from), aggs$meta_data$id)
@@ -81,7 +84,9 @@ bind_objs = function(objs) {
     aggs$pt_edges$to_pt = match(paste0(aggs$pt_edges$sample_id, '_', aggs$pt_edges$to_pt), aggs$pts$id)
     # aggs$pt_edges$from_tri = match(paste0(aggs$pt_edges$sample_id, '_', aggs$pt_edges$from_tri), aggs$pts$id)
     # aggs$pt_edges$to_tri = match(paste0(aggs$pt_edges$sample_id, '_', aggs$pt_edges$to_tri), aggs$pts$id)
-    
+
+    ## Update index between cells and aggregates 
+    dmt$pts$agg_idx = match(dmt$pts$agg_id, aggs$meta_data$id)
     
     # return(aggs)
     return(list(aggs=aggs, dmt=dmt))
