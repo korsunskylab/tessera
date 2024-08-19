@@ -59,9 +59,9 @@ bind_objs = function(objs) {
 
         return(list(
             aggs = aggs[c('meta_data', 'edges', 'counts', 'pcs')], 
-            dmt = dmt[c('pts', 'edges')]
-            # dmt = dmt[c('pts', 'counts')]
+            dmt = dmt[c('pts', 'edges', 'udv_cells')]
         ))
+        
     })
     
     # aggs = objs %>% purrr::map('aggs') %>% purrr::reduce(aggs_bind2)
