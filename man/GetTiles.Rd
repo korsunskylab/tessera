@@ -8,6 +8,8 @@ GetTiles(
   X,
   Y,
   counts,
+  embeddings = NULL,
+  loadings = NULL,
   meta_data = NULL,
   meta_vars_include = NULL,
   npcs = 10,
@@ -26,6 +28,11 @@ GetTiles(
 \item{X, Y}{A pair of numeric vectors with the coordinates for each of \code{num_cells} points.}
 
 \item{counts}{A \code{num_genes} x \code{num_cells} gene-by-cell matrix of transcript counts.}
+
+\item{embeddings}{(Optional) A \code{num_cells} x \code{num_dim} matrix of cell embeddings across all latent dimensions.
+If missing, cell embeddings are calculated using PCA. If provided, the \code{npcs} parameter is ignored.}
+
+\item{loadings}{(Optional) A \code{num_genes} x \code{num_dim} matrix of gene loadings.}
 
 \item{meta_data}{A data frame with additional cell metadata to include in \code{dmt$pts}.}
 
@@ -112,9 +119,9 @@ external triangle has 2 vertices.
 \item \code{counts}: A \code{num_genes} x \code{num_cells_pruned} gene-by-cell matrix of transcript counts.
 \item \code{udv_cells}: A List with the PC embeddings for each cell, which are used for segmentation.
 \itemize{
-\item \code{loadings}: A \code{num_genes} x \code{npcs} matrix of gene loadings
+\item \code{loadings}: If not provided as input, a \code{num_genes} x \code{npcs} matrix of gene loadings
 for each PC. Each column is a unit vector.
-\item \code{embeddings}: A \code{num_cells} x \code{npcs} matrix of cell
+\item \code{embeddings}: If not provided as input, a \code{num_cells} x \code{npcs} matrix of cell
 embeddings across all PCs. Each column \code{j} has magnitude
 equal to the \code{j}th singular value. That is, PCs with
 larger contribution to the total variance will have

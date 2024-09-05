@@ -4,7 +4,12 @@
 \alias{compute_gradients}
 \title{Compute spatial gradient field for input to DMT}
 \usage{
-compute_gradients(dmt, smooth_distance = "none", smooth_similarity = "none")
+compute_gradients(
+  dmt,
+  smooth_distance = "none",
+  smooth_similarity = "none",
+  smooth_iter = 1
+)
 }
 \arguments{
 \item{dmt}{A list containing the mesh data structures:
