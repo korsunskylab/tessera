@@ -18,6 +18,7 @@ GetTiles(
   prune_thresh = NA,
   smooth_distance = c("none", "euclidean", "projected", "constant")[1],
   smooth_similarity = c("none", "euclidean", "projected", "constant")[1],
+  smooth_iter = 1,
   max_npts = 50,
   min_npts = 5,
   alpha = 1,
@@ -58,6 +59,8 @@ then no smoothing of the gradient field is conducted.}
 \item{smooth_similarity}{One of \code{c('none', 'euclidean', 'projected', 'constant')}.
 If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'} (the default),
 then no smoothing of the gradient field is conducted.}
+
+\item{smooth_iter}{Number of rounds of gradient smoothing.}
 
 \item{max_npts}{Maximum number of cells allowed in each tile during the
 agglomerative clustering phase.}

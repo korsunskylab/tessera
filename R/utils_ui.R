@@ -88,6 +88,7 @@
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
 #'   then no smoothing of the gradient field is conducted.
+#' @param smooth_iter Number of rounds of gradient smoothing.
 #' @param max_npts Maximum number of cells allowed in each tile during the
 #'   agglomerative clustering phase.
 #' @param min_npts Minimum number of cells allowed in each tile during the
@@ -219,6 +220,7 @@ GetTiles = function(
     ###### STEP 1: GRADIENTS ######
     smooth_distance = c('none', 'euclidean', 'projected', 'constant')[1], 
     smooth_similarity = c('none', 'euclidean', 'projected', 'constant')[1], 
+    smooth_iter = 1,
 
     ###### STEP 2: DMT ######
 
@@ -249,7 +251,7 @@ GetTiles = function(
 
     ## STEP 1: GRADIENTS 
     if (verbose) message('STEP 1: GRADIENTS ')
-    field = compute_gradients(dmt, smooth_distance, smooth_similarity)
+    field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
     field = compress_gradients_svd(field)    
     
     ## STEP 2: DMT

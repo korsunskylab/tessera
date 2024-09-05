@@ -118,6 +118,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
 #'   then no smoothing of the gradient field is conducted.
+#' @param smooth_iter Number of rounds of gradient smoothing.
 #' 
 #' @returns A gradient field with the following attributes:
 #' \item{pts}{A `2` x `D` x `N` array in column-major ordering

@@ -37,6 +37,8 @@ then no smoothing of the gradient field is conducted.}
 \item{smooth_similarity}{One of \code{c('none', 'euclidean', 'projected', 'constant')}.
 If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'} (the default),
 then no smoothing of the gradient field is conducted.}
+
+\item{smooth_iter}{Number of rounds of gradient smoothing.}
 }
 \value{
 A gradient field with the following attributes:
