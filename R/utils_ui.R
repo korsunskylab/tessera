@@ -68,6 +68,9 @@
 #' 
 #' @param X,Y A pair of numeric vectors with the coordinates for each of `num_cells` points.
 #' @param counts A `num_genes` x `num_cells` gene-by-cell matrix of transcript counts.
+#' @param embeddings (Optional) A `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions.
+#'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
+#' @param loadings (Optional) A `num_genes` x `num_dim` matrix of gene loadings.
 #' @param meta_data A data frame with additional cell metadata to include in `dmt$pts`.
 #' @param meta_vars_include Names of columns in meta_data to include in `dmt$pts`.
 #' @param npcs Number of PCs to compute for input to segmentation.
@@ -85,6 +88,7 @@
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
 #'   then no smoothing of the gradient field is conducted.
+#' @param smooth_iter Number of rounds of gradient smoothing.
 #' @param max_npts Maximum number of cells allowed in each tile during the
 #'   agglomerative clustering phase.
 #' @param min_npts Minimum number of cells allowed in each tile during the
@@ -134,9 +138,9 @@
 #'     external triangle has 2 vertices.
 #'   * `counts`: A `num_genes` x `num_cells_pruned` gene-by-cell matrix of transcript counts.
 #'   * `udv_cells`: A List with the PC embeddings for each cell, which are used for segmentation.
-#'     * `loadings`: A `num_genes` x `npcs` matrix of gene loadings
+#'     * `loadings`: If not provided as input, a `num_genes` x `npcs` matrix of gene loadings
 #'       for each PC. Each column is a unit vector.
-#'     * `embeddings`: A `num_cells` x `npcs` matrix of cell
+#'     * `embeddings`: If not provided as input, a `num_cells` x `npcs` matrix of cell
 #'       embeddings across all PCs. Each column `j` has magnitude
 #'       equal to the `j`th singular value. That is, PCs with
 #'       larger contribution to the total variance will have
@@ -202,6 +206,8 @@
 GetTiles = function(
     X, Y, counts, 
     
+    embeddings = NULL,
+    loadings = NULL,
     meta_data = NULL, meta_vars_include = NULL, 
 
     ###### STEP 0 ######
@@ -214,6 +220,7 @@ GetTiles = function(
     ###### STEP 1: GRADIENTS ######
     smooth_distance = c('none', 'euclidean', 'projected', 'constant')[1], 
     smooth_similarity = c('none', 'euclidean', 'projected', 'constant')[1], 
+    smooth_iter = 1,
 
     ###### STEP 2: DMT ######
 
@@ -233,11 +240,18 @@ GetTiles = function(
                       mincells = prune_min_cells, thresh = prune_thresh) 
     dmt = add_exterior_triangles(dmt)
 
-    dmt$udv_cells = do_pca(dmt$counts, npcs)
+    if (is.null(embeddings)) {
+        dmt$udv_cells = do_pca(dmt$counts, npcs)
+    } else {
+        dmt$udv_cells = list(
+            loadings = loadings,
+            embeddings = embeddings[as.integer(dmt$pts$ORIG_ID),]
+        )
+    }
 
     ## STEP 1: GRADIENTS 
     if (verbose) message('STEP 1: GRADIENTS ')
-    field = compute_gradients(dmt, smooth_distance, smooth_similarity)
+    field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
     field = compress_gradients_svd(field)    
     
     ## STEP 2: DMT

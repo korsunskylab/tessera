@@ -4,7 +4,12 @@
 \alias{compute_gradients}
 \title{Compute spatial gradient field for input to DMT}
 \usage{
-compute_gradients(dmt, smooth_distance = "none", smooth_similarity = "none")
+compute_gradients(
+  dmt,
+  smooth_distance = "none",
+  smooth_similarity = "none",
+  smooth_iter = 1
+)
 }
 \arguments{
 \item{dmt}{A list containing the mesh data structures:
@@ -32,6 +37,8 @@ then no smoothing of the gradient field is conducted.}
 \item{smooth_similarity}{One of \code{c('none', 'euclidean', 'projected', 'constant')}.
 If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'} (the default),
 then no smoothing of the gradient field is conducted.}
+
+\item{smooth_iter}{Number of rounds of gradient smoothing.}
 }
 \value{
 A gradient field with the following attributes:

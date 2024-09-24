@@ -118,6 +118,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
 #'   then no smoothing of the gradient field is conducted.
+#' @param smooth_iter Number of rounds of gradient smoothing.
 #' 
 #' @returns A gradient field with the following attributes:
 #' \item{pts}{A `2` x `D` x `N` array in column-major ordering
@@ -137,7 +138,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #'   Average of the two adjacent triangles.}
 #' 
 #' @export
-compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='none') {
+compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='none', smooth_iter=1) {
     field = list()
 
     ## First on points 
@@ -148,8 +149,11 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
     field$pts = estimate_field(coords, adj, embeddings)
 
     ## Smooth pt gradient first
-    if (smooth_distance != 'none' & smooth_similarity != 'none')
-        field$pts = smooth_field(coords, field=field$pts, adj, include_self=TRUE, distance=smooth_distance, similarity=smooth_similarity) 
+    if (smooth_distance != 'none' & smooth_similarity != 'none') {
+        for (i in seq_len(smooth_iter)) {
+            field$pts = smooth_field(coords, field=field$pts, adj, include_self=TRUE, distance=smooth_distance, similarity=smooth_similarity) 
+        }
+    }
     
     ## Field on tris
     ## Now, we need to do some tensor math to derive fields for each triangle. 
