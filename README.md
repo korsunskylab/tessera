@@ -1,4 +1,4 @@
-# cygnus
+# Tessera
 
 Algorithm for getting tiles for spatial clustering. 
 
