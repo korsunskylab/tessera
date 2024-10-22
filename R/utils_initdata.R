@@ -148,6 +148,9 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10, thresh = NA) 
     ] %>% 
         as.matrix() %>% 
         igraph::from_edgelist()$fun(directed = FALSE) 
+    # add missing isolated triangles to graph
+    g = igraph::add_vertices(g, nv = nrow(tris) - igraph::gorder(g))
+    
     comps = igraph::components(g)$membership
     tris$comp = factor(comps) 
     
