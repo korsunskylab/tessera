@@ -13,19 +13,19 @@
 #' @returns A dense matrix in column-major ordering
 #'   with dimensions `nrow` x `ncol`.
 scaleRows_dgc <- function(x, p, i, ncol, nrow, thresh) {
-    .Call('_cygnus_scaleRows_dgc', PACKAGE = 'cygnus', x, p, i, ncol, nrow, thresh)
+    .Call('_tessera_scaleRows_dgc', PACKAGE = 'tessera', x, p, i, ncol, nrow, thresh)
 }
 
 st_mats_perimeter <- function(Xvec) {
-    .Call('_cygnus_st_mats_perimeter', PACKAGE = 'cygnus', Xvec)
+    .Call('_tessera_st_mats_perimeter', PACKAGE = 'tessera', Xvec)
 }
 
 get_e_minus_epaths_saddles <- function(epaths, saddles, N) {
-    .Call('_cygnus_get_e_minus_epaths_saddles', PACKAGE = 'cygnus', epaths, saddles, N)
+    .Call('_tessera_get_e_minus_epaths_saddles', PACKAGE = 'tessera', epaths, saddles, N)
 }
 
 is_in_list <- function(target, mylist) {
-    .Call('_cygnus_is_in_list', PACKAGE = 'cygnus', target, mylist)
+    .Call('_tessera_is_in_list', PACKAGE = 'tessera', target, mylist)
 }
 
 #' Copies elements from two lists an Armadillo uvec
@@ -36,7 +36,7 @@ is_in_list <- function(target, mylist) {
 #'
 #' @returns An Armadillo uvec that concatenates `list1` and `list2`.
 mergeListsToArmaUVec <- function(list1, list2) {
-    .Call('_cygnus_mergeListsToArmaUVec', PACKAGE = 'cygnus', list1, list2)
+    .Call('_tessera_mergeListsToArmaUVec', PACKAGE = 'tessera', list1, list2)
 }
 
 #' Find duplicates within a vector
@@ -46,7 +46,7 @@ mergeListsToArmaUVec <- function(list1, list2) {
 #' @returns Vector of values from `input` that appear at least twice.
 #'   Each value that appears N times in `input` will appear N-1 times in the output.
 findDuplicates <- function(input) {
-    .Call('_cygnus_findDuplicates', PACKAGE = 'cygnus', input)
+    .Call('_tessera_findDuplicates', PACKAGE = 'tessera', input)
 }
 
 #' Updates information for tiles after merging two tiles
@@ -56,7 +56,7 @@ findDuplicates <- function(input) {
 #' within the `V_pcs`, `V_npts`, `V_perimeter`, `V_area` input data structures.
 #'
 update_V_cpp <- function(V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode) {
-    invisible(.Call('_cygnus_update_V_cpp', PACKAGE = 'cygnus', V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode))
+    invisible(.Call('_tessera_update_V_cpp', PACKAGE = 'tessera', V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode))
 }
 
 #' Updates information for boundaries after merging two tiles
@@ -73,7 +73,7 @@ update_V_cpp <- function(V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_mer
 #'
 #' @param e_update Edges that should be updated.
 update_E_cpp <- function(V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts) {
-    invisible(.Call('_cygnus_update_E_cpp', PACKAGE = 'cygnus', V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts))
+    invisible(.Call('_tessera_update_E_cpp', PACKAGE = 'tessera', V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts))
 }
 
 #' Merges tiles using single-linkage agglomerative clustering
@@ -98,11 +98,11 @@ update_E_cpp <- function(V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npt
 #'   of the original tiles have been merged together. Some vectors will have length 0.
 #'
 merge_aggs_cpp <- function(V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts) {
-    .Call('_cygnus_merge_aggs_cpp', PACKAGE = 'cygnus', V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
+    .Call('_tessera_merge_aggs_cpp', PACKAGE = 'tessera', V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
 }
 
 foo_triplets_edges <- function(triplets, edges) {
-    .Call('_cygnus_foo_triplets_edges', PACKAGE = 'cygnus', triplets, edges)
+    .Call('_tessera_foo_triplets_edges', PACKAGE = 'tessera', triplets, edges)
 }
 
 #' Construct maximum spanning forest
@@ -132,7 +132,7 @@ foo_triplets_edges <- function(triplets, edges) {
 #'    each point as a target node. Critical points have no parent edge, so the value should be ignored.
 #'
 do_dmt_forest_cpp <- function(f, edges_from, edges_to, edges_f) {
-    .Call('_cygnus_do_dmt_forest_cpp', PACKAGE = 'cygnus', f, edges_from, edges_to, edges_f)
+    .Call('_tessera_do_dmt_forest_cpp', PACKAGE = 'tessera', f, edges_from, edges_to, edges_f)
 }
 
 #' Trace back from a point to its root in the spanning forest
@@ -147,7 +147,7 @@ do_dmt_forest_cpp <- function(f, edges_from, edges_to, edges_f) {
 #' @returns Vector of edge indices along the path from `v0` to its root `vcrit` in the tree (1-indexed).
 #'
 trace_back_cpp <- function(v0, vcrit, parent_edge, parent) {
-    .Call('_cygnus_trace_back_cpp', PACKAGE = 'cygnus', v0, vcrit, parent_edge, parent)
+    .Call('_tessera_trace_back_cpp', PACKAGE = 'tessera', v0, vcrit, parent_edge, parent)
 }
 
 #' Trace all paths from saddles to critical points in the spanning forest
@@ -167,7 +167,7 @@ trace_back_cpp <- function(v0, vcrit, parent_edge, parent) {
 #' @returns A list of length `2*num_saddles` containing the two paths from each saddle edge to the
 #'   two critical points that it joins. Each path is a numeric vector of edge indices (1-indexed).
 trace_epaths_cpp <- function(saddles, vcrits, edges_from, edges_to, parent_edge, parent) {
-    .Call('_cygnus_trace_epaths_cpp', PACKAGE = 'cygnus', saddles, vcrits, edges_from, edges_to, parent_edge, parent)
+    .Call('_tessera_trace_epaths_cpp', PACKAGE = 'tessera', saddles, vcrits, edges_from, edges_to, parent_edge, parent)
 }
 
 #' Get the collection of edges that lie along separatrices
@@ -181,11 +181,11 @@ trace_epaths_cpp <- function(saddles, vcrits, edges_from, edges_to, parent_edge,
 #'   lie along the paths in `epaths`. These edges make up the separatrices that separate points into
 #'   different components.
 get_e_sep <- function(epaths, saddles, nedges) {
-    .Call('_cygnus_get_e_sep', PACKAGE = 'cygnus', epaths, saddles, nedges)
+    .Call('_tessera_get_e_sep', PACKAGE = 'tessera', epaths, saddles, nedges)
 }
 
 prune_e_sep <- function(edges, ntris, is_tri_external, e_sep) {
-    .Call('_cygnus_prune_e_sep', PACKAGE = 'cygnus', edges, ntris, is_tri_external, e_sep)
+    .Call('_tessera_prune_e_sep', PACKAGE = 'tessera', edges, ntris, is_tri_external, e_sep)
 }
 
 #' Bilateral / anisotropic filtering of gradient field
@@ -212,7 +212,7 @@ prune_e_sep <- function(edges, ntris, is_tri_external, e_sep) {
 #'   `D` latent variables at every point in space.
 #' 
 smooth_field_cpp <- function(pvec, adj_i, adj_p, field, coords, distance, similarity) {
-    .Call('_cygnus_smooth_field_cpp', PACKAGE = 'cygnus', pvec, adj_i, adj_p, field, coords, distance, similarity)
+    .Call('_tessera_smooth_field_cpp', PACKAGE = 'tessera', pvec, adj_i, adj_p, field, coords, distance, similarity)
 }
 
 #' Compress a gradient field using SVD
@@ -235,7 +235,7 @@ smooth_field_cpp <- function(pvec, adj_i, adj_p, field, coords, distance, simila
 #'     gradient and orthogonal directions (singular values).}
 #'
 compress_field_cpp <- function(field) {
-    .Call('_cygnus_compress_field_cpp', PACKAGE = 'cygnus', field)
+    .Call('_tessera_compress_field_cpp', PACKAGE = 'tessera', field)
 }
 
 #' Compute a spatial gradient field at each point (cell)
@@ -255,7 +255,7 @@ compress_field_cpp <- function(field) {
 #'   `D` embedding dimensions at every point in space.
 #'
 estimate_field_cpp <- function(coords, embeddings, adj_i, adj_p) {
-    .Call('_cygnus_estimate_field_cpp', PACKAGE = 'cygnus', coords, embeddings, adj_i, adj_p)
+    .Call('_tessera_estimate_field_cpp', PACKAGE = 'tessera', coords, embeddings, adj_i, adj_p)
 }
 
 #' Assigns a unique ID to each point with distinct X,Y coordinates
@@ -266,7 +266,7 @@ estimate_field_cpp <- function(coords, embeddings, adj_i, adj_p) {
 #'   IDs that range from 0 to N where N is the number of unique points.
 #' 
 assign_unique_rowid_cpp <- function(X, Y) {
-    .Call('_cygnus_assign_unique_rowid_cpp', PACKAGE = 'cygnus', X, Y)
+    .Call('_tessera_assign_unique_rowid_cpp', PACKAGE = 'tessera', X, Y)
 }
 
 #' Calculates triangles' centroids, areas, and heights from vertices
@@ -287,7 +287,7 @@ assign_unique_rowid_cpp <- function(X, Y) {
 #'   Note that indices that reference the `pts` and `tris` tables are 1-indexed.
 #' 
 init_edges_cpp <- function(triplets, pts, tris) {
-    .Call('_cygnus_init_edges_cpp', PACKAGE = 'cygnus', triplets, pts, tris)
+    .Call('_tessera_init_edges_cpp', PACKAGE = 'tessera', triplets, pts, tris)
 }
 
 #' Calculates triangles' centroids, areas, and heights from vertices
@@ -302,31 +302,31 @@ init_edges_cpp <- function(triplets, pts, tris) {
 #'   largest height of each triangle in the last two columns.
 #' 
 init_tris_cpp <- function(triplets, pts) {
-    .Call('_cygnus_init_tris_cpp', PACKAGE = 'cygnus', triplets, pts)
+    .Call('_tessera_init_tris_cpp', PACKAGE = 'tessera', triplets, pts)
 }
 
 mapToConsecutivePositions <- function(numbers) {
-    .Call('_cygnus_mapToConsecutivePositions', PACKAGE = 'cygnus', numbers)
+    .Call('_tessera_mapToConsecutivePositions', PACKAGE = 'tessera', numbers)
 }
 
 splitSequence <- function(y) {
-    .Call('_cygnus_splitSequence', PACKAGE = 'cygnus', y)
+    .Call('_tessera_splitSequence', PACKAGE = 'tessera', y)
 }
 
 findLargestComponentEulerCycle <- function(edges) {
-    .Call('_cygnus_findLargestComponentEulerCycle', PACKAGE = 'cygnus', edges)
+    .Call('_tessera_findLargestComponentEulerCycle', PACKAGE = 'tessera', edges)
 }
 
 get_agg_to_boundary_edge <- function(E, n_agg) {
-    .Call('_cygnus_get_agg_to_boundary_edge', PACKAGE = 'cygnus', E, n_agg)
+    .Call('_tessera_get_agg_to_boundary_edge', PACKAGE = 'tessera', E, n_agg)
 }
 
 get_agg_to_edge <- function(edges, naggs, always_include_boundary) {
-    .Call('_cygnus_get_agg_to_edge', PACKAGE = 'cygnus', edges, naggs, always_include_boundary)
+    .Call('_tessera_get_agg_to_edge', PACKAGE = 'tessera', edges, naggs, always_include_boundary)
 }
 
 get_boundary_graph_cpp <- function(e_dual, i_pts, e_prim, E, ntris) {
-    .Call('_cygnus_get_boundary_graph_cpp', PACKAGE = 'cygnus', e_dual, i_pts, e_prim, E, ntris)
+    .Call('_tessera_get_boundary_graph_cpp', PACKAGE = 'tessera', e_dual, i_pts, e_prim, E, ntris)
 }
 
 #' Contruct shapes that outline each tile
@@ -341,10 +341,10 @@ get_boundary_graph_cpp <- function(e_dual, i_pts, e_prim, E, ntris) {
 #'   polygons that trace the outline of each tile.
 #'
 trace_polygons_cpp <- function(edges, naggs, ntris, pts_dmt_component) {
-    .Call('_cygnus_trace_polygons_cpp', PACKAGE = 'cygnus', edges, naggs, ntris, pts_dmt_component)
+    .Call('_tessera_trace_polygons_cpp', PACKAGE = 'tessera', edges, naggs, ntris, pts_dmt_component)
 }
 
 trace_polygons_pts_cpp <- function(edges, naggs) {
-    .Call('_cygnus_trace_polygons_pts_cpp', PACKAGE = 'cygnus', edges, naggs)
+    .Call('_tessera_trace_polygons_pts_cpp', PACKAGE = 'tessera', edges, naggs)
 }
 

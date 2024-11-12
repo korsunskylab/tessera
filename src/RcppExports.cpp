@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // scaleRows_dgc
 arma::mat scaleRows_dgc(const arma::vec& x, const arma::vec& p, const arma::vec& i, int ncol, int nrow, float thresh);
-RcppExport SEXP _cygnus_scaleRows_dgc(SEXP xSEXP, SEXP pSEXP, SEXP iSEXP, SEXP ncolSEXP, SEXP nrowSEXP, SEXP threshSEXP) {
+RcppExport SEXP _tessera_scaleRows_dgc(SEXP xSEXP, SEXP pSEXP, SEXP iSEXP, SEXP ncolSEXP, SEXP nrowSEXP, SEXP threshSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -29,7 +29,7 @@ END_RCPP
 }
 // st_mats_perimeter
 arma::vec st_mats_perimeter(std::vector<arma::mat>& Xvec);
-RcppExport SEXP _cygnus_st_mats_perimeter(SEXP XvecSEXP) {
+RcppExport SEXP _tessera_st_mats_perimeter(SEXP XvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,7 +40,7 @@ END_RCPP
 }
 // get_e_minus_epaths_saddles
 arma::uvec get_e_minus_epaths_saddles(std::vector<arma::uvec>& epaths, arma::uvec saddles, int N);
-RcppExport SEXP _cygnus_get_e_minus_epaths_saddles(SEXP epathsSEXP, SEXP saddlesSEXP, SEXP NSEXP) {
+RcppExport SEXP _tessera_get_e_minus_epaths_saddles(SEXP epathsSEXP, SEXP saddlesSEXP, SEXP NSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -53,7 +53,7 @@ END_RCPP
 }
 // is_in_list
 bool is_in_list(unsigned target, std::list<unsigned> mylist);
-RcppExport SEXP _cygnus_is_in_list(SEXP targetSEXP, SEXP mylistSEXP) {
+RcppExport SEXP _tessera_is_in_list(SEXP targetSEXP, SEXP mylistSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,7 +65,7 @@ END_RCPP
 }
 // mergeListsToArmaUVec
 arma::uvec mergeListsToArmaUVec(const std::list<unsigned>& list1, const std::list<unsigned>& list2);
-RcppExport SEXP _cygnus_mergeListsToArmaUVec(SEXP list1SEXP, SEXP list2SEXP) {
+RcppExport SEXP _tessera_mergeListsToArmaUVec(SEXP list1SEXP, SEXP list2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -77,7 +77,7 @@ END_RCPP
 }
 // findDuplicates
 arma::uvec findDuplicates(const arma::uvec& input);
-RcppExport SEXP _cygnus_findDuplicates(SEXP inputSEXP) {
+RcppExport SEXP _tessera_findDuplicates(SEXP inputSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,7 +88,7 @@ END_RCPP
 }
 // update_V_cpp
 void update_V_cpp(arma::mat& V_pcs, arma::vec& V_npts, arma::vec& V_perimeter, arma::vec& V_area, unsigned e_merge_from, unsigned e_merge_to, double e_merge_edge_length, double e_merge_area, double e_merge_npts, const arma::rowvec& e_merge_pcs, int agg_mode);
-RcppExport SEXP _cygnus_update_V_cpp(SEXP V_pcsSEXP, SEXP V_nptsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP e_merge_fromSEXP, SEXP e_merge_toSEXP, SEXP e_merge_edge_lengthSEXP, SEXP e_merge_areaSEXP, SEXP e_merge_nptsSEXP, SEXP e_merge_pcsSEXP, SEXP agg_modeSEXP) {
+RcppExport SEXP _tessera_update_V_cpp(SEXP V_pcsSEXP, SEXP V_nptsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP e_merge_fromSEXP, SEXP e_merge_toSEXP, SEXP e_merge_edge_lengthSEXP, SEXP e_merge_areaSEXP, SEXP e_merge_nptsSEXP, SEXP e_merge_pcsSEXP, SEXP agg_modeSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type V_pcs(V_pcsSEXP);
@@ -108,7 +108,7 @@ END_RCPP
 }
 // update_E_cpp
 void update_E_cpp(arma::mat& V_pcs, arma::vec& V_perimeter, arma::vec& V_area, arma::vec& V_npts, arma::uvec& E_from, arma::uvec& E_to, arma::vec& E_npts, arma::vec& E_area, arma::vec& E_edge_length, arma::mat& E_pcs_merge, arma::vec& E_w, arma::vec& E_perimeter_merge, arma::vec& E_score_size, arma::vec& E_dscore, arma::uvec& e_update, std::vector<std::list<unsigned> >& V_to_E_from, std::vector<std::list<unsigned> >& V_to_E_to, double d_mu, double d_sig, int agg_mode, double min_npts, double max_npts);
-RcppExport SEXP _cygnus_update_E_cpp(SEXP V_pcsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP e_updateSEXP, SEXP V_to_E_fromSEXP, SEXP V_to_E_toSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP agg_modeSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
+RcppExport SEXP _tessera_update_E_cpp(SEXP V_pcsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP e_updateSEXP, SEXP V_to_E_fromSEXP, SEXP V_to_E_toSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP agg_modeSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type V_pcs(V_pcsSEXP);
@@ -139,7 +139,7 @@ END_RCPP
 }
 // merge_aggs_cpp
 std::vector<std::list<unsigned> > merge_aggs_cpp(arma::mat& V_pcs, arma::vec& V_area, arma::vec& V_perimeter, arma::vec& V_npts, arma::uvec& E_from, arma::uvec& E_to, arma::vec& E_npts, arma::vec& E_area, arma::vec& E_edge_length, arma::mat& E_pcs_merge, arma::vec& E_w, arma::vec& E_perimeter_merge, arma::vec& E_score_size, arma::vec& E_dscore, double d_mu, double d_sig, unsigned iter_max, int agg_mode, double dscore_thresh, double min_npts, double max_npts);
-RcppExport SEXP _cygnus_merge_aggs_cpp(SEXP V_pcsSEXP, SEXP V_areaSEXP, SEXP V_perimeterSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP iter_maxSEXP, SEXP agg_modeSEXP, SEXP dscore_threshSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
+RcppExport SEXP _tessera_merge_aggs_cpp(SEXP V_pcsSEXP, SEXP V_areaSEXP, SEXP V_perimeterSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP iter_maxSEXP, SEXP agg_modeSEXP, SEXP dscore_threshSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -170,7 +170,7 @@ END_RCPP
 }
 // foo_triplets_edges
 arma::umat foo_triplets_edges(arma::umat& triplets, arma::umat& edges);
-RcppExport SEXP _cygnus_foo_triplets_edges(SEXP tripletsSEXP, SEXP edgesSEXP) {
+RcppExport SEXP _tessera_foo_triplets_edges(SEXP tripletsSEXP, SEXP edgesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -182,7 +182,7 @@ END_RCPP
 }
 // do_dmt_forest_cpp
 Rcpp::List do_dmt_forest_cpp(const arma::vec& f, const arma::uvec& edges_from, const arma::uvec& edges_to, const arma::vec& edges_f);
-RcppExport SEXP _cygnus_do_dmt_forest_cpp(SEXP fSEXP, SEXP edges_fromSEXP, SEXP edges_toSEXP, SEXP edges_fSEXP) {
+RcppExport SEXP _tessera_do_dmt_forest_cpp(SEXP fSEXP, SEXP edges_fromSEXP, SEXP edges_toSEXP, SEXP edges_fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -196,7 +196,7 @@ END_RCPP
 }
 // trace_back_cpp
 std::list<unsigned> trace_back_cpp(unsigned v0, unsigned vcrit, const arma::uvec& parent_edge, const arma::uvec& parent);
-RcppExport SEXP _cygnus_trace_back_cpp(SEXP v0SEXP, SEXP vcritSEXP, SEXP parent_edgeSEXP, SEXP parentSEXP) {
+RcppExport SEXP _tessera_trace_back_cpp(SEXP v0SEXP, SEXP vcritSEXP, SEXP parent_edgeSEXP, SEXP parentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -210,7 +210,7 @@ END_RCPP
 }
 // trace_epaths_cpp
 std::vector<std::list<unsigned> > trace_epaths_cpp(const arma::uvec& saddles, const arma::uvec& vcrits, const arma::uvec& edges_from, const arma::uvec& edges_to, const arma::uvec& parent_edge, const arma::uvec& parent);
-RcppExport SEXP _cygnus_trace_epaths_cpp(SEXP saddlesSEXP, SEXP vcritsSEXP, SEXP edges_fromSEXP, SEXP edges_toSEXP, SEXP parent_edgeSEXP, SEXP parentSEXP) {
+RcppExport SEXP _tessera_trace_epaths_cpp(SEXP saddlesSEXP, SEXP vcritsSEXP, SEXP edges_fromSEXP, SEXP edges_toSEXP, SEXP parent_edgeSEXP, SEXP parentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -226,7 +226,7 @@ END_RCPP
 }
 // get_e_sep
 arma::uvec get_e_sep(std::vector<arma::uvec> epaths, arma::uvec saddles, int nedges);
-RcppExport SEXP _cygnus_get_e_sep(SEXP epathsSEXP, SEXP saddlesSEXP, SEXP nedgesSEXP) {
+RcppExport SEXP _tessera_get_e_sep(SEXP epathsSEXP, SEXP saddlesSEXP, SEXP nedgesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -239,7 +239,7 @@ END_RCPP
 }
 // prune_e_sep
 arma::uvec prune_e_sep(arma::mat& edges, int ntris, std::vector<bool> is_tri_external, arma::uvec e_sep);
-RcppExport SEXP _cygnus_prune_e_sep(SEXP edgesSEXP, SEXP ntrisSEXP, SEXP is_tri_externalSEXP, SEXP e_sepSEXP) {
+RcppExport SEXP _tessera_prune_e_sep(SEXP edgesSEXP, SEXP ntrisSEXP, SEXP is_tri_externalSEXP, SEXP e_sepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -253,7 +253,7 @@ END_RCPP
 }
 // smooth_field_cpp
 arma::cube smooth_field_cpp(arma::uvec& pvec, arma::uvec& adj_i, arma::uvec& adj_p, arma::cube& field, arma::mat& coords, unsigned distance, unsigned similarity);
-RcppExport SEXP _cygnus_smooth_field_cpp(SEXP pvecSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP, SEXP fieldSEXP, SEXP coordsSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
+RcppExport SEXP _tessera_smooth_field_cpp(SEXP pvecSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP, SEXP fieldSEXP, SEXP coordsSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -270,7 +270,7 @@ END_RCPP
 }
 // compress_field_cpp
 arma::mat compress_field_cpp(arma::cube& field);
-RcppExport SEXP _cygnus_compress_field_cpp(SEXP fieldSEXP) {
+RcppExport SEXP _tessera_compress_field_cpp(SEXP fieldSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -281,7 +281,7 @@ END_RCPP
 }
 // estimate_field_cpp
 arma::cube estimate_field_cpp(arma::mat& coords, arma::mat& embeddings, arma::uvec& adj_i, arma::uvec& adj_p);
-RcppExport SEXP _cygnus_estimate_field_cpp(SEXP coordsSEXP, SEXP embeddingsSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP) {
+RcppExport SEXP _tessera_estimate_field_cpp(SEXP coordsSEXP, SEXP embeddingsSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -295,7 +295,7 @@ END_RCPP
 }
 // assign_unique_rowid_cpp
 arma::uvec assign_unique_rowid_cpp(arma::vec X, arma::vec Y);
-RcppExport SEXP _cygnus_assign_unique_rowid_cpp(SEXP XSEXP, SEXP YSEXP) {
+RcppExport SEXP _tessera_assign_unique_rowid_cpp(SEXP XSEXP, SEXP YSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -307,7 +307,7 @@ END_RCPP
 }
 // init_edges_cpp
 arma::mat init_edges_cpp(arma::mat& triplets, arma::mat& pts, arma::mat& tris);
-RcppExport SEXP _cygnus_init_edges_cpp(SEXP tripletsSEXP, SEXP ptsSEXP, SEXP trisSEXP) {
+RcppExport SEXP _tessera_init_edges_cpp(SEXP tripletsSEXP, SEXP ptsSEXP, SEXP trisSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -320,7 +320,7 @@ END_RCPP
 }
 // init_tris_cpp
 arma::mat init_tris_cpp(arma::umat& triplets, arma::mat& pts);
-RcppExport SEXP _cygnus_init_tris_cpp(SEXP tripletsSEXP, SEXP ptsSEXP) {
+RcppExport SEXP _tessera_init_tris_cpp(SEXP tripletsSEXP, SEXP ptsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -332,7 +332,7 @@ END_RCPP
 }
 // mapToConsecutivePositions
 arma::vec mapToConsecutivePositions(const arma::vec& numbers);
-RcppExport SEXP _cygnus_mapToConsecutivePositions(SEXP numbersSEXP) {
+RcppExport SEXP _tessera_mapToConsecutivePositions(SEXP numbersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -343,7 +343,7 @@ END_RCPP
 }
 // splitSequence
 std::vector<arma::uvec> splitSequence(const arma::vec& y);
-RcppExport SEXP _cygnus_splitSequence(SEXP ySEXP) {
+RcppExport SEXP _tessera_splitSequence(SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -354,7 +354,7 @@ END_RCPP
 }
 // findLargestComponentEulerCycle
 arma::uvec findLargestComponentEulerCycle(arma::mat& edges);
-RcppExport SEXP _cygnus_findLargestComponentEulerCycle(SEXP edgesSEXP) {
+RcppExport SEXP _tessera_findLargestComponentEulerCycle(SEXP edgesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -365,7 +365,7 @@ END_RCPP
 }
 // get_agg_to_boundary_edge
 std::vector<arma::uvec > get_agg_to_boundary_edge(arma::mat& E, unsigned n_agg);
-RcppExport SEXP _cygnus_get_agg_to_boundary_edge(SEXP ESEXP, SEXP n_aggSEXP) {
+RcppExport SEXP _tessera_get_agg_to_boundary_edge(SEXP ESEXP, SEXP n_aggSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -377,7 +377,7 @@ END_RCPP
 }
 // get_agg_to_edge
 std::vector<arma::uvec> get_agg_to_edge(arma::mat& edges, unsigned naggs, bool always_include_boundary);
-RcppExport SEXP _cygnus_get_agg_to_edge(SEXP edgesSEXP, SEXP naggsSEXP, SEXP always_include_boundarySEXP) {
+RcppExport SEXP _tessera_get_agg_to_edge(SEXP edgesSEXP, SEXP naggsSEXP, SEXP always_include_boundarySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -390,7 +390,7 @@ END_RCPP
 }
 // get_boundary_graph_cpp
 arma::mat get_boundary_graph_cpp(arma::uvec e_dual, arma::uvec i_pts, arma::uvec e_prim, arma::mat& E, double ntris);
-RcppExport SEXP _cygnus_get_boundary_graph_cpp(SEXP e_dualSEXP, SEXP i_ptsSEXP, SEXP e_primSEXP, SEXP ESEXP, SEXP ntrisSEXP) {
+RcppExport SEXP _tessera_get_boundary_graph_cpp(SEXP e_dualSEXP, SEXP i_ptsSEXP, SEXP e_primSEXP, SEXP ESEXP, SEXP ntrisSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -405,7 +405,7 @@ END_RCPP
 }
 // trace_polygons_cpp
 Rcpp::List trace_polygons_cpp(arma::mat& edges, unsigned naggs, unsigned ntris, arma::vec& pts_dmt_component);
-RcppExport SEXP _cygnus_trace_polygons_cpp(SEXP edgesSEXP, SEXP naggsSEXP, SEXP ntrisSEXP, SEXP pts_dmt_componentSEXP) {
+RcppExport SEXP _tessera_trace_polygons_cpp(SEXP edgesSEXP, SEXP naggsSEXP, SEXP ntrisSEXP, SEXP pts_dmt_componentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -419,7 +419,7 @@ END_RCPP
 }
 // trace_polygons_pts_cpp
 Rcpp::List trace_polygons_pts_cpp(arma::mat& edges, unsigned naggs);
-RcppExport SEXP _cygnus_trace_polygons_pts_cpp(SEXP edgesSEXP, SEXP naggsSEXP) {
+RcppExport SEXP _tessera_trace_polygons_pts_cpp(SEXP edgesSEXP, SEXP naggsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -431,39 +431,39 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_cygnus_scaleRows_dgc", (DL_FUNC) &_cygnus_scaleRows_dgc, 6},
-    {"_cygnus_st_mats_perimeter", (DL_FUNC) &_cygnus_st_mats_perimeter, 1},
-    {"_cygnus_get_e_minus_epaths_saddles", (DL_FUNC) &_cygnus_get_e_minus_epaths_saddles, 3},
-    {"_cygnus_is_in_list", (DL_FUNC) &_cygnus_is_in_list, 2},
-    {"_cygnus_mergeListsToArmaUVec", (DL_FUNC) &_cygnus_mergeListsToArmaUVec, 2},
-    {"_cygnus_findDuplicates", (DL_FUNC) &_cygnus_findDuplicates, 1},
-    {"_cygnus_update_V_cpp", (DL_FUNC) &_cygnus_update_V_cpp, 11},
-    {"_cygnus_update_E_cpp", (DL_FUNC) &_cygnus_update_E_cpp, 22},
-    {"_cygnus_merge_aggs_cpp", (DL_FUNC) &_cygnus_merge_aggs_cpp, 21},
-    {"_cygnus_foo_triplets_edges", (DL_FUNC) &_cygnus_foo_triplets_edges, 2},
-    {"_cygnus_do_dmt_forest_cpp", (DL_FUNC) &_cygnus_do_dmt_forest_cpp, 4},
-    {"_cygnus_trace_back_cpp", (DL_FUNC) &_cygnus_trace_back_cpp, 4},
-    {"_cygnus_trace_epaths_cpp", (DL_FUNC) &_cygnus_trace_epaths_cpp, 6},
-    {"_cygnus_get_e_sep", (DL_FUNC) &_cygnus_get_e_sep, 3},
-    {"_cygnus_prune_e_sep", (DL_FUNC) &_cygnus_prune_e_sep, 4},
-    {"_cygnus_smooth_field_cpp", (DL_FUNC) &_cygnus_smooth_field_cpp, 7},
-    {"_cygnus_compress_field_cpp", (DL_FUNC) &_cygnus_compress_field_cpp, 1},
-    {"_cygnus_estimate_field_cpp", (DL_FUNC) &_cygnus_estimate_field_cpp, 4},
-    {"_cygnus_assign_unique_rowid_cpp", (DL_FUNC) &_cygnus_assign_unique_rowid_cpp, 2},
-    {"_cygnus_init_edges_cpp", (DL_FUNC) &_cygnus_init_edges_cpp, 3},
-    {"_cygnus_init_tris_cpp", (DL_FUNC) &_cygnus_init_tris_cpp, 2},
-    {"_cygnus_mapToConsecutivePositions", (DL_FUNC) &_cygnus_mapToConsecutivePositions, 1},
-    {"_cygnus_splitSequence", (DL_FUNC) &_cygnus_splitSequence, 1},
-    {"_cygnus_findLargestComponentEulerCycle", (DL_FUNC) &_cygnus_findLargestComponentEulerCycle, 1},
-    {"_cygnus_get_agg_to_boundary_edge", (DL_FUNC) &_cygnus_get_agg_to_boundary_edge, 2},
-    {"_cygnus_get_agg_to_edge", (DL_FUNC) &_cygnus_get_agg_to_edge, 3},
-    {"_cygnus_get_boundary_graph_cpp", (DL_FUNC) &_cygnus_get_boundary_graph_cpp, 5},
-    {"_cygnus_trace_polygons_cpp", (DL_FUNC) &_cygnus_trace_polygons_cpp, 4},
-    {"_cygnus_trace_polygons_pts_cpp", (DL_FUNC) &_cygnus_trace_polygons_pts_cpp, 2},
+    {"_tessera_scaleRows_dgc", (DL_FUNC) &_tessera_scaleRows_dgc, 6},
+    {"_tessera_st_mats_perimeter", (DL_FUNC) &_tessera_st_mats_perimeter, 1},
+    {"_tessera_get_e_minus_epaths_saddles", (DL_FUNC) &_tessera_get_e_minus_epaths_saddles, 3},
+    {"_tessera_is_in_list", (DL_FUNC) &_tessera_is_in_list, 2},
+    {"_tessera_mergeListsToArmaUVec", (DL_FUNC) &_tessera_mergeListsToArmaUVec, 2},
+    {"_tessera_findDuplicates", (DL_FUNC) &_tessera_findDuplicates, 1},
+    {"_tessera_update_V_cpp", (DL_FUNC) &_tessera_update_V_cpp, 11},
+    {"_tessera_update_E_cpp", (DL_FUNC) &_tessera_update_E_cpp, 22},
+    {"_tessera_merge_aggs_cpp", (DL_FUNC) &_tessera_merge_aggs_cpp, 21},
+    {"_tessera_foo_triplets_edges", (DL_FUNC) &_tessera_foo_triplets_edges, 2},
+    {"_tessera_do_dmt_forest_cpp", (DL_FUNC) &_tessera_do_dmt_forest_cpp, 4},
+    {"_tessera_trace_back_cpp", (DL_FUNC) &_tessera_trace_back_cpp, 4},
+    {"_tessera_trace_epaths_cpp", (DL_FUNC) &_tessera_trace_epaths_cpp, 6},
+    {"_tessera_get_e_sep", (DL_FUNC) &_tessera_get_e_sep, 3},
+    {"_tessera_prune_e_sep", (DL_FUNC) &_tessera_prune_e_sep, 4},
+    {"_tessera_smooth_field_cpp", (DL_FUNC) &_tessera_smooth_field_cpp, 7},
+    {"_tessera_compress_field_cpp", (DL_FUNC) &_tessera_compress_field_cpp, 1},
+    {"_tessera_estimate_field_cpp", (DL_FUNC) &_tessera_estimate_field_cpp, 4},
+    {"_tessera_assign_unique_rowid_cpp", (DL_FUNC) &_tessera_assign_unique_rowid_cpp, 2},
+    {"_tessera_init_edges_cpp", (DL_FUNC) &_tessera_init_edges_cpp, 3},
+    {"_tessera_init_tris_cpp", (DL_FUNC) &_tessera_init_tris_cpp, 2},
+    {"_tessera_mapToConsecutivePositions", (DL_FUNC) &_tessera_mapToConsecutivePositions, 1},
+    {"_tessera_splitSequence", (DL_FUNC) &_tessera_splitSequence, 1},
+    {"_tessera_findLargestComponentEulerCycle", (DL_FUNC) &_tessera_findLargestComponentEulerCycle, 1},
+    {"_tessera_get_agg_to_boundary_edge", (DL_FUNC) &_tessera_get_agg_to_boundary_edge, 2},
+    {"_tessera_get_agg_to_edge", (DL_FUNC) &_tessera_get_agg_to_edge, 3},
+    {"_tessera_get_boundary_graph_cpp", (DL_FUNC) &_tessera_get_boundary_graph_cpp, 5},
+    {"_tessera_trace_polygons_cpp", (DL_FUNC) &_tessera_trace_polygons_cpp, 4},
+    {"_tessera_trace_polygons_pts_cpp", (DL_FUNC) &_tessera_trace_polygons_pts_cpp, 2},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_cygnus(DllInfo *dll) {
+RcppExport void R_init_tessera(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
