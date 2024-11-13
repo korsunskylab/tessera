@@ -26,12 +26,12 @@ aggs_bind = function(objs) {
     ## Smarter order for binding should help with sparse matrix binding 
     aggs_list = purrr::map(objs, 'aggs')
     naggs = length(aggs_list)
-    sizes = aggs_list %>% map('meta_data') %>% map_int(nrow)
+    sizes = map_int(map(aggs_list, 'meta_data'), nrow)
     merge_next = order(sizes)[1:2]
     for (i in seq_len(naggs - 1)) {
         aggs_list[[merge_next[1]]] = aggs_bind2(aggs_list[[merge_next[1]]], aggs_list[[merge_next[2]]])
         aggs_list[[merge_next[2]]] = NULL
-        sizes = aggs_list %>% map('meta_data') %>% map_int(nrow)
+        sizes = purrr::map_int(purrr::map(aggs_list, 'meta_data'), nrow)
         merge_next = order(sizes)[1:2]
     }
     return(aggs_list[[1]])
@@ -42,7 +42,7 @@ aggs_bind = function(objs) {
 #' @export
 bind_objs = function(objs) {
     ## First, simplify and prepare objects for merging 
-    objs = imap(objs, function(obj, sample_name) {
+    objs = purrr::imap(objs, function(obj, sample_name) {
         aggs = obj$aggs
         dmt = obj$dmt
         
@@ -64,7 +64,6 @@ bind_objs = function(objs) {
         
     })
     
-    # aggs = objs %>% purrr::map('aggs') %>% purrr::reduce(aggs_bind2)
     aggs = aggs_bind(objs)
 
     ## Only save meta_data from points
@@ -73,7 +72,7 @@ bind_objs = function(objs) {
         .obj$dmt$embeddings = .obj$dmt$udv_cells$embeddings ## For ease of joining downstream 
         return(.obj)
     })
-    dmt = objs %>% purrr::map('dmt') %>% purrr::reduce(dmt_bind2)# %>% with(pts)
+    dmt = purrr::reduce(purrr::map(obj, 'dmt'), dmt_bind2)
     
     ## Re-index edges between aggs
     aggs$edges$from = match(paste0(aggs$edges$sample_id, '_', aggs$edges$from), aggs$meta_data$id)

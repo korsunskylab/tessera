@@ -192,8 +192,8 @@ get_boundary_shape = function(.SD, boundary) {
     ## First, find the incomplete path, from pt1 to pt2 
     pt1_i = c(.SD$from, .SD$to)[which(c(.SD$from_id, .SD$to_id) == i[1])]
     pt2_i = c(.SD$from, .SD$to)[which(c(.SD$from_id, .SD$to_id) == i[2])]
-    path = igraph::from_edgelist()$fun(as.matrix(dplyr::select(.SD, from, to)), directed=FALSE) %>% 
-        igraph::shortest_paths(pt1_i, pt2_i) %>% with(vpath)
+    path = igraph::from_edgelist()$fun(as.matrix(dplyr::select(.SD, from, to)), directed=FALSE) 
+    path = igraph::shortest_paths(path,pt1_i, pt2_i)$vpath
     path = as.integer(path[[1]])
     path = dplyr::arrange(unique(bind_rows(
         dplyr::select(.SD, id = from, x=x0, y=y0),

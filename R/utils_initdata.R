@@ -121,7 +121,8 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10, thresh = NA) 
     tri_to_pt = data$tri_to_pt
 
     edges[, qc := length_pt <= thresh]
-    pts_keep = edges[qc == TRUE] %>% with(union(from_pt, to_pt))
+    pts_keep = edges[qc == TRUE]
+    pts_keep = with(pts_keep, union(from_pt, to_pt))
     pts$qc = FALSE
     pts$qc[pts_keep] = TRUE
     
@@ -145,9 +146,9 @@ prune_graph = function(data, thresh_quantile = .95, mincells = 10, thresh = NA) 
     g = edges[
         qc == TRUE & from_tri %in% which(tris$qc == TRUE) & to_tri %in% which(tris$qc == TRUE), 
         .(from_tri, to_tri)
-    ] %>% 
-        as.matrix() %>% 
-        igraph::from_edgelist()$fun(directed = FALSE) 
+    ]
+    g = as.matrix(g) 
+    g = igraph::from_edgelist()$fun(g, directed = FALSE) 
     # add missing isolated triangles to graph
     g = igraph::add_vertices(g, nv = nrow(tris) - igraph::gorder(g))
     

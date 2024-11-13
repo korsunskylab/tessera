@@ -14,10 +14,7 @@ trace_polygons = function(dmt, aggs) {
         nrow(dmt$tris), 
         dmt$pts$agg_id
     ) 
-    shapes = res %>% 
-        purrr::map(list) %>% 
-        purrr::map(sf::st_polygon) %>% 
-        sf::st_sfc()
+    shapes = sf::st_sfc(purrr::map(purrr::map(res, list), sf::st_polygon))
     shapes = sf::st_make_valid(shapes)
 
     return(shapes)
