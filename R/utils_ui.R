@@ -212,14 +212,15 @@ GetTiles = function(
 
     ###### STEP 0 ######
     npcs = 10, 
+    
     ## Graph pruning
     prune_thresh_quantile = 0.95, 
     prune_min_cells = 10, 
     prune_thresh = NA,
 
     ###### STEP 1: GRADIENTS ######
-    smooth_distance = c('none', 'euclidean', 'projected', 'constant')[1], 
-    smooth_similarity = c('none', 'euclidean', 'projected', 'constant')[1], 
+    smooth_distance = c('none', 'euclidean', 'projected', 'constant')[3], 
+    smooth_similarity = c('none', 'euclidean', 'projected', 'constant')[3], 
     smooth_iter = 1,
 
     ###### STEP 2: DMT ######
