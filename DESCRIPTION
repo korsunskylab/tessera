@@ -28,7 +28,8 @@ Imports:
     mclust, 
     sf, 
     harmony, 
-    RSpectra
+    RSpectra, 
+    geometry
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
