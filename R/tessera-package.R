@@ -9,6 +9,7 @@
 #' @importFrom methods as is
 #' @importFrom Matrix Matrix
 #' @importFrom mclust Mclust
+#' @importFrom mclust mclustBIC
 #' @importFrom utils head
 #' @importFrom Rcpp evalCpp sourceCpp loadModule
 #' @importFrom rlang .data
