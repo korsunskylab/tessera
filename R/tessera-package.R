@@ -8,6 +8,7 @@
 #' @importClassesFrom Matrix dgCMatrix 
 #' @importFrom methods as is
 #' @importFrom Matrix Matrix
+#' @importFrom mclust Mclust
 #' @importFrom utils head
 #' @importFrom Rcpp evalCpp sourceCpp loadModule
 #' @importFrom rlang .data

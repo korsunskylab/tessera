@@ -203,12 +203,12 @@ get_boundary_shape = function(.SD, boundary) {
 
     ## All the steps below help to complete the cycle for this path 
     ## Find two closest points from incomplete shape to the boundary line 
-    pt1 = st_point(as.numeric(st_drop_geometry(dmt$tris)[i[1], c('X', 'Y')]))
-    pt2 = st_point(as.numeric(st_drop_geometry(dmt$tris)[i[2], c('X', 'Y')]))
+    pt1 = sf::st_point(as.numeric(sf::st_drop_geometry(dmt$tris)[i[1], c('X', 'Y')]))
+    pt2 = sf::st_point(as.numeric(sf::st_drop_geometry(dmt$tris)[i[2], c('X', 'Y')]))
     
 
     ## Split boundary into two lines using pt1 and pt2 
-    lines = st_split_line(boundary, pt1, pt2) ## this is our custom function 
+    lines = sf::st_split_line(boundary, pt1, pt2) ## this is our custom function 
 
 
     stopifnot(length(lines) == 2) ## must be true for closed linestrings 
@@ -216,23 +216,23 @@ get_boundary_shape = function(.SD, boundary) {
     ## Try to close polygon with both lines
     ## Keep smaller area shape
     shapes = purrr::map(lines, function(line) {
-        line = st_coordinates(line)[, 1:2]
+        line = sf::st_coordinates(line)[, 1:2]
         ## order the line so that it starts at pt2 
         if (
-            sum((head(line, 1) - st_coordinates(pt2))^2) > 
-            sum((tail(line, 1) - st_coordinates(pt2))^2)
+            sum((head(line, 1) - sf::st_coordinates(pt2))^2) > 
+            sum((tail(line, 1) - sf::st_coordinates(pt2))^2)
         ) {
             line = line[rev(seq_len(nrow(line))), ] ## reserve order 
         }
     
         colnames(line) = colnames(path)
         path = Reduce(rbind, list(path, line, path[1, ])) ## connect boundary line to dual forest path 
-        shape = st_polygon(list(as.matrix(path)))
+        shape = sf::st_polygon(list(as.matrix(path)))
         return(shape)
     })
 
 
-    if (st_area(shapes[[1]]) < st_area(shapes[[2]])) {
+    if (sf::st_area(shapes[[1]]) < sf::st_area(shapes[[2]])) {
         return(shapes[[1]])
     } else {
         return(shapes[[2]])
@@ -282,8 +282,8 @@ dmt_init_tiles = function(dmt) {
     aggs$meta_data$shape = trace_polygons(dmt, aggs)  
     aggs$meta_data[
         , `:=`(
-            area = st_area(shape), 
-            perimeter = st_length(st_boundary(shape))
+            area = sf::st_area(shape), 
+            perimeter = sf::st_length(sf::st_boundary(shape))
         )
     ]
     

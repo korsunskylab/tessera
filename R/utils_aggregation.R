@@ -484,7 +484,7 @@ update_dmt_aggid = function(dmt, aggs) {
 #' @export
 update_agg_shapes = function(dmt, aggs) {
     aggs$meta_data$shape = trace_polygons(dmt, aggs)
-    xy = st_coordinates(st_centroid(aggs$meta_data$shape))
+    xy = sf::st_coordinates(sf::st_centroid(aggs$meta_data$shape))
     aggs$meta_data$X = xy[, 'X']
     aggs$meta_data$Y = xy[, 'Y']
     aggs$edges[from > to, `:=`(from=to, to=from, x0=x1, y0=y1, x1=x0, y1=y0)]
