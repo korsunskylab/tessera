@@ -34,7 +34,7 @@ init_data = function(X, Y, counts, meta_data=NULL, meta_vars_include=c()) {
     triplets = geometry::delaunayn(pts)
     tris = init_tris_cpp(triplets, pts)
     colnames(tris) = c('X', 'Y', 'area', 'height')
-    tri_to_pt = sparseMatrix(i = rep(seq_len(nrow(triplets)), each = 3), j = c(t(triplets)), x = 1)
+    tri_to_pt = Matrix::sparseMatrix(i = rep(seq_len(nrow(triplets)), each = 3), j = c(t(triplets)), x = 1)
     
     edges = init_edges_cpp(triplets, as.matrix(pts), as.matrix(tris))
     colnames(edges) = c(
