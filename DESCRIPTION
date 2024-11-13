@@ -15,21 +15,22 @@ Depends: R (>= 3.5.0), Rcpp, data.table
 LinkingTo: Rcpp, RcppArmadillo, BH
 biocViews:
 Imports: 
-    dplyr, 
+    dplyr,
     methods,
-    tidyr, 
+    tidyr,
     purrr,
     tibble,
     Matrix,
     rlang,
-    stats, 
-    utils, 
-    Matrix, 
-    mclust, 
-    sf, 
-    harmony, 
-    RSpectra, 
-    geometry
+    stats,
+    utils,
+    Matrix,
+    mclust,
+    sf,
+    harmony,
+    RSpectra,
+    geometry,
+    magrittr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 NeedsCompilation: yes

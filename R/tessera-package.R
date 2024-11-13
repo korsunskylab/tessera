@@ -8,7 +8,6 @@
 #' @importClassesFrom Matrix dgCMatrix 
 #' @importFrom methods as is
 #' @importFrom Matrix Matrix
-#' @importFrom dplyr `%>%`
 #' @importFrom mclust Mclust
 #' @importFrom mclust mclustBIC
 #' @importFrom utils head
