@@ -25,7 +25,10 @@ Imports:
     stats, 
     utils, 
     Matrix, 
-    mclust
+    mclust, 
+    sf, 
+    harmony, 
+    RSpectra
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
