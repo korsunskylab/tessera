@@ -26,7 +26,7 @@ aggs_bind = function(objs) {
     ## Smarter order for binding should help with sparse matrix binding 
     aggs_list = purrr::map(objs, 'aggs')
     naggs = length(aggs_list)
-    sizes = map_int(map(aggs_list, 'meta_data'), nrow)
+    sizes = purrr::map_int(map(aggs_list, 'meta_data'), nrow)
     merge_next = order(sizes)[1:2]
     for (i in seq_len(naggs - 1)) {
         aggs_list[[merge_next[1]]] = aggs_bind2(aggs_list[[merge_next[1]]], aggs_list[[merge_next[2]]])

@@ -435,7 +435,7 @@ merge_aggs = function(
     memory = purrr::map(memory, `+`, 1)
     
     o = order(Reduce(c, memory))
-    aggmap = rep(seq_len(length(memory)), map_int(memory, length))[o]                               
+    aggmap = rep(seq_len(length(memory)), purrr::map_int(memory, length))[o]                               
     aggs$meta_data = aggs$meta_data[aggs_keep, ]
     aggs$meta_data$id = seq_len(nrow(aggs$meta_data))
 
