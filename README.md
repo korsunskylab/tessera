@@ -1,10 +1,15 @@
 # Tessera
 
-Algorithm for getting tiles for spatial clustering. 
+Algorithm for getting tiles for spatial clustering.
 
-Install from github: 
+![cartoon](img/cartoon.png)
 
+## Installation
+
+Install from GitHub: 
+```R
 devtools::install_github('korsunskylab/tessera')
+```
 
 ## Vignettes: 
 (1) Quickstart
