@@ -1,3 +1,41 @@
+#' @family GetTiles
+#' @rdname GetTiles
+#' @inheritDotParams GetTiles.default
+#' 
+#' @export
+GetTiles = function(...) {
+    UseMethod("GetTiles")
+}
+
+#' @family GetTiles
+#' @rdname GetTiles.Seurat
+#' @inheritDotParams GetTiles.default -X -Y -counts -embeddings -loadings -meta_data
+#' 
+#' @export
+GetTiles.Seurat = function(
+    object,
+    spatial,
+    embeddings = NULL,
+    assay = 'RNA',
+    ...
+) {
+    if ((!is.null(embeddings)) && (embeddings != 'harmony')) {
+        warning('It is recommended to use harmonized cell embeddings as input for Tessera')
+    }
+
+    res = GetTiles(
+        X = Embeddings(object, spatial)[,1],
+        Y = Embeddings(object, spatial)[,2],
+        counts = object[[assay]]$counts,
+        embeddings = Embeddings(object, reduction = embeddings),
+        loadings = Loadings(object, reduction = embeddings),
+        meta_data = object@meta.data,
+        ...
+    )
+
+    return(res)
+}
+
 #' Run full DMT segmentation pipeline to make aggregated tiles from cells
 #' 
 #' Segmentation has four main steps:
@@ -66,13 +104,19 @@
 #'     have at least `min_npts` cells, to prioritize merging of small tiles.
 #'   * `dC`: `.5 * (C_merge - C_from - C_to + 1)`. Ranges from 0 to 1.
 #' 
+#' @rdname GetTiles.default
+#' @family GetTiles
+#' 
 #' @param X,Y A pair of numeric vectors with the coordinates for each of `num_cells` points.
 #' @param counts A `num_genes` x `num_cells` gene-by-cell matrix of transcript counts.
-#' @param embeddings (Optional) A `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions.
+#'   Optional if `embeddings` are provided directly.
+#' @param embeddings A `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions.
 #'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
 #' @param loadings (Optional) A `num_genes` x `num_dim` matrix of gene loadings.
 #' @param meta_data A data frame with additional cell metadata to include in `dmt$pts`.
 #' @param meta_vars_include Names of columns in meta_data to include in `dmt$pts`.
+#' @param group.by Name of column in `meta_data` that provides the group IDs. Tessera tiles are
+#'   constructed separately for each group (which could be separate experimental samples or FOVs).
 #' @param npcs Number of PCs to compute for input to segmentation.
 #' @param prune_thresh_quantile Floating point value between 0 and 1, inclusive.
 #'   Quantile of edge length above which edges are pruned. Defaults to 0.95.
@@ -98,7 +142,7 @@
 #' @param verbose Whether to print progress messages for each stage of the segmentation pipeline.
 #' 
 #' 
-#' @returns A List with the results of segmentation:
+#' @returns A named List, which contains, for each group, a List with the results of segmentation:
 #' \item{dmt}{Mesh data structures with input points/edges/triangles and the results from segmentation:
 #'   * `pts`: A data table with `num_cells_pruned` rows containing cells in the mesh that
 #'     remain after Delauney triangulation and pruning, with the following columns:
@@ -203,12 +247,14 @@
 #'   * `counts`: A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.}
 #' 
 #' @export
-GetTiles = function(
-    X, Y, counts, 
-    
+GetTiles.default = function(
+    X, Y,
+    counts = NULL,
     embeddings = NULL,
     loadings = NULL,
-    meta_data = NULL, meta_vars_include = NULL, 
+    meta_data = NULL,
+    meta_vars_include = NULL, 
+    group.by = NULL,
 
     ###### STEP 0 ######
     npcs = 10, 
@@ -233,52 +279,99 @@ GetTiles = function(
     verbose = TRUE
 
 ) {
-
-    ## STEP 0: PREPARE DATA STRUCTURES
-    if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
-    dmt = init_data(X, Y, counts, meta_data, meta_vars_include)
-    dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
-                      mincells = prune_min_cells, thresh = prune_thresh) 
-    dmt = add_exterior_triangles(dmt)
-
-    if (is.null(embeddings)) {
-        dmt$udv_cells = do_pca(dmt$counts, npcs)
-    } else {
-        dmt$udv_cells = list(
-            loadings = loadings,
-            embeddings = embeddings[as.integer(dmt$pts$ORIG_ID),]
-        )
+    if (length(X) != length(Y)) {
+        stop('X and Y have different lengths')
     }
 
-    ## STEP 1: GRADIENTS 
-    if (verbose) message('STEP 1: GRADIENTS ')
-    field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
-    field = compress_gradients_svd(field)    
-    
-    ## STEP 2: DMT
-    if (verbose) message('STEP 2: DMT')
-    dmt = dmt_set_f(dmt, field)    
-    dmt$prim = do_primary_forest(dmt)
-    dmt$dual = do_dual_forest(dmt)
-    dmt$e_sep = dmt_get_separatrices(dmt)    
-    dmt = dmt_assign_tiles(dmt)
-    aggs = dmt_init_tiles(dmt)    
-    
-    ## STEP 3: AGGREGATION
-    if (verbose) message('STEP 3: AGGREGATION')
-    ## First, main aggregation
-    aggs = init_scores(aggs, agg_mode=2, alpha=alpha, max_npts=max_npts)
-    aggs = merge_aggs(aggs, agg_mode=2, max_npts=max_npts) 
-    dmt = update_dmt_aggid(dmt, aggs)
-    aggs = update_agg_shapes(dmt, aggs)    
+    if (is.null(counts)) {
+        if (is.null(embeddings)) {
+            stop('Both counts and embeddings are missing. Must supply at least one.')
+        }
+        warning('No counts provided. Using placeholder values.')
+        counts = sparseMatrix(c(), c(), dims = c(0, length(X)))
+    }
+    if (is.null(embeddings)) {
+        warning('No embeddings provided. Calculating embeddings using PCA.')
+    }
 
-    ## Then, clean up stray small aggs
-    aggs = init_scores(aggs, agg_mode=3, alpha=alpha, min_npts=min_npts)  
-    aggs = merge_aggs(aggs, agg_mode=3, min_npts=min_npts)
-    dmt = update_dmt_aggid(dmt, aggs)
-    aggs = update_agg_shapes(dmt, aggs)    
-    
-    return(list(dmt=dmt, aggs=aggs))
+    if (is.null(group.by)) {
+        warning('No value for group.by provided. Analyzing as a single sample.')
+        if (is.null(meta_data)) {
+            group.by = 'group'
+            meta_data = data.frame(group = factor(rep(1, length(X))))
+        } else {
+            group.by = tail(make.unique(c(colnames(meta_data), 'group')), n = 1) # avoid overwriting existing columns
+            meta_data[[group.by]] = factor(rep(1, length(X)))
+        }
+    } else {
+        if (!(group.by %in% colnames(meta_data))) {
+            stop('group.by must be a column of meta_data')
+        } else if (!(group.by %in% colnames(meta_vars_include))) {
+            meta_vars_include = c(meta_vars_include, group.by)
+        }
+    }
+
+    groups = unique(as.character(unique(meta_data[[group.by]])))
+    names(groups) = groups
+
+    res = future_map(groups, function(group) {
+
+        idx = which(meta_data[[group.by]] == group)
+
+        ## STEP 0: PREPARE DATA STRUCTURES
+        if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
+        dmt = init_data(X[idx], Y[idx], counts[,idx], meta_data[idx,], meta_vars_include)
+        dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
+                        mincells = prune_min_cells, thresh = prune_thresh) 
+        dmt = add_exterior_triangles(dmt)
+
+        if (is.null(embeddings)) {
+            dmt$udv_cells = do_pca(dmt$counts, npcs)
+        } else {
+            dmt$udv_cells = list(
+                loadings = loadings,
+                embeddings = embeddings[idx,][as.integer(dmt$pts$ORIG_ID),]
+            )
+        }
+
+        ## STEP 1: GRADIENTS 
+        if (verbose) message('STEP 1: GRADIENTS ')
+        field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
+        field = compress_gradients_svd(field)    
+        
+        ## STEP 2: DMT
+        if (verbose) message('STEP 2: DMT')
+        dmt = dmt_set_f(dmt, field)    
+        dmt$prim = do_primary_forest(dmt)
+        dmt$dual = do_dual_forest(dmt)
+        dmt$e_sep = dmt_get_separatrices(dmt)    
+        dmt = dmt_assign_tiles(dmt)
+        aggs = dmt_init_tiles(dmt)    
+        
+        ## STEP 3: AGGREGATION
+        if (verbose) message('STEP 3: AGGREGATION')
+        ## First, main aggregation
+        aggs = init_scores(aggs, agg_mode=2, alpha=alpha, max_npts=max_npts)
+        aggs = merge_aggs(aggs, agg_mode=2, max_npts=max_npts) 
+        dmt = update_dmt_aggid(dmt, aggs)
+        aggs = update_agg_shapes(dmt, aggs)    
+
+        ## Then, clean up stray small aggs
+        aggs = init_scores(aggs, agg_mode=3, alpha=alpha, min_npts=min_npts)  
+        aggs = merge_aggs(aggs, agg_mode=3, min_npts=min_npts)
+        dmt = update_dmt_aggid(dmt, aggs)
+        aggs = update_agg_shapes(dmt, aggs)
+        aggs$meta_data$shape = st_cast(aggs$meta_data$shape, "MULTIPOLYGON")
+
+        stopifnot(all(dmt$pts[[group.by]] == group))
+        aggs$meta_data[[group.by]] = group
+        dmt$pts[[group.by]] = group
+        aggs$edges[[group.by]] = group
+        
+        return(list(dmt=dmt, aggs=aggs))
+    })
+
+    return(res)
 }
 
 
