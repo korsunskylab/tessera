@@ -247,6 +247,7 @@ GetTiles.Seurat = function(
 #'   * `d_mu`,`d_sig`: Parameters used to calculate `w` in the edge score `dscore`.
 #'   * `aggmap`: A length `orig_num_tiles` vector mapping each original tile ID to the new
 #'     tile IDs after merging.
+#'   * `adj`: Sparse adjacency matrix between all tiles (if `consolidate==TRUE`).
 #'   * `counts`: A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.}
 #' 
 #' @export
@@ -303,7 +304,6 @@ GetTiles.default = function(
 
     if (is.null(group.by)) {
         warning('No value for group.by provided. Analyzing as a single sample.')
-        consolidate = FALSE
         if (is.null(meta_data)) {
             group.by = 'group'
             meta_data = data.frame(group = factor(rep(1, length(X))))
@@ -386,7 +386,13 @@ GetTiles.default = function(
     }, .progress=.progress, .options=.options)
 
     if (consolidate) {
-        return(ConsolidateResults(res, group.by))
+        if (length(res) > 1) {
+            res = ConsolidateResults(res, group.by)
+        } else {
+            res = res[[1]]
+        }
+        res$aggs = AddAggsAdjacencyMatrix(res$aggs)
+        return(res)
     } else {
         return(res)
     }
@@ -417,13 +423,6 @@ ConsolidateResults = function(res, group.by) {
     all_aggs$edges[[group.by]] = factor(all_aggs$edges[[group.by]])
     all_aggs$edges$from = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$from)
     all_aggs$edges$to = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$to)
-
-    all_aggs$adj <- as.matrix(igraph::graph_from_data_frame(
-        d = data.frame(from = all_aggs$edges$from, to = all_aggs$edges$to),
-        vertices = data.frame(name = all_aggs$meta_data$id),
-        directed = FALSE))
-    stopifnot(all(colnames(all_aggs$adj) == all_aggs$meta_data$id))
-    stopifnot(all(rownames(all_aggs$adj) == all_aggs$meta_data$id))
     
     all_dmt = list()
     all_dmt$pts = rbindlist(lapply(names(res), function(group) {res[[group]]$dmt$pts}))
@@ -433,4 +432,18 @@ ConsolidateResults = function(res, group.by) {
     return(list(dmt=all_dmt, aggs=all_aggs))
 }
 
+#' Construct tile adjacency matrix from consolidated GetTiles output.
+#' 
+#' @param aggs Aggregated tile information after consolidation.
+#' 
+#' @export
+AddAggsAdjacencyMatrix = function(aggs) {
+    aggs$adj <- as.matrix(igraph::graph_from_data_frame(
+        d = data.frame(from = aggs$edges$from, to = aggs$edges$to),
+        vertices = data.frame(name = aggs$meta_data$id),
+        directed = FALSE))
+    stopifnot(all(colnames(aggs$adj) == aggs$meta_data$id))
+    stopifnot(all(rownames(aggs$adj) == aggs$meta_data$id))
+    return(aggs)
+}
 

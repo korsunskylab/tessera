@@ -209,6 +209,7 @@ the two adjacent tiles connected by the edge were merged.
 \item \code{d_mu},\code{d_sig}: Parameters used to calculate \code{w} in the edge score \code{dscore}.
 \item \code{aggmap}: A length \code{orig_num_tiles} vector mapping each original tile ID to the new
 tile IDs after merging.
+\item \code{adj}: Sparse adjacency matrix between all tiles (if \code{consolidate==TRUE}).
 \item \code{counts}: A \code{num_genes} x \code{num_tiles} gene-by-tile matrix of aggregated transcript counts.}
 }
 }

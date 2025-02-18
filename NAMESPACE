@@ -3,6 +3,7 @@
 S3method(GetTiles,Seurat)
 S3method(GetTiles,default)
 export("%>%")
+export(AddAggsAdjacencyMatrix)
 export(ConsolidateResults)
 export(GetTiles)
 export(add_exterior_triangles)
