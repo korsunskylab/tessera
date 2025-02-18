@@ -26,9 +26,8 @@ devtools::install_github('korsunskylab/tessera')
 This will install dependencies from CRAN.
 
 ### Manually Install Dependencies with Conda/Mamba
-```
-################### in terminal ###################
-
+In the command line:
+```bash
 mamba create -n tessera_env
 mamba activate tessera_env
 
@@ -42,8 +41,9 @@ r-geometry r-mclust r-rspectra r-magrittr r-cowplot r-rhpcblasctl
 
 # Optionally install Seurat and additional packages to run vignettes (~15 sec)
 mamba install -c conda-forge r-seurat r-ggthemes r-patchwork r-viridis jupyterlab r-irkernel
-
-################### in R console ###################
+```
+Next, in an R console:
+```R
 install.packages("harmony")  # ~1 min
 devtools::install_github('korsunskylab/tessera', dependencies = FALSE)  # ~1 min
 ```
