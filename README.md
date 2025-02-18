@@ -35,9 +35,9 @@ Open R and run:
 ```R
 devtools::install_github('korsunskylab/tessera')
 ```
-This will install dependencies from CRAN.
+This will install dependencies from CRAN, which can be slow and fails on some systems. Instead, it is recommended to install the dependencies manually using conda/mamba (see below).
 
-### Manually Install Dependencies with Conda/Mamba
+### Manually install dependencies with conda/mamba (recommended)
 In the command line:
 ```bash
 mamba create -n tessera_env
@@ -49,14 +49,13 @@ mamba activate tessera_env
 # Install required dependencies (~1 min)
 mamba install -c conda-forge r-essentials r-rcpp r-rcpparmadillo r-bh r-devtools \
 r-tidyverse r-matrix r-rlang r-r.utils r-sf r-igraph r-furrr r-future r-data.table \
-r-geometry r-mclust r-rspectra r-magrittr r-cowplot r-rhpcblasctl
+r-geometry r-mclust r-rspectra r-magrittr r-harmony
 
 # Optionally install Seurat and additional packages to run vignettes (~15 sec)
 mamba install -c conda-forge r-seurat r-ggthemes r-patchwork r-viridis jupyterlab r-irkernel
 ```
 Next, in an R console:
 ```R
-install.packages("harmony")  # ~1 min
 devtools::install_github('korsunskylab/tessera', dependencies = FALSE)  # ~1 min
 ```
 
