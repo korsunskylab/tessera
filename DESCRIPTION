@@ -24,14 +24,14 @@ Imports:
     rlang,
     stats,
     utils,
-    Matrix,
     mclust,
     sf,
     harmony,
     RSpectra,
     geometry,
     magrittr,
-    furrr
+    furrr,
+    igraph
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
