@@ -58,37 +58,40 @@ demonstrates using `tessera` in standalone mode on a single sample.
 The basic usage is as follows:
 ```R
 res = GetTiles(
-    X = meta_data$X, 
-    Y = meta_data$Y, 
-    counts = counts, 
-    embeddings = embeddings, # (Optional) If missing, embeddings are calculated using PCA.
-    meta_data = meta_data,   # (Optional)
-    meta_vars_include = meta_vars_include, # (Optional)
+    X = meta_data$X,         # Vector of cell spatial coordinates
+    Y = meta_data$Y,         # Vector of cell spatial coordinates
+    counts = counts,         # Gene-by-cell matrix of transcript counts
+
+    embeddings = embeddings, # (Optional) Cell-by-embedding matrix of pre-computed cell embeddings. If missing, embeddings are calculated using PCA.
+    meta_data = meta_data,   # (Optional) Additional cell meta data
+    meta_vars_include = meta_vars_include, # (Optional) Cell meta data to include in output
+
     group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
     ...                      # Additional Tessera algorithm parameters
 )
-dmt = res$dmt
-aggs = res$aggs
+dmt = res$dmt                # Tiling results with mapping from cells to tiles
+aggs = res$aggs              # Meta data for aggregated tiles
 ```
 
 ### Seurat Objects (Multi-sample)
-Tessera can be applied directly to a Seurat object containing single-cells with spatial coordinates using `GetTiles`.
+Tessera can also be applied directly to a Seurat object containing single cells with spatial coordinates.
 The `GetTiles` function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples).
 By default, the output is a pair of Seurat objects: 1) a single-cell object updated with tile assignments for each cell, and 2) a Seurat object
 where each entry represents an individual Tessera tile.
 ```R
 future::plan(future::multicore)
 res = GetTiles(
-    obj,        # single-cell Seurat object
-    'spatial',  # name of dimesional reduction where x/y coordinates are stored
+    obj,        # Single-cell Seurat object
+    'spatial',  # Name of dimesional reduction where x/y coordinates are stored
+
     embeddings = 'harmony',  # (Optional) Name of dimensional reduction where pre-computed single-cell embeddings are stored
-    group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
-    
+    group.by = 'sample_id',  # (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.
+
     # Additional Tessera algorithm parameters
     prune_thresh_quantile = 0.99, prune_min_cells = 1, ...
 )
-obj = res$obj
-tile_obj = res$tile_obj
+obj = res$obj                # Seurat object of single-cells (with cell-to-tile mapping)
+tile_obj = res$tile_obj      # Seurat object of Tessera tiles
 ```
 
 ## Vignettes: 
