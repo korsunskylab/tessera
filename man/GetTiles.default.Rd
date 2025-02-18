@@ -61,12 +61,12 @@ the threshold. Otherwise, if \code{thresh} is set, then \code{thresh_quantile}
 is ignored. Defaults to NA.}
 
 \item{smooth_distance}{One of \code{c('none', 'euclidean', 'projected', 'constant')}.
-If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'} (the default),
-then no smoothing of the gradient field is conducted.}
+If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'},
+then no smoothing of the gradient field is conducted. Defaults to \code{'projected'}.}
 
 \item{smooth_similarity}{One of \code{c('none', 'euclidean', 'projected', 'constant')}.
-If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'} (the default),
-then no smoothing of the gradient field is conducted.}
+If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'},
+then no smoothing of the gradient field is conducted. Defaults to \code{'projected'}.}
 
 \item{smooth_iter}{Number of rounds of gradient smoothing.}
 

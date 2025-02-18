@@ -1,39 +1,112 @@
+#' Generic function that runs the Tessera algorithm on single-cell spatial data
+#' 
+#' GetTiles is a generic function that runs the main Tessera algorithm.
+#' If working with a Seurat object, please refer to the documentation of
+#' the appropriate generic API: [GetTiles.Seurat()]. If users work with other
+#' forms of the input, they can pass them directly to Tessera using the
+#' [GetTiles.default()] API. The function arguments listed here are common in all
+#' GetTiles interfaces.
+#' 
 #' @family GetTiles
 #' @rdname GetTiles
-#' @inheritDotParams GetTiles.default
+#' @inheritDotParams GetTiles.default -X -Y -counts -embeddings -loadings -meta_data
+#' 
+#' @return If used with a Seurat object, it will return a pair of Seurat objects:
+#' 1) the input single-cell object updated with tile assignments for each cell, and
+#' 2) a Seurat object where each item represents an individual Tessera tile.
+#' 
+#' For standalone operation, it returns Lists with the output of Tessera segmentation
+#' (see [GetTiles.default()]).
 #' 
 #' @export
 GetTiles = function(...) {
     UseMethod("GetTiles")
 }
 
+#' Applies Tessera on a Seurat object
+#' 
 #' @family GetTiles
 #' @rdname GetTiles.Seurat
+#' 
+#' @param obj Seurat object with spatial coordinates (and optionally, pre-computed
+#'   single cell embeddings) stored as dimensional reductions.
+#' @param spatial Name of dimensional reduction where the cells' x/y coordinates are stored.
+#' @param embeddings Name of dimensional reduction where pre-computed single-cell embeddings are stored 
+#'   (a `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions).
+#'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
+#' @param assay Seurat assay to pull data for when using the cell counts. Defaults to the DefaultAssay.
+#' @param raw_results Whether to return the raw results from [GetTiles.default()].
+#' @param tile.id.name Name of variable to store the tile IDs in the cell-level Seurat object.
+#' @param reduction.name Name of dimesional reduction to store the aggregated tile-level embeddings
+#'   in the tile-level Seurat object.
+#' @param graph.name Nmae of graph to store tile adjacency matrix in the tile-level Seurat object.
 #' @inheritDotParams GetTiles.default -X -Y -counts -embeddings -loadings -meta_data
+#' 
+#' @returns A List containing a pair of Seurat objects:
+#' 1) `obj`: the input single-cell object whose meta.data has been updated with tile assignments for each cell
+#' 2) `tile_obj`: a Seurat object where each item represents an individual Tessera tile
 #' 
 #' @export
 GetTiles.Seurat = function(
-    object,
+    obj,
     spatial,
     embeddings = NULL,
-    assay = 'RNA',
+    assay = NULL,
+    raw_results = FALSE,
+    tile.id.name = 'tile_id',
+    reduction.name = 'pca',
+    graph.name = 'tile_adj',
     ...
 ) {
     if ((!is.null(embeddings)) && (embeddings != 'harmony')) {
         warning('It is recommended to use harmonized cell embeddings as input for Tessera')
     }
 
+    if (is.null(assay)) {
+        assay = Seurat::DefaultAssay(obj)
+    }
+
     res = GetTiles(
-        X = Embeddings(object, spatial)[,1],
-        Y = Embeddings(object, spatial)[,2],
-        counts = object[[assay]]$counts,
-        embeddings = Embeddings(object, reduction = embeddings),
-        loadings = Loadings(object, reduction = embeddings),
-        meta_data = object@meta.data,
+        X = Embeddings(obj, spatial)[,1],
+        Y = Embeddings(obj, spatial)[,2],
+        counts = obj[[assay]]$counts,
+        embeddings = Embeddings(obj, reduction = embeddings),
+        loadings = Loadings(obj, reduction = embeddings),
+        meta_data = obj@meta.data,
         ...
     )
 
-    return(res)
+    if (raw_results) {return(res)}
+
+    stopifnot(all(colnames(res$aggs$counts) == res$aggs$meta_data$id))
+
+    # Add tile IDs to input Seurat object
+    if (tile.id.name %in% colnames(obj@meta.data)) {
+        tile.id.name = tail(make.unique(c(colnames(obj@meta.data), tile.id.name)), n = 1) # avoid overwriting existing columns
+        warning(paste0('To avoid overwriting existing meta.data variables, tile.id.name is set to ', tile.id.name))
+    }
+    obj@meta.data[[tile.id.name]] = as.character(NA)
+    obj@meta.data[[tile.id.name]][res$dmt$pts$ORIG_ID] = res$dmt$pts$agg_id
+    obj@meta.data[[tile.id.name]] = factor(obj@meta.data[[tile.id.name]])
+
+
+    # Make Seurat object of tiles
+    meta.data = data.frame(dplyr::select(res$aggs$meta_data, -shape))
+    row.names(meta.data) = meta.data$id
+    stopifnot(all(colnames(res$aggs$counts) == res$aggs$meta_data$id))
+    stopifnot(all(colnames(res$aggs$counts) == row.names(meta.data)))
+
+    tile_obj = Seurat::CreateSeuratObject(
+        counts = res$aggs$counts,
+        meta.data = meta.data
+    )
+    ## Seurat doesn't do sf shapes well 
+    tile_obj@meta.data$shape = res$aggs$meta_data$shape
+    row.names(res$aggs$pcs) = colnames(tile_obj)
+    tile_obj[[reduction.name]] <- CreateDimReducObject(embeddings = res$aggs$pcs, key = reduction.name)
+    tile_obj[[graph.name]] = as.Graph(res$aggs$adj)
+
+    return(list(obj=obj, tile_obj=tile_obj))
 }
 
 #' Run full DMT segmentation pipeline to make aggregated tiles from cells
@@ -127,11 +200,11 @@ GetTiles.Seurat = function(
 #'   the threshold. Otherwise, if `thresh` is set, then `thresh_quantile`
 #'   is ignored. Defaults to NA.
 #' @param smooth_distance One of `c('none', 'euclidean', 'projected', 'constant')`.
-#'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
-#'   then no smoothing of the gradient field is conducted.
+#'   If either `smooth_distance` or `smooth_similarity` is `'none'`,
+#'   then no smoothing of the gradient field is conducted. Defaults to `'projected'`.
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
-#'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
-#'   then no smoothing of the gradient field is conducted.
+#'   If either `smooth_distance` or `smooth_similarity` is `'none'`,
+#'   then no smoothing of the gradient field is conducted. Defaults to `'projected'`.
 #' @param smooth_iter Number of rounds of gradient smoothing.
 #' @param max_npts Maximum number of cells allowed in each tile during the
 #'   agglomerative clustering phase.
