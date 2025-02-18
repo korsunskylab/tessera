@@ -37,7 +37,7 @@ devtools::install_github('korsunskylab/tessera')
 ```
 This will install dependencies from CRAN.
 
-### Manually Install Dependencies with Conda/Mamba
+### Manually install dependencies with conda/mamba (recommended)
 In the command line:
 ```bash
 mamba create -n tessera_env
