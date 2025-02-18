@@ -48,6 +48,23 @@ install.packages("harmony")  # ~1 min
 devtools::install_github('korsunskylab/tessera', dependencies = FALSE)  # ~1 min
 ```
 
+## Quick Start
+
+### Seurat Objects (Multi-sample)
+Tessera can be applied directly to a Seurat object containing single-cells with spatial coordinates using `GetTiles`.
+The `GetTiles` function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples).
+By default, the output is a pair of Seurat objects: 1) a single-cell object updated with tile assignments for each cell, and 2) a Seurat object
+where each entry represents an individual Tessera tile.
+```R
+future::plan(future::multicore)
+res = GetTiles(
+    obj, 'spatial', embeddings = 'harmony', group.by = 'sample_id',
+    prune_thresh_quantile = 0.99, prune_min_cells = 1
+)
+obj = res$obj
+tile_obj = res$tile_obj
+```
+
 ## Vignettes: 
 (1) Quickstart (approx. runtime: <10 sec)
 
