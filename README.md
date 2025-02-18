@@ -4,6 +4,29 @@
 
 ![cartoon](img/cartoon.png)
 
+## Overview
+
+Segmentation has four main steps:
+   1. **Preparing data structures:** A triangle mesh is constructed using Delauney
+      triangulation and pruned to eliminate long edges. PC embeddings for each
+      each are computed.
+   2. **Computing gradients:** Gradients are calculated at each point by considering
+      the difference in expression between each cell in its neighbors in the mesh.
+      These gradients are smoothed using (anisotropic) bilateral filtering, and then
+      gradients are defined for edges and triangles in the mesh by averaging the
+      points that each edge or triangle contains.
+   3. **DMT:** A scalar field is defined by taking the magnitude of the total gradient
+      at each point/edge/triangle. Then DMT-based segmentation is performed by constructing
+      a maximum spanning forest on the triangles and a minimum spanning forest on the points.
+      Separatrices that separate cells into tiles of homogeneous composition are defined
+      by tracing paths between critical points, particularly between saddle edges and maximum
+      triangles.
+   4. **Aggregation:** Tiles from DMT-based segmentation are merged using single-linkage
+      agglomerative clustering to obtain tiles containing a number of cells between a
+      user-provided minimum and maximum value. Pairs of adjacent tiles are scored according
+      to their transcriptional similarity, compactness of shape after merging, and number
+      of cells in order to prioritize favorable merges in each agglomerative clustering step.
+
 ## System Requirements
 
 ### OS Requirements
@@ -69,14 +92,14 @@ res = GetTiles(
     group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
     ...                      # Additional Tessera algorithm parameters
 )
-dmt = res$dmt                # Tiling results with mapping from cells to tiles
-aggs = res$aggs              # Meta data for aggregated tiles
+dmt = res$dmt                # Mesh data structures with results from segmentation
+aggs = res$aggs              # Tiles resulting from DMT-based segmentation and agglomeration
 ```
 
 ### Seurat Objects (Multi-sample)
 Tessera can also be applied directly to a Seurat object containing single cells with spatial coordinates.
 The `GetTiles` function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples).
-By default, the output is a pair of Seurat objects: 1) a single-cell object updated with tile assignments for each cell, and 2) a Seurat object
+By default, the output is a pair of Seurat objects: 1) a single-cell Seurat object updated with tile assignments for each cell, and 2) a Seurat object
 where each entry represents an individual Tessera tile.
 ```R
 future::plan(future::multicore)  # Parallelize over multiple samples (if doing multi-sample analysis)
