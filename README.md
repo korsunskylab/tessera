@@ -12,10 +12,10 @@ devtools::install_github('korsunskylab/tessera')
 ```
 
 ## Vignettes: 
-(1) Quickstart
+(1) Quickstart (approximate runtime: <10 sec)
 
 https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_basic.ipynb
 
-(2) Walkthrough 
+(2) Walkthrough (approximate runtime: <10 sec)
 
 https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_stepthrough.ipynb
