@@ -1,3 +1,114 @@
+#' Generic function that runs the Tessera algorithm on single-cell spatial data
+#' 
+#' GetTiles is a generic function that runs the main Tessera algorithm.
+#' If working with a Seurat object, please refer to the documentation of
+#' the appropriate generic API: [GetTiles.Seurat()]. If users work with other
+#' forms of the input, they can pass them directly to Tessera using the
+#' [GetTiles.default()] API. The function arguments listed here are common in all
+#' GetTiles interfaces.
+#' 
+#' @family GetTiles
+#' @rdname GetTiles
+#' @inheritDotParams GetTiles.default -X -Y -counts -embeddings -loadings -meta_data
+#' 
+#' @return If used with a Seurat object, it will return a pair of Seurat objects:
+#' 1) the input single-cell object updated with tile assignments for each cell, and
+#' 2) a Seurat object where each item represents an individual Tessera tile.
+#' 
+#' For standalone operation, it returns Lists with the output of Tessera segmentation
+#' (see [GetTiles.default()]).
+#' 
+#' @export
+GetTiles = function(...) {
+    UseMethod("GetTiles")
+}
+
+#' Applies Tessera on a Seurat object
+#' 
+#' @family GetTiles
+#' @rdname GetTiles.Seurat
+#' 
+#' @param obj Seurat object with spatial coordinates (and optionally, pre-computed
+#'   single cell embeddings) stored as dimensional reductions.
+#' @param spatial Name of dimensional reduction where the cells' x/y coordinates are stored.
+#' @param embeddings Name of dimensional reduction where pre-computed single-cell embeddings are stored 
+#'   (a `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions).
+#'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
+#' @param assay Seurat assay to pull data for when using the cell counts. Defaults to the DefaultAssay.
+#' @param raw_results Whether to return the raw results from [GetTiles.default()].
+#' @param tile.id.name Name of variable to store the tile IDs in the cell-level Seurat object.
+#' @param reduction.name Name of dimesional reduction to store the aggregated tile-level embeddings
+#'   in the tile-level Seurat object.
+#' @param graph.name Nmae of graph to store tile adjacency matrix in the tile-level Seurat object.
+#' @inheritDotParams GetTiles.default -X -Y -counts -embeddings -loadings -meta_data
+#' 
+#' @returns A List containing a pair of Seurat objects:
+#' 1) `obj`: the input single-cell object whose meta.data has been updated with tile assignments for each cell
+#' 2) `tile_obj`: a Seurat object where each item represents an individual Tessera tile
+#' 
+#' @export
+GetTiles.Seurat = function(
+    obj,
+    spatial,
+    embeddings = NULL,
+    assay = NULL,
+    raw_results = FALSE,
+    tile.id.name = 'tile_id',
+    reduction.name = 'pca',
+    graph.name = 'tile_adj',
+    ...
+) {
+    if ((!is.null(embeddings)) && (embeddings != 'harmony')) {
+        warning('It is recommended to use harmonized cell embeddings as input for Tessera')
+    }
+
+    if (is.null(assay)) {
+        assay = Seurat::DefaultAssay(obj)
+    }
+
+    res = GetTiles(
+        X = Embeddings(obj, spatial)[,1],
+        Y = Embeddings(obj, spatial)[,2],
+        counts = obj[[assay]]$counts,
+        embeddings = Embeddings(obj, reduction = embeddings),
+        loadings = Loadings(obj, reduction = embeddings),
+        meta_data = obj@meta.data,
+        ...
+    )
+
+    if (raw_results) {return(res)}
+
+    stopifnot(all(colnames(res$aggs$counts) == res$aggs$meta_data$id))
+
+    # Add tile IDs to input Seurat object
+    if (tile.id.name %in% colnames(obj@meta.data)) {
+        tile.id.name = tail(make.unique(c(colnames(obj@meta.data), tile.id.name)), n = 1) # avoid overwriting existing columns
+        warning(paste0('To avoid overwriting existing meta.data variables, tile.id.name is set to ', tile.id.name))
+    }
+    obj@meta.data[[tile.id.name]] = as.character(NA)
+    obj@meta.data[[tile.id.name]][res$dmt$pts$ORIG_ID] = res$dmt$pts$agg_id
+    obj@meta.data[[tile.id.name]] = factor(obj@meta.data[[tile.id.name]])
+
+
+    # Make Seurat object of tiles
+    meta.data = data.frame(dplyr::select(res$aggs$meta_data, -shape))
+    row.names(meta.data) = meta.data$id
+    stopifnot(all(colnames(res$aggs$counts) == res$aggs$meta_data$id))
+    stopifnot(all(colnames(res$aggs$counts) == row.names(meta.data)))
+
+    tile_obj = Seurat::CreateSeuratObject(
+        counts = res$aggs$counts,
+        meta.data = meta.data
+    )
+    ## Seurat doesn't do sf shapes well 
+    tile_obj@meta.data$shape = res$aggs$meta_data$shape
+    row.names(res$aggs$pcs) = colnames(tile_obj)
+    tile_obj[[reduction.name]] <- CreateDimReducObject(embeddings = res$aggs$pcs, key = reduction.name)
+    tile_obj[[graph.name]] = as.Graph(res$aggs$adj)
+
+    return(list(obj=obj, tile_obj=tile_obj))
+}
+
 #' Run full DMT segmentation pipeline to make aggregated tiles from cells
 #' 
 #' Segmentation has four main steps:
@@ -66,13 +177,19 @@
 #'     have at least `min_npts` cells, to prioritize merging of small tiles.
 #'   * `dC`: `.5 * (C_merge - C_from - C_to + 1)`. Ranges from 0 to 1.
 #' 
+#' @rdname GetTiles.default
+#' @family GetTiles
+#' 
 #' @param X,Y A pair of numeric vectors with the coordinates for each of `num_cells` points.
 #' @param counts A `num_genes` x `num_cells` gene-by-cell matrix of transcript counts.
-#' @param embeddings (Optional) A `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions.
+#'   Optional if `embeddings` are provided directly.
+#' @param embeddings A `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions.
 #'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
 #' @param loadings (Optional) A `num_genes` x `num_dim` matrix of gene loadings.
 #' @param meta_data A data frame with additional cell metadata to include in `dmt$pts`.
 #' @param meta_vars_include Names of columns in meta_data to include in `dmt$pts`.
+#' @param group.by Name of column in `meta_data` that provides the group IDs. Tessera tiles are
+#'   constructed separately for each group (which could be separate experimental samples or FOVs).
 #' @param npcs Number of PCs to compute for input to segmentation.
 #' @param prune_thresh_quantile Floating point value between 0 and 1, inclusive.
 #'   Quantile of edge length above which edges are pruned. Defaults to 0.95.
@@ -83,11 +200,11 @@
 #'   the threshold. Otherwise, if `thresh` is set, then `thresh_quantile`
 #'   is ignored. Defaults to NA.
 #' @param smooth_distance One of `c('none', 'euclidean', 'projected', 'constant')`.
-#'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
-#'   then no smoothing of the gradient field is conducted.
+#'   If either `smooth_distance` or `smooth_similarity` is `'none'`,
+#'   then no smoothing of the gradient field is conducted. Defaults to `'projected'`.
 #' @param smooth_similarity One of `c('none', 'euclidean', 'projected', 'constant')`.
-#'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
-#'   then no smoothing of the gradient field is conducted.
+#'   If either `smooth_distance` or `smooth_similarity` is `'none'`,
+#'   then no smoothing of the gradient field is conducted. Defaults to `'projected'`.
 #' @param smooth_iter Number of rounds of gradient smoothing.
 #' @param max_npts Maximum number of cells allowed in each tile during the
 #'   agglomerative clustering phase.
@@ -95,10 +212,13 @@
 #'   agglomerative clustering phase.
 #' @param alpha Parameter for scoring transcriptional similarity between adjacent tiles during
 #'   the agglomerative clustering phase. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
+#' @param consolidate Whether to consolidate results from multiple groups into a single collection of
+#'   points and tiles (TRUE) or to return a list of separate results for each group (FALSE).
 #' @param verbose Whether to print progress messages for each stage of the segmentation pipeline.
 #' 
 #' 
-#' @returns A List with the results of segmentation:
+#' @returns If `consolidate==TRUE`, a List with the results of segmentation, combined across groups
+#' (otherwise, if `consolidate==FALSE`, a named List, which contains separate results for each group):
 #' \item{dmt}{Mesh data structures with input points/edges/triangles and the results from segmentation:
 #'   * `pts`: A data table with `num_cells_pruned` rows containing cells in the mesh that
 #'     remain after Delauney triangulation and pruning, with the following columns:
@@ -200,15 +320,18 @@
 #'   * `d_mu`,`d_sig`: Parameters used to calculate `w` in the edge score `dscore`.
 #'   * `aggmap`: A length `orig_num_tiles` vector mapping each original tile ID to the new
 #'     tile IDs after merging.
+#'   * `adj`: Sparse adjacency matrix between all tiles (if `consolidate==TRUE`).
 #'   * `counts`: A `num_genes` x `num_tiles` gene-by-tile matrix of aggregated transcript counts.}
 #' 
 #' @export
-GetTiles = function(
-    X, Y, counts, 
-    
+GetTiles.default = function(
+    X, Y,
+    counts = NULL,
     embeddings = NULL,
     loadings = NULL,
-    meta_data = NULL, meta_vars_include = NULL, 
+    meta_data = NULL,
+    meta_vars_include = NULL, 
+    group.by = NULL,
 
     ###### STEP 0 ######
     npcs = 10, 
@@ -230,55 +353,170 @@ GetTiles = function(
     min_npts = 5, 
     alpha = 1, ## 0.2 = conservative merging, 2 = liberal merging 
 
-    verbose = TRUE
+    ## future_map parameters
+    .progress = TRUE,
+    .options = NULL,
 
+    consolidate = TRUE,
+    verbose = FALSE
 ) {
-
-    ## STEP 0: PREPARE DATA STRUCTURES
-    if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
-    dmt = init_data(X, Y, counts, meta_data, meta_vars_include)
-    dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
-                      mincells = prune_min_cells, thresh = prune_thresh) 
-    dmt = add_exterior_triangles(dmt)
-
-    if (is.null(embeddings)) {
-        dmt$udv_cells = do_pca(dmt$counts, npcs)
-    } else {
-        dmt$udv_cells = list(
-            loadings = loadings,
-            embeddings = embeddings[as.integer(dmt$pts$ORIG_ID),]
-        )
+    if (length(X) != length(Y)) {
+        stop('X and Y have different lengths')
     }
 
-    ## STEP 1: GRADIENTS 
-    if (verbose) message('STEP 1: GRADIENTS ')
-    field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
-    field = compress_gradients_svd(field)    
-    
-    ## STEP 2: DMT
-    if (verbose) message('STEP 2: DMT')
-    dmt = dmt_set_f(dmt, field)    
-    dmt$prim = do_primary_forest(dmt)
-    dmt$dual = do_dual_forest(dmt)
-    dmt$e_sep = dmt_get_separatrices(dmt)    
-    dmt = dmt_assign_tiles(dmt)
-    aggs = dmt_init_tiles(dmt)    
-    
-    ## STEP 3: AGGREGATION
-    if (verbose) message('STEP 3: AGGREGATION')
-    ## First, main aggregation
-    aggs = init_scores(aggs, agg_mode=2, alpha=alpha, max_npts=max_npts)
-    aggs = merge_aggs(aggs, agg_mode=2, max_npts=max_npts) 
-    dmt = update_dmt_aggid(dmt, aggs)
-    aggs = update_agg_shapes(dmt, aggs)    
+    if (is.null(counts)) {
+        if (is.null(embeddings)) {
+            stop('Both counts and embeddings are missing. Must supply at least one.')
+        }
+        warning('No counts provided. Using placeholder values.')
+        counts = sparseMatrix(c(), c(), dims = c(0, length(X)))
+    }
+    if (is.null(embeddings)) {
+        warning('No embeddings provided. Calculating embeddings using PCA.')
+    }
 
-    ## Then, clean up stray small aggs
-    aggs = init_scores(aggs, agg_mode=3, alpha=alpha, min_npts=min_npts)  
-    aggs = merge_aggs(aggs, agg_mode=3, min_npts=min_npts)
-    dmt = update_dmt_aggid(dmt, aggs)
-    aggs = update_agg_shapes(dmt, aggs)    
-    
-    return(list(dmt=dmt, aggs=aggs))
+    if (is.null(group.by)) {
+        warning('No value for group.by provided. Analyzing as a single sample.')
+        if (is.null(meta_data)) {
+            group.by = 'group'
+            meta_data = data.frame(group = factor(rep(1, length(X))))
+        } else {
+            group.by = tail(make.unique(c(colnames(meta_data), 'group')), n = 1) # avoid overwriting existing columns
+            meta_data[[group.by]] = factor(rep(1, length(X)))
+        }
+    } else {
+        if (!(group.by %in% colnames(meta_data))) {
+            stop('group.by must be a column of meta_data')
+        } else if (!(group.by %in% colnames(meta_vars_include))) {
+            meta_vars_include = c(meta_vars_include, group.by)
+        }
+    }
+
+    if (is.null(.options)) {
+        .options=furrr::furrr_options(stdout = TRUE, seed = TRUE)
+    }
+
+    groups = unique(as.character(unique(meta_data[[group.by]])))
+    names(groups) = groups
+
+    res = future_map(groups, function(group) {
+
+        idx = which(meta_data[[group.by]] == group)
+
+        ## STEP 0: PREPARE DATA STRUCTURES
+        if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
+        dmt = init_data(X[idx], Y[idx], counts[,idx], meta_data[idx,], meta_vars_include)
+        dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
+                        mincells = prune_min_cells, thresh = prune_thresh) 
+        dmt = add_exterior_triangles(dmt)
+
+        if (is.null(embeddings)) {
+            dmt$udv_cells = do_pca(dmt$counts, npcs)
+        } else {
+            dmt$udv_cells = list(
+                loadings = loadings,
+                embeddings = embeddings[idx,][as.integer(dmt$pts$ORIG_ID),]
+            )
+        }
+
+        ## STEP 1: GRADIENTS 
+        if (verbose) message('STEP 1: GRADIENTS ')
+        field = compute_gradients(dmt, smooth_distance, smooth_similarity, smooth_iter = smooth_iter)
+        field = compress_gradients_svd(field)    
+        
+        ## STEP 2: DMT
+        if (verbose) message('STEP 2: DMT')
+        dmt = dmt_set_f(dmt, field)    
+        dmt$prim = do_primary_forest(dmt)
+        dmt$dual = do_dual_forest(dmt)
+        dmt$e_sep = dmt_get_separatrices(dmt)    
+        dmt = dmt_assign_tiles(dmt)
+        aggs = dmt_init_tiles(dmt)    
+        
+        ## STEP 3: AGGREGATION
+        if (verbose) message('STEP 3: AGGREGATION')
+        ## First, main aggregation
+        aggs = init_scores(aggs, agg_mode=2, alpha=alpha, max_npts=max_npts)
+        aggs = merge_aggs(aggs, agg_mode=2, max_npts=max_npts) 
+        dmt = update_dmt_aggid(dmt, aggs)
+        aggs = update_agg_shapes(dmt, aggs)    
+
+        ## Then, clean up stray small aggs
+        aggs = init_scores(aggs, agg_mode=3, alpha=alpha, min_npts=min_npts)  
+        aggs = merge_aggs(aggs, agg_mode=3, min_npts=min_npts)
+        dmt = update_dmt_aggid(dmt, aggs)
+        aggs = update_agg_shapes(dmt, aggs)
+        aggs$meta_data$shape = st_cast(aggs$meta_data$shape, "MULTIPOLYGON")
+
+        stopifnot(all(dmt$pts[[group.by]] == group))
+        aggs$meta_data[[group.by]] = group
+        dmt$pts[[group.by]] = group
+        aggs$edges[[group.by]] = group
+
+        dmt$pts$ORIG_ID = idx[dmt$pts$ORIG_ID]
+        
+        return(list(dmt=dmt, aggs=aggs))
+    }, .progress=.progress, .options=.options)
+
+    if (consolidate) {
+        if (length(res) > 1) {
+            res = ConsolidateResults(res, group.by)
+        } else {
+            res = res[[1]]
+        }
+        res$aggs = AddAggsAdjacencyMatrix(res$aggs)
+        return(res)
+    } else {
+        return(res)
+    }
 }
 
+#' Consolidate Tessera results from multiple samples (groups) after constructing
+#' Tessera tiles separately on cells from each group.
+#' 
+#' @param res Output of running GetTiles (when consolidate == FALSE).
+#' @param group.by Name of metadata variable that identifies distinct groups.
+#' 
+#' @export
+ConsolidateResults = function(res, group.by) {
+    all_aggs = list()
+    all_aggs$meta_data = rbindlist(lapply(names(res), function(group) {res[[group]]$aggs$meta_data}))
+    all_aggs$meta_data[[group.by]] = factor(all_aggs$meta_data[[group.by]])
+    all_aggs$meta_data$id = paste0(all_aggs$meta_data[[group.by]], '_', all_aggs$meta_data$id)
+    if (length(unique(all_aggs$meta_data$id)) != length(all_aggs$meta_data$id)) {
+        stop('not all tile IDs are unique')
+    }
+
+    all_aggs$counts = do.call(cbind, lapply(names(res), function(group) {res[[group]]$aggs$counts}))
+    colnames(all_aggs$counts) = all_aggs$meta_data$id
+
+    all_aggs$pcs = do.call(rbind, lapply(names(res), function(group) {res[[group]]$aggs$pcs}))
+
+    all_aggs$edges = rbindlist(lapply(names(res), function(group) {res[[group]]$aggs$edges}))
+    all_aggs$edges[[group.by]] = factor(all_aggs$edges[[group.by]])
+    all_aggs$edges$from = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$from)
+    all_aggs$edges$to = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$to)
+    
+    all_dmt = list()
+    all_dmt$pts = rbindlist(lapply(names(res), function(group) {res[[group]]$dmt$pts}))
+    all_dmt$pts[[group.by]] = factor(all_dmt$pts[[group.by]])
+    all_dmt$pts$agg_id = paste0(all_dmt$pts[[group.by]], '_', all_dmt$pts$agg_id)
+
+    return(list(dmt=all_dmt, aggs=all_aggs))
+}
+
+#' Construct tile adjacency matrix from consolidated GetTiles output.
+#' 
+#' @param aggs Aggregated tile information after consolidation.
+#' 
+#' @export
+AddAggsAdjacencyMatrix = function(aggs) {
+    aggs$adj <- as.matrix(igraph::graph_from_data_frame(
+        d = data.frame(from = aggs$edges$from, to = aggs$edges$to),
+        vertices = data.frame(name = aggs$meta_data$id),
+        directed = FALSE))
+    stopifnot(all(colnames(aggs$adj) == aggs$meta_data$id))
+    stopifnot(all(rownames(aggs$adj) == aggs$meta_data$id))
+    return(aggs)
+}
 
