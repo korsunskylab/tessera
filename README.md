@@ -6,26 +6,11 @@
 
 ## Overview
 
-Segmentation has four main steps:
-   1. **Preparing data structures:** A triangle mesh is constructed using Delauney
-      triangulation and pruned to eliminate long edges. PC embeddings for each
-      each are computed.
-   2. **Computing gradients:** Gradients are calculated at each point by considering
-      the difference in expression between each cell in its neighbors in the mesh.
-      These gradients are smoothed using (anisotropic) bilateral filtering, and then
-      gradients are defined for edges and triangles in the mesh by averaging the
-      points that each edge or triangle contains.
-   3. **DMT:** A scalar field is defined by taking the magnitude of the total gradient
-      at each point/edge/triangle. Then DMT-based segmentation is performed by constructing
-      a maximum spanning forest on the triangles and a minimum spanning forest on the points.
-      Separatrices that separate cells into tiles of homogeneous composition are defined
-      by tracing paths between critical points, particularly between saddle edges and maximum
-      triangles.
-   4. **Aggregation:** Tiles from DMT-based segmentation are merged using single-linkage
-      agglomerative clustering to obtain tiles containing a number of cells between a
-      user-provided minimum and maximum value. Pairs of adjacent tiles are scored according
-      to their transcriptional similarity, compactness of shape after merging, and number
-      of cells in order to prioritize favorable merges in each agglomerative clustering step.
+The Tessera algorithm takes as input single cells (or pixels) with spatial coordinates and cell embeddings (or transcript counts) for each cell. The output is a segmentation of adjacent cells into tiles with a user-controlled size parameter. Boundaries between tiles align with where cell composition and gene expression change the most within the tissue. Segmentation using the Tessera algorithm has four main steps:
+1. *Constructing inputs:* A triangle mesh is constructed using Delauney triangulation and pruned to eliminate long edges. If transcript counts are provided for each cell instead of embeddings, then cell embeddings are computed using principal component analysis (PCA).
+2. *Gradient estimation:* Gradients are calculated at each vertex by considering the difference in cell embeddings between each cell and its neighbors in the mesh. These gradients are smoothed using anisotropic bilateral filtering, and then gradients are defined for edges and triangles in the mesh by averaging the vertices that each edge or triangle contains.
+3. *Tissue segmentation using discrete Morse theory (DMT):* A scalar field is defined by taking the magnitude of the total gradient at each vertex, edge, and triangle. Then DMT-based segmentation is performed by constructing a maximum spanning forest on the triangles and a minimum spanning forest on the vertices. Separatrices that partition cells into tiles of homogeneous composition are defined by tracing paths between critical points, specifically between saddle edges and maximum triangles.
+4. *Hierarchical agglomeration:* Tiles from DMT-based segmentation are merged using single-linkage agglomerative clustering to obtain tiles containing a number of cells between a user-provided minimum and maximum value. Pairs of adjacent tiles are scored according to their transcriptional similarity, compactness of shape after merging, and number of cells, in order to prioritize favorable merges in each agglomerative clustering step.
 
 ## System Requirements
 
@@ -90,7 +75,11 @@ res = GetTiles(
     meta_vars_include = meta_vars_include, # (Optional) Cell meta data to include in output
 
     group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
-    ...                      # Additional Tessera algorithm parameters
+
+    # Additional Tessera algorithm parameters
+    prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
+    max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
+    ...                      
 )
 dmt = res$dmt                # Mesh data structures with results from segmentation
 aggs = res$aggs              # Tiles resulting from DMT-based segmentation and agglomeration
@@ -111,7 +100,9 @@ res = GetTiles(
     group.by = 'sample_id',  # (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.
 
     # Additional Tessera algorithm parameters
-    prune_thresh_quantile = 0.99, prune_min_cells = 1, ...
+    prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
+    max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
+    ...
 )
 obj = res$obj                # Seurat object of single-cells (with cell-to-tile mapping)
 tile_obj = res$tile_obj      # Seurat object of Tessera tiles
