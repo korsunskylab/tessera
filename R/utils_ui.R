@@ -139,10 +139,13 @@ GetTiles.Seurat = function(
 #'   agglomerative clustering phase.
 #' @param alpha Parameter for scoring transcriptional similarity between adjacent tiles during
 #'   the agglomerative clustering phase. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
+#' @param consolidate Whether to consolidate results from multiple groups into a single collection of
+#'   points and tiles (TRUE) or to return a list of separate results for each group (FALSE).
 #' @param verbose Whether to print progress messages for each stage of the segmentation pipeline.
 #' 
 #' 
-#' @returns A named List, which contains, for each group, a List with the results of segmentation:
+#' @returns If `consolidate==TRUE`, a List with the results of segmentation, combined across groups
+#' (otherwise, if `consolidate==FALSE`, a named List, which contains separate results for each group):
 #' \item{dmt}{Mesh data structures with input points/edges/triangles and the results from segmentation:
 #'   * `pts`: A data table with `num_cells_pruned` rows containing cells in the mesh that
 #'     remain after Delauney triangulation and pruning, with the following columns:
@@ -276,8 +279,12 @@ GetTiles.default = function(
     min_npts = 5, 
     alpha = 1, ## 0.2 = conservative merging, 2 = liberal merging 
 
-    verbose = TRUE
+    ## future_map parameters
+    .progress = TRUE,
+    .options = NULL,
 
+    consolidate = TRUE,
+    verbose = FALSE
 ) {
     if (length(X) != length(Y)) {
         stop('X and Y have different lengths')
@@ -296,6 +303,7 @@ GetTiles.default = function(
 
     if (is.null(group.by)) {
         warning('No value for group.by provided. Analyzing as a single sample.')
+        consolidate = FALSE
         if (is.null(meta_data)) {
             group.by = 'group'
             meta_data = data.frame(group = factor(rep(1, length(X))))
@@ -309,6 +317,10 @@ GetTiles.default = function(
         } else if (!(group.by %in% colnames(meta_vars_include))) {
             meta_vars_include = c(meta_vars_include, group.by)
         }
+    }
+
+    if (is.null(.options)) {
+        .options=furrr::furrr_options(stdout = TRUE, seed = TRUE)
     }
 
     groups = unique(as.character(unique(meta_data[[group.by]])))
@@ -367,11 +379,58 @@ GetTiles.default = function(
         aggs$meta_data[[group.by]] = group
         dmt$pts[[group.by]] = group
         aggs$edges[[group.by]] = group
+
+        dmt$pts$ORIG_ID = idx[dmt$pts$ORIG_ID]
         
         return(list(dmt=dmt, aggs=aggs))
-    })
+    }, .progress=.progress, .options=.options)
 
-    return(res)
+    if (consolidate) {
+        return(ConsolidateResults(res, group.by))
+    } else {
+        return(res)
+    }
+}
+
+#' Consolidate Tessera results from multiple samples (groups) after constructing
+#' Tessera tiles separately on cells from each group.
+#' 
+#' @param res Output of running GetTiles (when consolidate == FALSE).
+#' @param group.by Name of metadata variable that identifies distinct groups.
+#' 
+#' @export
+ConsolidateResults = function(res, group.by) {
+    all_aggs = list()
+    all_aggs$meta_data = rbindlist(lapply(names(res), function(group) {res[[group]]$aggs$meta_data}))
+    all_aggs$meta_data[[group.by]] = factor(all_aggs$meta_data[[group.by]])
+    all_aggs$meta_data$id = paste0(all_aggs$meta_data[[group.by]], '_', all_aggs$meta_data$id)
+    if (length(unique(all_aggs$meta_data$id)) != length(all_aggs$meta_data$id)) {
+        stop('not all tile IDs are unique')
+    }
+
+    all_aggs$counts = do.call(cbind, lapply(names(res), function(group) {res[[group]]$aggs$counts}))
+    colnames(all_aggs$counts) = all_aggs$meta_data$id
+
+    all_aggs$pcs = do.call(rbind, lapply(names(res), function(group) {res[[group]]$aggs$pcs}))
+
+    all_aggs$edges = rbindlist(lapply(names(res), function(group) {res[[group]]$aggs$edges}))
+    all_aggs$edges[[group.by]] = factor(all_aggs$edges[[group.by]])
+    all_aggs$edges$from = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$from)
+    all_aggs$edges$to = paste0(all_aggs$edges[[group.by]], '_', all_aggs$edges$to)
+
+    all_aggs$adj <- as.matrix(igraph::graph_from_data_frame(
+        d = data.frame(from = all_aggs$edges$from, to = all_aggs$edges$to),
+        vertices = data.frame(name = all_aggs$meta_data$id),
+        directed = FALSE))
+    stopifnot(all(colnames(all_aggs$adj) == all_aggs$meta_data$id))
+    stopifnot(all(rownames(all_aggs$adj) == all_aggs$meta_data$id))
+    
+    all_dmt = list()
+    all_dmt$pts = rbindlist(lapply(names(res), function(group) {res[[group]]$dmt$pts}))
+    all_dmt$pts[[group.by]] = factor(all_dmt$pts[[group.by]])
+    all_dmt$pts$agg_id = paste0(all_dmt$pts[[group.by]], '_', all_dmt$pts$agg_id)
+
+    return(list(dmt=all_dmt, aggs=all_aggs))
 }
 
 

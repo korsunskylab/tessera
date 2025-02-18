@@ -23,7 +23,10 @@
   max_npts = 50,
   min_npts = 5,
   alpha = 1,
-  verbose = TRUE
+  .progress = TRUE,
+  .options = NULL,
+  consolidate = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -76,10 +79,14 @@ agglomerative clustering phase.}
 \item{alpha}{Parameter for scoring transcriptional similarity between adjacent tiles during
 the agglomerative clustering phase. For \code{alpha}, 0.2 = conservative merging, 2 = liberal merging.}
 
+\item{consolidate}{Whether to consolidate results from multiple groups into a single collection of
+points and tiles (TRUE) or to return a list of separate results for each group (FALSE).}
+
 \item{verbose}{Whether to print progress messages for each stage of the segmentation pipeline.}
 }
 \value{
-A named List, which contains, for each group, a List with the results of segmentation:
+If \code{consolidate==TRUE}, a List with the results of segmentation, combined across groups
+(otherwise, if \code{consolidate==FALSE}, a named List, which contains separate results for each group):
 \item{dmt}{Mesh data structures with input points/edges/triangles and the results from segmentation:
 \itemize{
 \item \code{pts}: A data table with \code{num_cells_pruned} rows containing cells in the mesh that
