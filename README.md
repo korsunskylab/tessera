@@ -1,6 +1,10 @@
 # Tessera
 
+
+
 **Tessera** is an algorithm for segmenting single-cell resolution spatial omics data into small multicellular tiles whose edges track with natural tissue boundaries. These tiles can then be used in downstream analysis to label and define tissue regions across samples.
+
+Check out the manuscript: *Accurate tiling of spatial single-cell data with Tessera* ([bioRxiv link](https://www.biorxiv.org/content/10.1101/2025.01.17.633630v1))
 
 ![cartoon](img/cartoon.png)
 
