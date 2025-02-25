@@ -1,5 +1,5 @@
 Package: tessera
-Title: Tiling for spatial clustering 
+Title: Accurate Tiling of Spatial Single-Cell Data
 Version: 0.1.5
 Authors@R: c(
     person("Ilya", "Korsunsky", email = "ilya.korsunsky@gmail.com", 
@@ -7,7 +7,10 @@ Authors@R: c(
     person("Daniel", "Stein", email = "daniel_stein@g.harvard.edu", 
         role = "aut", comment = c(ORCID = "0000-0002-9442-2604"))
     )
-Description: Tiling package 
+Description: An algorithm for segmenting single-cell resolution
+    spatial omics data into small multicellular tiles whose edges track with
+    natural tissue boundaries. These tiles can then be used in downstream
+    analysis to label and define tissue regions across samples.
 License: GPL-3
 LazyData: true
 Encoding: UTF-8
