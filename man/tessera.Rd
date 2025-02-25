@@ -4,9 +4,20 @@
 \name{tessera}
 \alias{tessera-package}
 \alias{tessera}
-\title{tessera}
+\title{Accurate tiling of spatial single-cell data}
 \description{
-Spatial tiling
+An algorithm for segmenting single-cell resolution
+spatial omics data into small multicellular tiles whose edges track with
+natural tissue boundaries. These tiles can then be used in downstream
+analysis to label and define tissue regions across samples.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/korsunskylab/tessera}
+  \item Report bugs at \url{https://github.com/korsunskylab/tessera/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Ilya Korsunsky \email{ilya.korsunsky@gmail.com} (\href{https://orcid.org/0000-0003-4848-3948}{ORCID})

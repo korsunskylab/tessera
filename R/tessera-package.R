@@ -1,6 +1,9 @@
-#' tessera
+#' Accurate tiling of spatial single-cell data
 #'
-#' Spatial tiling 
+#' An algorithm for segmenting single-cell resolution
+#' spatial omics data into small multicellular tiles whose edges track with
+#' natural tissue boundaries. These tiles can then be used in downstream
+#' analysis to label and define tissue regions across samples.
 #'
 #' @name tessera
 #' @useDynLib tessera
