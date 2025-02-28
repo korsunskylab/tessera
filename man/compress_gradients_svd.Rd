@@ -8,21 +8,23 @@ compress_gradients_svd(field)
 }
 \arguments{
 \item{field}{A gradient field with the following attributes:
-\item{pts}{A \code{2} x \code{D} x \code{N} array in column-major ordering
+\itemize{
+\item \code{pts}: A \code{2} x \code{D} x \code{N} array in column-major ordering
 containing the spatial gradient in expression for each of
-\code{D} latent variables at every point in space.}
-\item{tris}{A \code{2} x \code{D} x \code{F} array in column-major ordering
+\code{D} latent variables at every point in space.
+\item \code{tris}: A \code{2} x \code{D} x \code{F} array in column-major ordering
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every triangle in the mesh.
-Average of the vertices (3 for full triangles, 2 for degenerate triangles).}
-\item{edges_pts}{A \code{2} x \code{D} x \code{E} array in column-major ordering
+Average of the vertices (3 for full triangles, 2 for degenerate triangles).
+\item \code{edges_pts}: A \code{2} x \code{D} x \code{E} array in column-major ordering
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every primal edge (point-to-point) in the mesh.
-Sum of the two endpoints.}
-\item{edges_tris}{A \code{2} x \code{D} x \code{E} array in column-major ordering
+Sum of the two endpoints.
+\item \code{edges_tris}: A \code{2} x \code{D} x \code{E} array in column-major ordering
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every dual edge (triangle-to-triangle) in the mesh.
-Sum of the two adjacent triangles.}}
+Sum of the two adjacent triangles.
+}}
 }
 \value{
 A gradient field with the same attributes as the input, as well as compressed
