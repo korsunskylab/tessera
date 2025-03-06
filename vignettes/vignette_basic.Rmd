@@ -1,8 +1,8 @@
 ---
-title: "Basic Vignette: Using Tessera on a Single Sample"
+title: "Quickstart: Using Tessera on a Single Sample"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Basic Vignette: Using Tessera on a Single Sample}
+  %\VignetteIndexEntry{Quickstart: Using Tessera on a Single Sample}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
