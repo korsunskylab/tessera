@@ -191,21 +191,21 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
 #' directions.
 #'
 #' @param field A gradient field with the following attributes:
-#' \item{pts}{A `2` x `D` x `N` array in column-major ordering
-#'   containing the spatial gradient in expression for each of
-#'   `D` latent variables at every point in space.}
-#' \item{tris}{A `2` x `D` x `F` array in column-major ordering
-#'   containing the spatial gradient in expression for each of
-#'   `D` latent variables at every triangle in the mesh.
-#'   Average of the vertices (3 for full triangles, 2 for degenerate triangles).}
-#' \item{edges_pts}{A `2` x `D` x `E` array in column-major ordering
-#'   containing the spatial gradient in expression for each of
-#'   `D` latent variables at every primal edge (point-to-point) in the mesh.
-#'   Sum of the two endpoints.}
-#' \item{edges_tris}{A `2` x `D` x `E` array in column-major ordering
-#'   containing the spatial gradient in expression for each of
-#'   `D` latent variables at every dual edge (triangle-to-triangle) in the mesh.
-#'   Sum of the two adjacent triangles.}
+#'   * `pts`: A `2` x `D` x `N` array in column-major ordering
+#'     containing the spatial gradient in expression for each of
+#'     `D` latent variables at every point in space.
+#'   * `tris`: A `2` x `D` x `F` array in column-major ordering
+#'     containing the spatial gradient in expression for each of
+#'     `D` latent variables at every triangle in the mesh.
+#'     Average of the vertices (3 for full triangles, 2 for degenerate triangles).
+#'   * `edges_pts`: A `2` x `D` x `E` array in column-major ordering
+#'     containing the spatial gradient in expression for each of
+#'     `D` latent variables at every primal edge (point-to-point) in the mesh.
+#'     Sum of the two endpoints.
+#'   * `edges_tris`: A `2` x `D` x `E` array in column-major ordering
+#'     containing the spatial gradient in expression for each of
+#'     `D` latent variables at every dual edge (triangle-to-triangle) in the mesh.
+#'     Sum of the two adjacent triangles.
 #'
 #' @returns A gradient field with the same attributes as the input, as well as compressed
 #'   representations `pts_svd`, `tris_svd`, `edges_pts_svd`, and `edges_tris_svd`. Each of these

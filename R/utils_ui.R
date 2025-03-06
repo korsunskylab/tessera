@@ -58,6 +58,8 @@ GetTiles.Seurat = function(
     graph.name = 'tile_adj',
     ...
 ) {
+    rlang::check_installed("Seurat", reason = "to use `GetTiles.Seurat()`")
+
     if ((!is.null(embeddings)) && (embeddings != 'harmony')) {
         warning('It is recommended to use harmonized cell embeddings as input for Tessera')
     }
@@ -67,11 +69,11 @@ GetTiles.Seurat = function(
     }
 
     res = GetTiles(
-        X = Embeddings(obj, spatial)[,1],
-        Y = Embeddings(obj, spatial)[,2],
+        X = Seurat::Embeddings(obj, spatial)[,1],
+        Y = Seurat::Embeddings(obj, spatial)[,2],
         counts = obj[[assay]]$counts,
-        embeddings = Embeddings(obj, reduction = embeddings),
-        loadings = Loadings(obj, reduction = embeddings),
+        embeddings = Seurat::Embeddings(obj, reduction = embeddings),
+        loadings = Seurat::Loadings(obj, reduction = embeddings),
         meta_data = obj@meta.data,
         ...
     )
@@ -103,8 +105,8 @@ GetTiles.Seurat = function(
     ## Seurat doesn't do sf shapes well 
     tile_obj@meta.data$shape = res$aggs$meta_data$shape
     row.names(res$aggs$pcs) = colnames(tile_obj)
-    tile_obj[[reduction.name]] <- CreateDimReducObject(embeddings = res$aggs$pcs, key = reduction.name)
-    tile_obj[[graph.name]] = as.Graph(res$aggs$adj)
+    tile_obj[[reduction.name]] <- Seurat::CreateDimReducObject(embeddings = res$aggs$pcs, key = reduction.name)
+    tile_obj[[graph.name]] = Seurat::as.Graph(res$aggs$adj)
 
     return(list(obj=obj, tile_obj=tile_obj))
 }

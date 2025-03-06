@@ -13,3 +13,4 @@ config.status
 /Meta/
 src/*.dylib
 .vscode/*
+docs
