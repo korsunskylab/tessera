@@ -63,7 +63,7 @@ devtools::install_github('korsunskylab/tessera', dependencies = FALSE)  # ~1 min
 
 ### Standalone Mode
 
-Check out this [vignette](https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_basic.ipynb) for a quick start tutorial which
+Check out `vignette("vignette_basic")` for a quick start tutorial which
 demonstrates using `tessera` in standalone mode on a single sample.
 
 The basic usage is as follows:
@@ -112,10 +112,10 @@ tile_obj = res$tile_obj      # Seurat object of Tessera tiles
 ```
 
 ## Vignettes: 
-(1) Quickstart (approx. runtime: <10 sec)
+(1) Quickstart (approx. runtime: <10 sec): `vignette("vignette_basic")`
 
 https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_basic.ipynb
 
-(2) Walkthrough (approx. runtime: <10 sec)
+(2) Walkthrough (approx. runtime: <10 sec): `vignette("vignette_stepthrough")`
 
 https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_stepthrough.ipynb
