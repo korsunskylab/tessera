@@ -12,7 +12,7 @@ Description: An algorithm for segmenting single-cell resolution spatial
     natural tissue boundaries. These tiles can then be used in downstream
     analysis to label and define tissue regions across samples.
 License: GPL-3
-URL: https://github.com/korsunskylab/tessera
+URL: https://github.com/korsunskylab/tessera, https://korsunskylab.github.io/tessera/
 BugReports: https://github.com/korsunskylab/tessera/issues
 Depends: 
     data.table,
