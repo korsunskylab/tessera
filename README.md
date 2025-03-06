@@ -6,7 +6,7 @@
 
 Check out the manuscript on [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.01.17.633630v1) for additional details.
 
-![cartoon](img/cartoon.png)
+![cartoon](man/figures/cartoon.png)
 
 ## Overview
 
