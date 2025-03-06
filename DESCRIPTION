@@ -47,4 +47,11 @@ NeedsCompilation: yes
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
-    Seurat (>= 5.0.0)
+    knitr,
+    rmarkdown,
+    Seurat (>= 5.0.0),
+    ggplot2,
+    ggthemes,
+    patchwork,
+    viridis
+VignetteBuilder: knitr
