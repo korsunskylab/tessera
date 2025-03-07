@@ -6,11 +6,12 @@
 
 Check out the manuscript on [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.01.17.633630v1) for additional details.
 
-![cartoon](man/figures/cartoon.png)
+![](man/figures/cartoon.png)
 
 ## Overview
 
 The Tessera algorithm takes as input single cells (or pixels) with spatial coordinates and cell embeddings (or transcript counts) for each cell. The output is a segmentation of adjacent cells into tiles with a user-controlled size parameter. Boundaries between tiles align with where cell composition and gene expression change the most within the tissue. Segmentation using the Tessera algorithm has four main steps:
+
 1. *Constructing inputs:* A triangle mesh is constructed using Delauney triangulation and pruned to eliminate long edges. If transcript counts are provided for each cell instead of embeddings, then cell embeddings are computed using principal component analysis (PCA).
 2. *Gradient estimation:* Gradients are calculated at each vertex by considering the difference in cell embeddings between each cell and its neighbors in the mesh. These gradients are smoothed using anisotropic bilateral filtering, and then gradients are defined for edges and triangles in the mesh by averaging the vertices that each edge or triangle contains.
 3. *Tissue segmentation using discrete Morse theory (DMT):* A scalar field is defined by taking the magnitude of the total gradient at each vertex, edge, and triangle. Then DMT-based segmentation is performed by constructing a maximum spanning forest on the triangles and a minimum spanning forest on the vertices. Separatrices that partition cells into tiles of homogeneous composition are defined by tracing paths between critical points, specifically between saddle edges and maximum triangles.
