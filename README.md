@@ -22,6 +22,7 @@ The Tessera algorithm takes as input single cells (or pixels) with spatial coord
 ### OS Requirements
 
 `tessera` is supperted for *macOS* and *Linux*. The package has been tested on the following systems:
+
 * macOS: Sonoma (14.6.1)
 * Linux: CentOS 7 (7.9.2009)
 
