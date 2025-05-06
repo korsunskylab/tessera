@@ -146,7 +146,8 @@
 </h3>
 <p>Tessera can also be applied directly to a Seurat object containing single cells with spatial coordinates. The <code>GetTiles</code> function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples). By default, the output is a pair of Seurat objects: 1) a single-cell Seurat object updated with tile assignments for each cell, and 2) a Seurat object where each entry represents an individual Tessera tile.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multicore.html" class="external-link">multicore</a></span><span class="op">)</span>  <span class="co"># Parallelize over multiple samples (if doing multi-sample analysis)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>future.globals.maxSize<span class="op">=</span> <span class="fl">4</span><span class="op">*</span><span class="fl">1024</span><span class="op">^</span><span class="fl">3</span><span class="op">)</span>   <span class="co"># For larger datasets, the memory allowance may need to be increased for parallelization</span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multicore.html" class="external-link">multicore</a></span><span class="op">)</span>             <span class="co"># Parallelize over multiple samples (if doing multi-sample analysis)</span></span>
 <span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="reference/GetTiles.html">GetTiles</a></span><span class="op">(</span></span>
 <span>    <span class="va">obj</span>,        <span class="co"># Single-cell Seurat object</span></span>
 <span>    <span class="st">'spatial'</span>,  <span class="co"># Name of dimesional reduction where x/y coordinates are stored</span></span>
@@ -204,8 +205,8 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Ilya Korsunsky <br><small class="roles"> Maintainer, author </small> <a href="https://orcid.org/0000-0003-4848-3948" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Daniel Stein <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-9442-2604" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Ilya Korsunsky <br><small class="roles"> Maintainer, author </small> <a href="https://orcid.org/0000-0003-4848-3948" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Daniel Stein <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-9442-2604" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -220,7 +221,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
