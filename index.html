@@ -58,13 +58,21 @@
 <p><em>Accurate tiling of spatial single-cell data with Tessera</em></p>
 <p><strong>Tessera</strong> is an algorithm for segmenting single-cell resolution spatial omics data into small multicellular tiles whose edges track with natural tissue boundaries. These tiles can then be used in downstream analysis to label and define tissue regions across samples.</p>
 <p>Check out the manuscript on <a href="https://www.biorxiv.org/content/10.1101/2025.01.17.633630v1" class="external-link">bioRxiv</a> for additional details.</p>
-<div class="float">
-<img src="reference/figures/cartoon.png" alt="cartoon"><div class="figcaption">cartoon</div>
-</div>
+<p><img src="reference/figures/cartoon.png"></p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The Tessera algorithm takes as input single cells (or pixels) with spatial coordinates and cell embeddings (or transcript counts) for each cell. The output is a segmentation of adjacent cells into tiles with a user-controlled size parameter. Boundaries between tiles align with where cell composition and gene expression change the most within the tissue. Segmentation using the Tessera algorithm has four main steps: 1. <em>Constructing inputs:</em> A triangle mesh is constructed using Delauney triangulation and pruned to eliminate long edges. If transcript counts are provided for each cell instead of embeddings, then cell embeddings are computed using principal component analysis (PCA). 2. <em>Gradient estimation:</em> Gradients are calculated at each vertex by considering the difference in cell embeddings between each cell and its neighbors in the mesh. These gradients are smoothed using anisotropic bilateral filtering, and then gradients are defined for edges and triangles in the mesh by averaging the vertices that each edge or triangle contains. 3. <em>Tissue segmentation using discrete Morse theory (DMT):</em> A scalar field is defined by taking the magnitude of the total gradient at each vertex, edge, and triangle. Then DMT-based segmentation is performed by constructing a maximum spanning forest on the triangles and a minimum spanning forest on the vertices. Separatrices that partition cells into tiles of homogeneous composition are defined by tracing paths between critical points, specifically between saddle edges and maximum triangles. 4. <em>Hierarchical agglomeration:</em> Tiles from DMT-based segmentation are merged using single-linkage agglomerative clustering to obtain tiles containing a number of cells between a user-provided minimum and maximum value. Pairs of adjacent tiles are scored according to their transcriptional similarity, compactness of shape after merging, and number of cells, in order to prioritize favorable merges in each agglomerative clustering step.</p>
+<p>The Tessera algorithm takes as input single cells (or pixels) with spatial coordinates and cell embeddings (or transcript counts) for each cell. The output is a segmentation of adjacent cells into tiles with a user-controlled size parameter. Boundaries between tiles align with where cell composition and gene expression change the most within the tissue. Segmentation using the Tessera algorithm has four main steps:</p>
+<ol style="list-style-type: decimal">
+<li>
+<em>Constructing inputs:</em> A triangle mesh is constructed using Delauney triangulation and pruned to eliminate long edges. If transcript counts are provided for each cell instead of embeddings, then cell embeddings are computed using principal component analysis (PCA).</li>
+<li>
+<em>Gradient estimation:</em> Gradients are calculated at each vertex by considering the difference in cell embeddings between each cell and its neighbors in the mesh. These gradients are smoothed using anisotropic bilateral filtering, and then gradients are defined for edges and triangles in the mesh by averaging the vertices that each edge or triangle contains.</li>
+<li>
+<em>Tissue segmentation using discrete Morse theory (DMT):</em> A scalar field is defined by taking the magnitude of the total gradient at each vertex, edge, and triangle. Then DMT-based segmentation is performed by constructing a maximum spanning forest on the triangles and a minimum spanning forest on the vertices. Separatrices that partition cells into tiles of homogeneous composition are defined by tracing paths between critical points, specifically between saddle edges and maximum triangles.</li>
+<li>
+<em>Hierarchical agglomeration:</em> Tiles from DMT-based segmentation are merged using single-linkage agglomerative clustering to obtain tiles containing a number of cells between a user-provided minimum and maximum value. Pairs of adjacent tiles are scored according to their transcriptional similarity, compactness of shape after merging, and number of cells, in order to prioritize favorable merges in each agglomerative clustering step.</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="system-requirements">System Requirements<a class="anchor" aria-label="anchor" href="#system-requirements"></a>
@@ -72,7 +80,11 @@
 <div class="section level3">
 <h3 id="os-requirements">OS Requirements<a class="anchor" aria-label="anchor" href="#os-requirements"></a>
 </h3>
-<p><code>tessera</code> is supperted for <em>macOS</em> and <em>Linux</em>. The package has been tested on the following systems: * macOS: Sonoma (14.6.1) * Linux: CentOS 7 (7.9.2009)</p>
+<p><code>tessera</code> is supperted for <em>macOS</em> and <em>Linux</em>. The package has been tested on the following systems:</p>
+<ul>
+<li>macOS: Sonoma (14.6.1)</li>
+<li>Linux: CentOS 7 (7.9.2009)</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="r-dependencies">R Dependencies<a class="anchor" aria-label="anchor" href="#r-dependencies"></a>
