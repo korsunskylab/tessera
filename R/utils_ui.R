@@ -72,8 +72,8 @@ GetTiles.Seurat = function(
         X = Seurat::Embeddings(obj, spatial)[,1],
         Y = Seurat::Embeddings(obj, spatial)[,2],
         counts = obj[[assay]]$counts,
-        embeddings = Seurat::Embeddings(obj, reduction = embeddings),
-        loadings = Seurat::Loadings(obj, reduction = embeddings),
+        embeddings = ifelse(!is.null(embeddings), Seurat::Embeddings(obj, reduction = embeddings), NULL),
+        loadings = ifelse(!is.null(embeddings), Seurat::Loadings(obj, reduction = embeddings), NULL),
         meta_data = obj@meta.data,
         ...
     )
