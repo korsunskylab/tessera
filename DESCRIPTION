@@ -1,6 +1,6 @@
 Package: tessera
 Title: Accurate Tiling of Spatial Single-Cell Data
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: c(
     person("Ilya", "Korsunsky", , "ilya.korsunsky@gmail.com", role = c("cre", "aut"),
            comment = c(ORCID = "0000-0003-4848-3948")),
