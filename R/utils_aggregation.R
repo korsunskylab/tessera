@@ -109,7 +109,7 @@ init_scores = function(aggs, agg_mode, ...) {
 
         ## Change in compactness
         C_from = (a0 / atot) * (4 * pi * aggs$meta_data$area[aggs$edges$from]) / (aggs$meta_data$perimeter[aggs$edges$from]^2) 
-        C_to = (a1 / atot) * (4 * pi * aggs$meta_data$area[aggs$edges$from]) / (aggs$meta_data$perimeter[aggs$edges$from]^2)
+        C_to = (a1 / atot) * (4 * pi * aggs$meta_data$area[aggs$edges$to]) / (aggs$meta_data$perimeter[aggs$edges$to]^2)
         C_merge = (4 * pi * aggs$edges$area) / (aggs$edges$perimeter_merge ^ 2)
         dC = .5 * (C_merge - C_from - C_to + 1) ## ranges from 0 to 1
 
