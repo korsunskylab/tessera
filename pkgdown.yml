@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   vignette_basic: vignette_basic.html
   vignette_stepthrough: vignette_stepthrough.html
-last_built: 2025-07-15T19:08Z
+last_built: 2025-08-29T15:41Z
 urls:
   reference: https://korsunskylab.github.io/tessera/reference
   article: https://korsunskylab.github.io/tessera/articles
