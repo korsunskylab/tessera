@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,8 +40,7 @@
 
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -52,271 +51,386 @@
 
         </dt>
         <dd>Construct tile adjacency matrix from consolidated GetTiles output.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="ConsolidateResults.html">ConsolidateResults()</a></code>
 
         </dt>
         <dd>Consolidate Tessera results from multiple samples (groups) after constructing Tessera tiles separately on cells from each group.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="GetTiles.html">GetTiles()</a></code>
 
         </dt>
         <dd>Generic function that runs the Tessera algorithm on single-cell spatial data</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="GetTiles.Seurat.html">GetTiles(<i>&lt;Seurat&gt;</i>)</a></code>
 
         </dt>
         <dd>Applies Tessera on a Seurat object</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="GetTiles.default.html">GetTiles(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
         <dd>Run full DMT segmentation pipeline to make aggregated tiles from cells</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="RunUMAPCustom.html">RunUMAPCustom()</a></code>
+
+        </dt>
+        <dd>Run UMAP and save fgraph and embeddings in Seurat object</dd>
+
+        <dt>
 
           <code><a href="add_exterior_triangles.html">add_exterior_triangles()</a></code>
 
         </dt>
         <dd>For every edge on the boundary, adds a second degenerate triangle</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="assign_unique_rowid_cpp.html">assign_unique_rowid_cpp()</a></code>
 
         </dt>
         <dd>Assigns a unique ID to each point with distinct X,Y coordinates</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="compress_field_cpp.html">compress_field_cpp()</a></code>
 
         </dt>
         <dd>Compress a gradient field using SVD</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="compress_gradients_svd.html">compress_gradients_svd()</a></code>
 
         </dt>
         <dd>Compress a gradient field using SVD</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="compute_gradients.html">compute_gradients()</a></code>
 
         </dt>
         <dd>Compute spatial gradient field for input to DMT</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="compute_gradients_edges.html">compute_gradients_edges()</a></code>
+
+        </dt>
+        <dd>Compute spatial gradient field for input to DMT</dd>
+
+        <dt>
 
           <code><a href="dmt_assign_tiles.html">dmt_assign_tiles()</a></code>
 
         </dt>
         <dd>Assign points to tiles after DMT</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="dmt_get_separatrices.html">dmt_get_separatrices()</a></code>
 
         </dt>
         <dd>Get separatrices that separate points into components with strong boundaries</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="dmt_init_tiles.html">dmt_init_tiles()</a></code>
 
         </dt>
         <dd>Initialize tiles with shapes and other properties</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="dmt_set_f.html">dmt_set_f()</a></code>
 
         </dt>
         <dd>Set DMT scalar field values as the Frobenius norm of the total derivative</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="do_dmt_forest_cpp.html">do_dmt_forest_cpp()</a></code>
 
         </dt>
         <dd>Construct maximum spanning forest</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="do_dual_forest.html">do_dual_forest()</a></code>
 
         </dt>
         <dd>Construct dual maximum spanning forest on triangles</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="do_pca.html">do_pca()</a></code>
 
         </dt>
         <dd>Compute PCA embeddings from a raw counts matrix</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="do_primary_forest.html">do_primary_forest()</a></code>
 
         </dt>
         <dd>Construct primal minimum spanning forest on points</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="estimate_field.html">estimate_field()</a></code>
 
         </dt>
         <dd>Compute a spatial gradient field at each point (cell)</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="estimate_field_cpp.html">estimate_field_cpp()</a></code>
 
         </dt>
         <dd>Compute a spatial gradient field at each point (cell)</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="estimate_field_edges_cpp.html">estimate_field_edges_cpp()</a></code>
+
+        </dt>
+        <dd>Compute a spatial gradient field along each edge</dd>
+
+        <dt>
 
           <code><a href="findDuplicates.html">findDuplicates()</a></code>
 
         </dt>
         <dd>Find duplicates within a vector</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="get_e_sep.html">get_e_sep()</a></code>
 
         </dt>
         <dd>Get the collection of edges that lie along separatrices</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="init_data.html">init_data()</a></code>
 
         </dt>
         <dd>Generate mesh data structure from coordinates, for input to DMT analysis</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="init_edges_cpp.html">init_edges_cpp()</a></code>
 
         </dt>
         <dd>Calculates triangles' centroids, areas, and heights from vertices</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="init_scores.html">init_scores()</a></code>
 
         </dt>
         <dd>Initialize tile scores for aggregation</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="init_tris_cpp.html">init_tris_cpp()</a></code>
 
         </dt>
         <dd>Calculates triangles' centroids, areas, and heights from vertices</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="inv_svd_field_cpp.html">inv_svd_field_cpp()</a></code>
+
+        </dt>
+        <dd>Inverse SVD transform to reconstruct spatial gradient field</dd>
+
+        <dt>
 
           <code><a href="mergeListsToArmaUVec.html">mergeListsToArmaUVec()</a></code>
 
         </dt>
         <dd>Copies elements from two lists an Armadillo uvec</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="merge_aggs.html">merge_aggs()</a></code>
 
         </dt>
         <dd>Merges tiles using single-linkage agglomerative clustering</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="merge_aggs_cpp.html">merge_aggs_cpp()</a></code>
 
         </dt>
         <dd>Merges tiles using single-linkage agglomerative clustering</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="normalize_data.html">normalize_data()</a></code>
 
         </dt>
         <dd>Log-normalization for counts data</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="procrustes_inner.html">procrustes_inner()</a></code>
+
+        </dt>
+        <dd>Computes the procrustes inner product between two matrices</dd>
+
+        <dt>
+
+          <code><a href="procrustes_mat.html">procrustes_mat()</a></code>
+
+        </dt>
+        <dd>Solves the orthogonal procrustes problem</dd>
+
+        <dt>
 
           <code><a href="prune_graph.html">prune_graph()</a></code>
 
         </dt>
         <dd>Prunes mesh by eliminating long edges and small connected components</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="scaleRows_dgc.html">scaleRows_dgc()</a></code>
 
         </dt>
         <dd>Z-score a sparse matrix across each row</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="scale_data.html">scale_data()</a></code>
 
         </dt>
         <dd>Z-score a sparse matrix across each row or column</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="smooth_embedding.html">smooth_embedding()</a></code>
+
+        </dt>
+        <dd>Smooth embeddings along edges</dd>
+
+        <dt>
 
           <code><a href="smooth_field.html">smooth_field()</a></code>
 
         </dt>
         <dd>Bilateral / anisotropic filtering of gradient field</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="smooth_field_cpp.html">smooth_field_cpp()</a></code>
 
         </dt>
         <dd>Bilateral / anisotropic filtering of gradient field</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="smooth_field_edges.html">smooth_field_edges()</a></code>
+
+        </dt>
+        <dd>Bilateral / anisotropic filtering of gradient field</dd>
+
+        <dt>
+
+          <code><a href="smooth_field_edges_cpp.html">smooth_field_edges_cpp()</a></code>
+
+        </dt>
+        <dd>Bilateral / anisotropic filtering of gradient field</dd>
+
+        <dt>
+
+          <code><a href="svd_field_cpp.html">svd_field_cpp()</a></code>
+
+        </dt>
+        <dd>Compute the SVD of a spatial gradient field at each point (or edge/triangle)</dd>
+
+        <dt>
 
           <code><a href="tessera.html">tessera-package</a></code> <code><a href="tessera.html">tessera</a></code>
 
         </dt>
         <dd>Accurate tiling of spatial single-cell data</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="tessera_warmup.html">tessera_warmup</a></code>
 
         </dt>
         <dd>Sample data for Tessera vignettes</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="trace_back_cpp.html">trace_back_cpp()</a></code>
 
         </dt>
         <dd>Trace back from a point to its root in the spanning forest</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="trace_epaths_cpp.html">trace_epaths_cpp()</a></code>
 
         </dt>
         <dd>Trace all paths from saddles to critical points in the spanning forest</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="trace_paths.html">trace_paths()</a></code>
 
         </dt>
         <dd>Trace all paths from saddles to dual critical points in the spanning forest.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="trace_polygons.html">trace_polygons()</a></code>
 
         </dt>
         <dd>Contruct shapes that outline each tile</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="trace_polygons_cpp.html">trace_polygons_cpp()</a></code>
 
         </dt>
         <dd>Contruct shapes that outline each tile</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="update_E_cpp.html">update_E_cpp()</a></code>
 
         </dt>
         <dd>Updates information for boundaries after merging two tiles</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="update_V_cpp.html">update_V_cpp()</a></code>
 
         </dt>
         <dd>Updates information for tiles after merging two tiles</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="update_agg_shapes.html">update_agg_shapes()</a></code>
 
         </dt>
         <dd>Update shapes and counts matrix for tiles after merging</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="update_dmt_aggid.html">update_dmt_aggid()</a></code>
 
@@ -331,7 +445,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

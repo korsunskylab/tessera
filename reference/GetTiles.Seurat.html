@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,11 +48,14 @@
 <span>  <span class="va">obj</span>,</span>
 <span>  <span class="va">spatial</span>,</span>
 <span>  embeddings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dims.use <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  assay <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group.by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  raw_results <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  tile.id.name <span class="op">=</span> <span class="st">"tile_id"</span>,</span>
 <span>  reduction.name <span class="op">=</span> <span class="st">"pca"</span>,</span>
 <span>  graph.name <span class="op">=</span> <span class="st">"tile_adj"</span>,</span>
+<span>  add.isolated.cells <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -80,6 +83,10 @@ If missing, cell embeddings are calculated using PCA. If provided, the <code>npc
 <dd><p>Seurat assay to pull data for when using the cell counts. Defaults to the DefaultAssay.</p></dd>
 
 
+<dt id="arg-group-by">group.by<a class="anchor" aria-label="anchor" href="#arg-group-by"></a></dt>
+<dd><p>Name of column in <code>obj@meta.data</code> to use for grouping cells into separate samples.</p></dd>
+
+
 <dt id="arg-raw-results">raw_results<a class="anchor" aria-label="anchor" href="#arg-raw-results"></a></dt>
 <dd><p>Whether to return the raw results from <code><a href="GetTiles.default.html">GetTiles.default()</a></code>.</p></dd>
 
@@ -89,24 +96,31 @@ If missing, cell embeddings are calculated using PCA. If provided, the <code>npc
 
 
 <dt id="arg-reduction-name">reduction.name<a class="anchor" aria-label="anchor" href="#arg-reduction-name"></a></dt>
-<dd><p>Name of dimesional reduction to store the aggregated tile-level embeddings
+<dd><p>Name of dimensional reduction to store the aggregated tile-level embeddings
 in the tile-level Seurat object.</p></dd>
 
 
 <dt id="arg-graph-name">graph.name<a class="anchor" aria-label="anchor" href="#arg-graph-name"></a></dt>
-<dd><p>Nmae of graph to store tile adjacency matrix in the tile-level Seurat object.</p></dd>
+<dd><p>Name of graph to store tile adjacency matrix in the tile-level Seurat object.</p></dd>
+
+
+<dt id="arg-add-isolated-cells">add.isolated.cells<a class="anchor" aria-label="anchor" href="#arg-add-isolated-cells"></a></dt>
+<dd><p>Whether to add back isolated single cells that were pruned out.
+Only applies when <code>embeddings</code> are provided. Defaults to TRUE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Arguments passed on to <code><a href="GetTiles.default.html">GetTiles.default</a></code></p><dl><dt><code>meta_vars_include</code></dt>
 <dd><p>Names of columns in meta_data to include in <code>dmt$pts</code>.</p></dd>
 
-    <dt><code>group.by</code></dt>
-<dd><p>Name of column in <code>meta_data</code> that provides the group IDs. Tessera tiles are
-constructed separately for each group (which could be separate experimental samples or FOVs).</p></dd>
-
     <dt><code>npcs</code></dt>
-<dd><p>Number of PCs to compute for input to segmentation.</p></dd>
+<dd><p>Number of PCs to compute for input to segmentation.
+Ignored if <code>embeddings</code> are provided directly.</p></dd>
+
+    <dt><code>smooth_emb</code></dt>
+<dd><p>Number of smoothing iterations to perform on the cell embeddings
+prior to gradient computation. If a vector, then embeddings after each specified
+iteration are concatenated. If <code>0</code> is included, then the original embeddings are also included.</p></dd>
 
     <dt><code>prune_thresh_quantile</code></dt>
 <dd><p>Floating point value between 0 and 1, inclusive.
@@ -147,6 +161,10 @@ agglomerative clustering phase.</p></dd>
 <dd><p>Parameter for scoring transcriptional similarity between adjacent tiles during
 the agglomerative clustering phase. For <code>alpha</code>, 0.2 = conservative merging, 2 = liberal merging.</p></dd>
 
+    <dt><code>future.globals.maxSize</code></dt>
+<dd><p>Maximum allowed size (in bytes) of global variables that are exported to each parallel worker.
+Increase this value if you get an error about global object size. Default is 8*1024^3 (8 GB).</p></dd>
+
     <dt><code>consolidate</code></dt>
 <dd><p>Whether to consolidate results from multiple groups into a single collection of
 points and tiles (TRUE) or to return a list of separate results for each group (FALSE).</p></dd>
@@ -166,8 +184,8 @@ points and tiles (TRUE) or to return a list of separate results for each group (
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other GetTiles:
-<code><a href="GetTiles.html">GetTiles</a>()</code>,
-<code><a href="GetTiles.default.html">GetTiles.default</a>()</code></p></div>
+<code><a href="GetTiles.html">GetTiles()</a></code>,
+<code><a href="GetTiles.default.html">GetTiles.default()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -179,7 +197,7 @@ points and tiles (TRUE) or to return a list of separate results for each group (
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

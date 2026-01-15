@@ -49,7 +49,7 @@ of cells in order to prioritize favorable merges in each agglomerative clusterin
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,18 +113,21 @@ of cells in order to prioritize favorable merges in each agglomerative clusterin
 <span>  meta_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  meta_vars_include <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group.by <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  npcs <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  prune_thresh_quantile <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  prune_min_cells <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  npcs <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  smooth_emb <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prune_thresh_quantile <span class="op">=</span> <span class="fl">0.99</span>,</span>
+<span>  prune_min_cells <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  prune_thresh <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  smooth_distance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"euclidean"</span>, <span class="st">"projected"</span>, <span class="st">"constant"</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,</span>
 <span>  smooth_similarity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"euclidean"</span>, <span class="st">"projected"</span>, <span class="st">"constant"</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,</span>
 <span>  smooth_iter <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  on_edges <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  max_npts <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  min_npts <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  .progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .options <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  future.globals.maxSize <span class="op">=</span> <span class="fl">8</span> <span class="op">*</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">3</span>,</span>
 <span>  consolidate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -166,7 +169,14 @@ constructed separately for each group (which could be separate experimental samp
 
 
 <dt id="arg-npcs">npcs<a class="anchor" aria-label="anchor" href="#arg-npcs"></a></dt>
-<dd><p>Number of PCs to compute for input to segmentation.</p></dd>
+<dd><p>Number of PCs to compute for input to segmentation.
+Ignored if <code>embeddings</code> are provided directly.</p></dd>
+
+
+<dt id="arg-smooth-emb">smooth_emb<a class="anchor" aria-label="anchor" href="#arg-smooth-emb"></a></dt>
+<dd><p>Number of smoothing iterations to perform on the cell embeddings
+prior to gradient computation. If a vector, then embeddings after each specified
+iteration are concatenated. If <code>0</code> is included, then the original embeddings are also included.</p></dd>
 
 
 <dt id="arg-prune-thresh-quantile">prune_thresh_quantile<a class="anchor" aria-label="anchor" href="#arg-prune-thresh-quantile"></a></dt>
@@ -215,6 +225,11 @@ agglomerative clustering phase.</p></dd>
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Parameter for scoring transcriptional similarity between adjacent tiles during
 the agglomerative clustering phase. For <code>alpha</code>, 0.2 = conservative merging, 2 = liberal merging.</p></dd>
+
+
+<dt id="arg-future-globals-maxsize">future.globals.maxSize<a class="anchor" aria-label="anchor" href="#arg-future-globals-maxsize"></a></dt>
+<dd><p>Maximum allowed size (in bytes) of global variables that are exported to each parallel worker.
+Increase this value if you get an error about global object size. Default is 8*1024^3 (8 GB).</p></dd>
 
 
 <dt id="arg-consolidate">consolidate<a class="anchor" aria-label="anchor" href="#arg-consolidate"></a></dt>
@@ -393,8 +408,8 @@ have at least <code>min_npts</code> cells, to prioritize merging of small tiles.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other GetTiles:
-<code><a href="GetTiles.html">GetTiles</a>()</code>,
-<code><a href="GetTiles.Seurat.html">GetTiles.Seurat</a>()</code></p></div>
+<code><a href="GetTiles.html">GetTiles()</a></code>,
+<code><a href="GetTiles.Seurat.html">GetTiles.Seurat()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -406,7 +421,7 @@ have at least <code>min_npts</code> cells, to prioritize merging of small tiles.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

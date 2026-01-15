@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,6 +146,7 @@
 <span>    group.by <span class="op">=</span> <span class="st">'sample_id'</span>,  <span class="co"># (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.</span></span>
 <span></span>
 <span>    <span class="co"># Additional Tessera algorithm parameters</span></span>
+<span>    dims.use <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">25</span>,                                   <span class="co"># Choose how many embedding dimensions to use</span></span>
 <span>    prune_thresh_quantile <span class="op">=</span> <span class="fl">0.99</span>, prune_min_cells <span class="op">=</span> <span class="fl">1</span>, <span class="co"># Control pruning of long edges and disconnected cells</span></span>
 <span>    max_npts <span class="op">=</span> <span class="fl">50</span>, min_npts <span class="op">=</span> <span class="fl">5</span>,                       <span class="co"># Control size of Tessera tiles</span></span>
 <span>    <span class="va">...</span>                      </span>
@@ -168,6 +169,7 @@
 <span>    group.by <span class="op">=</span> <span class="st">'sample_id'</span>,  <span class="co"># (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.</span></span>
 <span></span>
 <span>    <span class="co"># Additional Tessera algorithm parameters</span></span>
+<span>    dims.use <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">25</span>,                                   <span class="co"># Choose how many embedding dimensions to use</span></span>
 <span>    prune_thresh_quantile <span class="op">=</span> <span class="fl">0.99</span>, prune_min_cells <span class="op">=</span> <span class="fl">1</span>, <span class="co"># Control pruning of long edges and disconnected cells</span></span>
 <span>    max_npts <span class="op">=</span> <span class="fl">50</span>, min_npts <span class="op">=</span> <span class="fl">5</span>,                       <span class="co"># Control size of Tessera tiles</span></span>
 <span>    <span class="va">...</span></span>
@@ -233,7 +235,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
