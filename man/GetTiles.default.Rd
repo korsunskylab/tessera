@@ -13,18 +13,21 @@
   meta_data = NULL,
   meta_vars_include = NULL,
   group.by = NULL,
-  npcs = 10,
-  prune_thresh_quantile = 0.95,
-  prune_min_cells = 10,
+  npcs = 25,
+  smooth_emb = c(0, 1),
+  prune_thresh_quantile = 0.99,
+  prune_min_cells = 1,
   prune_thresh = NA,
   smooth_distance = c("none", "euclidean", "projected", "constant")[3],
   smooth_similarity = c("none", "euclidean", "projected", "constant")[3],
   smooth_iter = 1,
+  on_edges = FALSE,
   max_npts = 50,
   min_npts = 5,
   alpha = 1,
   .progress = TRUE,
   .options = NULL,
+  future.globals.maxSize = 8 * 1024^3,
   consolidate = TRUE,
   verbose = FALSE
 )
@@ -47,7 +50,12 @@ If missing, cell embeddings are calculated using PCA. If provided, the \code{npc
 \item{group.by}{Name of column in \code{meta_data} that provides the group IDs. Tessera tiles are
 constructed separately for each group (which could be separate experimental samples or FOVs).}
 
-\item{npcs}{Number of PCs to compute for input to segmentation.}
+\item{npcs}{Number of PCs to compute for input to segmentation.
+Ignored if \code{embeddings} are provided directly.}
+
+\item{smooth_emb}{Number of smoothing iterations to perform on the cell embeddings
+prior to gradient computation. If a vector, then embeddings after each specified
+iteration are concatenated. If \code{0} is included, then the original embeddings are also included.}
 
 \item{prune_thresh_quantile}{Floating point value between 0 and 1, inclusive.
 Quantile of edge length above which edges are pruned. Defaults to 0.95.}
@@ -78,6 +86,9 @@ agglomerative clustering phase.}
 
 \item{alpha}{Parameter for scoring transcriptional similarity between adjacent tiles during
 the agglomerative clustering phase. For \code{alpha}, 0.2 = conservative merging, 2 = liberal merging.}
+
+\item{future.globals.maxSize}{Maximum allowed size (in bytes) of global variables that are exported to each parallel worker.
+Increase this value if you get an error about global object size. Default is 8*1024^3 (8 GB).}
 
 \item{consolidate}{Whether to consolidate results from multiple groups into a single collection of
 points and tiles (TRUE) or to return a list of separate results for each group (FALSE).}

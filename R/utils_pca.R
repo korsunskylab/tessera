@@ -79,3 +79,55 @@ do_pca = function(counts, npcs) {
     row.names(pres$u) = row.names(Z)
     return(list(loadings = pres$u, embeddings = V))
 }
+
+#' Smooth embeddings along edges
+#' 
+#' @param dmt A DMT object.
+#' @param smooth_emb Number of smoothing iterations to perform.
+#'   If a vector, then embeddings after each specified
+#'   iteration are concatenated. If `0` is included, then
+#'   the original embeddings are also included.
+#'
+#' @returns The input DMT object with smoothed embeddings stored in
+#'   `dmt$udv_cells$embeddings`.
+#' 
+#' @export
+smooth_embedding = function(
+    dmt,
+    smooth_emb = 0
+) {
+
+    adj = as.matrix(igraph::from_edgelist()$fun(as.matrix(dmt$edges[, .(from_pt, to_pt)]), directed=FALSE))
+    diag(adj) = 1
+    adj = adj / Matrix::colSums(adj)  # normalize
+
+    embeddings = dmt$udv_cells$embeddings
+
+    smoothed_embeddings = list()
+    if (0 %in% smooth_emb) {
+        smoothed_embeddings[['0']] = as.matrix(embeddings)
+    }
+    for (i in seq_len(max(smooth_emb))) {
+        embeddings = adj %*% embeddings
+        if (i %in% smooth_emb) {
+            smoothed_embeddings[[as.character(i)]] = as.matrix(embeddings)
+        }
+    }
+
+    embeddings = do.call(cbind, smoothed_embeddings)
+    rownames(embeddings) = rownames(dmt$udv_cells$embeddings)
+    colnames(embeddings) = paste0('PC_', 1:ncol(embeddings))
+    dmt$udv_cells$embeddings = embeddings
+
+    if (!is.null(dmt$udv_cells$loadings)) {
+        loadings = dmt$udv_cells$loadings
+
+        loadings = do.call(cbind, replicate(length(smooth_emb), loadings, simplify=FALSE))
+        rownames(loadings) = rownames(dmt$udv_cells$loadings)
+        colnames(loadings) = paste0('PC_', 1:ncol(embeddings))
+
+        dmt$udv_cells$loadings = loadings
+    }
+
+    return(dmt)
+}

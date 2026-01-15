@@ -1,10 +1,10 @@
 #' Bilateral / anisotropic filtering of gradient field
-#' 
+#'
 #' Gradient fields are smoothed using bilateral filtering,
 #' in which the smoothed gradient of each point is computed as
 #' the weighted average of the neighbors' gradients, considering
 #' both distance in space and also similarity in gradients.
-#' 
+#'
 #' The weight of each neighbor is computed from the product of two scores:
 #' * `distance` score: Generally, closer neighbors have greater weight.
 #'   * if `'euclidean'`: Gaussian transformation of the Euclidean distance
@@ -23,7 +23,7 @@
 #'   * if `'projected'`: Gaussian transformation of the cosine distance
 #'     between a cell's gradient field and its neighbor's gradient field.
 #'   * if `'constant'`: All neighbors have equal `similarity` weights
-#' 
+#'
 #' @param coords A `N` x `2` matrix of cell coordinates.
 #' @param field A `2` x `D` x `N` array in column-major ordering
 #'   containing the spatial gradient in expression for each of
@@ -36,11 +36,11 @@
 #'   See description for details. Defaults to `'euclidean'`.
 #' @param similarity Method for computing similarity score in weighted average.
 #'   See description for details. Defaults to `'euclidean'`.
-#' 
+#'
 #' @returns A `2` x `D` x `N` array in column-major ordering
 #'   containing the smoothed spatial gradient in expression for each of
 #'   `D` latent variables at every point in space.
-#' 
+#'
 #' @export
 smooth_field = function(coords, field, adj, include_self=TRUE,
                         distance="euclidean", similarity="euclidean") {
@@ -50,7 +50,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
         diag(adj) = 0
     }
 
-    ## method to compute distance between points 
+    ## method to compute distance between points
     if (distance == "euclidean") {
         ## Euclidean distance
         dist_mode = 0
@@ -74,9 +74,9 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
     } else {
         stop("Invalid similarity method")
     }
-    
+
     res = smooth_field_cpp(
-        pvec = diff(adj@p), 
+        pvec = diff(adj@p),
         adj_i = adj@i, ## keep it 0-indexed
         adj_p = adj@p,
         field = field,
@@ -88,7 +88,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 }
 
 #' Compute spatial gradient field for input to DMT
-#' 
+#'
 #' First, spatial gradients for each embedding dimension are computed for every
 #' points (cell) by looking at each cell's neighbors. These point gradients can
 #' be smoothed using bilateral/anisotropic filtering. Then gradients for triangles
@@ -96,7 +96,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #' degenerate exterior triangles at the boundaries). Finally, primal and dual
 #' edge gradients are computed as the sum of the gradients for the two points and
 #' two triangles, respectively, that are associated with each edge.
-#' 
+#'
 #' @param dmt A list containing the mesh data structures:
 #' * `pts` is a `N` x `2+M` data table with columns `X` and `Y` containing the
 #'   coordinates of cells and additional metadata.
@@ -119,7 +119,7 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'` (the default),
 #'   then no smoothing of the gradient field is conducted.
 #' @param smooth_iter Number of rounds of gradient smoothing.
-#' 
+#'
 #' @returns A gradient field with the following attributes:
 #' \item{pts}{A `2` x `D` x `N` array in column-major ordering
 #'   containing the spatial gradient in expression for each of
@@ -136,12 +136,25 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 #'   containing the spatial gradient in expression for each of
 #'   `D` latent variables at every dual edge (triangle-to-triangle) in the mesh.
 #'   Average of the two adjacent triangles.}
-#' 
+#'
 #' @export
-compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='none', smooth_iter=1) {
+compute_gradients = function(
+    dmt,
+    smooth_distance='none', smooth_similarity='none', smooth_iter=1,
+    on_edges = FALSE
+) {
+    if (on_edges) {
+        return(compute_gradients_edges(
+            dmt,
+            smooth_distance=smooth_distance,
+            smooth_similarity=smooth_similarity,
+            smooth_iter=smooth_iter
+        ))
+    }
+
     field = list()
 
-    ## First on points 
+    ## First on points
     coords = as.matrix(dmt$pts[, .(X, Y)])
     adj = as.matrix(igraph::from_edgelist()$fun(as.matrix(dmt$edges[, .(from_pt, to_pt)]), directed=FALSE))
     # adj = as.matrix(igraph::from_edgelist()$fun(as.matrix(dmt$edges[!is.na(from_pt), .(from_pt, to_pt)]), directed=FALSE))
@@ -151,18 +164,18 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
     ## Smooth pt gradient first
     if (smooth_distance != 'none' & smooth_similarity != 'none') {
         for (i in seq_len(smooth_iter)) {
-            field$pts = smooth_field(coords, field=field$pts, adj, include_self=TRUE, distance=smooth_distance, similarity=smooth_similarity) 
+            field$pts = smooth_field(coords, field=field$pts, adj, include_self=TRUE, distance=smooth_distance, similarity=smooth_similarity)
         }
     }
-    
+
     ## Field on tris
-    ## Now, we need to do some tensor math to derive fields for each triangle. 
+    ## Now, we need to do some tensor math to derive fields for each triangle.
     field$tris = array(dim = c(2, dim(field$pts)[2], nrow(dmt$tris)))
     field$tris[1, , ] = as.matrix(field$pts[1, , ] %*% Matrix::t(dmt$tri_to_pt))
     field$tris[2, , ] = as.matrix(field$pts[2, , ] %*% Matrix::t(dmt$tri_to_pt))
     field$tris = sweep(field$tris, 3, Matrix::rowSums(dmt$tri_to_pt), '/')
 
-    ## Finally on edges 
+    ## Finally on edges
     # i_edges_prim = which(!is.na(dmt$edges$from_pt))
     # field_edges_prim = array(dim = c(2, dim(field_pts)[2], length(i_edges_prim)))
     field$edges_pts = array(dim = c(2, dim(field$pts)[2], nrow(dmt$edges)))
@@ -180,7 +193,7 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
     field$edges_tris[1, , ] = as.matrix(field$tris[1, , ] %*% Matrix::t(adj_edges_to_tris))
     field$edges_tris[2, , ] = as.matrix(field$tris[2, , ] %*% Matrix::t(adj_edges_to_tris))
     field$edges_tris = field$edges_tris / 2   # divide by 2 to keep same units as points and triangles
-    
+
     return(field)
 }
 
@@ -220,17 +233,17 @@ compute_gradients = function(dmt, smooth_distance='none', smooth_similarity='non
 #'
 #' @export
 compress_gradients_svd = function(field) {
-    ## compress gradients into 2D representations 
+    ## compress gradients into 2D representations
     field$pts_svd = compress_field_cpp(field$pts)
     field$tris_svd = compress_field_cpp(field$tris)
     field$edges_pts_svd = compress_field_cpp(field$edges_pts)
-    field$edges_tris_svd = compress_field_cpp(field$edges_tris)        
-    
+    field$edges_tris_svd = compress_field_cpp(field$edges_tris)
+
     colnames(field$pts_svd) = c('dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho', 'len_grad', 'len_ortho')
     colnames(field$tris_svd) = c('dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho', 'len_grad', 'len_ortho')
     colnames(field$edges_pts_svd) = c('dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho', 'len_grad', 'len_ortho')
     colnames(field$edges_tris_svd) = c('dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho', 'len_grad', 'len_ortho')
-    
+
     return(field)
 }
 
@@ -252,11 +265,11 @@ compress_gradients_svd = function(field) {
 #'
 #' @export
 estimate_field = function(coords, adj, embeddings) {
-    diag(adj) = 0 ## cannot include self by definition 
+    diag(adj) = 0 ## cannot include self by definition
     res = estimate_field_cpp(
-        coords = coords, 
-        embeddings = embeddings, 
-        adj_i = adj@i, 
+        coords = coords,
+        embeddings = embeddings,
+        adj_i = adj@i,
         adj_p = adj@p
     )
     return(res)
@@ -265,12 +278,12 @@ estimate_field = function(coords, adj, embeddings) {
 # estimate_field = function(coords, adj, embeddings, include_self=TRUE) {
 #     if (include_self) diag(adj) = 1
 #     res = estimate_field_cpp(
-#         coords = coords, 
-#         embeddings = embeddings, 
-#         adj_i = adj@i, 
+#         coords = coords,
+#         embeddings = embeddings,
+#         adj_i = adj@i,
 #         adj_p = adj@p
 #     )
-    
+
 #     colnames(res) = c('len_grad', 'len_ortho', 'dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho')
 #     res = data.table(res)
 #     return(res)
@@ -279,15 +292,15 @@ estimate_field = function(coords, adj, embeddings) {
 # smooth_field_old = function(coords, field, adj, embeddings, include_self=TRUE, reorient_grad_pos_y=TRUE) {
 #     if (include_self) diag(adj) = 1
 #     res = smooth_field_cpp(
-#         pvec = diff(adj@p), 
+#         pvec = diff(adj@p),
 #         jvec = adj@i, ## keep it 0-indexed
-#         field_coords = as.matrix(field[, c('dx_grad', 'dy_grad')] * field$len_grad), 
+#         field_coords = as.matrix(field[, c('dx_grad', 'dy_grad')] * field$len_grad),
 #         coords = coords,
-#         embeddings = embeddings, 
+#         embeddings = embeddings,
 #         adj_p = adj@p,
 #         reorient_grad_pos_y
-#     )    
-    
+#     )
+
 #     colnames(res) = c('len_grad', 'len_ortho', 'dx_grad', 'dy_grad', 'dx_ortho', 'dy_ortho')
 #     res = data.table(res)
 #     return(res)

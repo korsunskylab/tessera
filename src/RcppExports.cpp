@@ -293,6 +293,84 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// estimate_field_edges_cpp
+arma::cube estimate_field_edges_cpp(arma::mat& coords, arma::mat& embeddings, arma::uvec& from_pt, arma::uvec& to_pt);
+RcppExport SEXP _tessera_estimate_field_edges_cpp(SEXP coordsSEXP, SEXP embeddingsSEXP, SEXP from_ptSEXP, SEXP to_ptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type embeddings(embeddingsSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type from_pt(from_ptSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type to_pt(to_ptSEXP);
+    rcpp_result_gen = Rcpp::wrap(estimate_field_edges_cpp(coords, embeddings, from_pt, to_pt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// svd_field_cpp
+Rcpp::List svd_field_cpp(arma::cube& field);
+RcppExport SEXP _tessera_svd_field_cpp(SEXP fieldSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube& >::type field(fieldSEXP);
+    rcpp_result_gen = Rcpp::wrap(svd_field_cpp(field));
+    return rcpp_result_gen;
+END_RCPP
+}
+// inv_svd_field_cpp
+arma::cube inv_svd_field_cpp(Rcpp::List svd_list);
+RcppExport SEXP _tessera_inv_svd_field_cpp(SEXP svd_listSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type svd_list(svd_listSEXP);
+    rcpp_result_gen = Rcpp::wrap(inv_svd_field_cpp(svd_list));
+    return rcpp_result_gen;
+END_RCPP
+}
+// procrustes_mat
+arma::mat procrustes_mat(arma::mat A, arma::mat B);
+RcppExport SEXP _tessera_procrustes_mat(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(procrustes_mat(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// procrustes_inner
+double procrustes_inner(arma::mat A, arma::mat B);
+RcppExport SEXP _tessera_procrustes_inner(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(procrustes_inner(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// smooth_field_edges_cpp
+arma::cube smooth_field_edges_cpp(arma::uvec& from_pt, arma::uvec& to_pt, arma::cube& field, Rcpp::List edges_svd, arma::mat& coords, const S4& adj_idx, unsigned distance, unsigned similarity);
+RcppExport SEXP _tessera_smooth_field_edges_cpp(SEXP from_ptSEXP, SEXP to_ptSEXP, SEXP fieldSEXP, SEXP edges_svdSEXP, SEXP coordsSEXP, SEXP adj_idxSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::uvec& >::type from_pt(from_ptSEXP);
+    Rcpp::traits::input_parameter< arma::uvec& >::type to_pt(to_ptSEXP);
+    Rcpp::traits::input_parameter< arma::cube& >::type field(fieldSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type edges_svd(edges_svdSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< const S4& >::type adj_idx(adj_idxSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type distance(distanceSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type similarity(similaritySEXP);
+    rcpp_result_gen = Rcpp::wrap(smooth_field_edges_cpp(from_pt, to_pt, field, edges_svd, coords, adj_idx, distance, similarity));
+    return rcpp_result_gen;
+END_RCPP
+}
 // assign_unique_rowid_cpp
 arma::uvec assign_unique_rowid_cpp(arma::vec X, arma::vec Y);
 RcppExport SEXP _tessera_assign_unique_rowid_cpp(SEXP XSEXP, SEXP YSEXP) {
@@ -449,6 +527,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tessera_smooth_field_cpp", (DL_FUNC) &_tessera_smooth_field_cpp, 7},
     {"_tessera_compress_field_cpp", (DL_FUNC) &_tessera_compress_field_cpp, 1},
     {"_tessera_estimate_field_cpp", (DL_FUNC) &_tessera_estimate_field_cpp, 4},
+    {"_tessera_estimate_field_edges_cpp", (DL_FUNC) &_tessera_estimate_field_edges_cpp, 4},
+    {"_tessera_svd_field_cpp", (DL_FUNC) &_tessera_svd_field_cpp, 1},
+    {"_tessera_inv_svd_field_cpp", (DL_FUNC) &_tessera_inv_svd_field_cpp, 1},
+    {"_tessera_procrustes_mat", (DL_FUNC) &_tessera_procrustes_mat, 2},
+    {"_tessera_procrustes_inner", (DL_FUNC) &_tessera_procrustes_inner, 2},
+    {"_tessera_smooth_field_edges_cpp", (DL_FUNC) &_tessera_smooth_field_edges_cpp, 8},
     {"_tessera_assign_unique_rowid_cpp", (DL_FUNC) &_tessera_assign_unique_rowid_cpp, 2},
     {"_tessera_init_edges_cpp", (DL_FUNC) &_tessera_init_edges_cpp, 3},
     {"_tessera_init_tris_cpp", (DL_FUNC) &_tessera_init_tris_cpp, 2},

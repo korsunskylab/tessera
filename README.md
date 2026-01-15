@@ -82,6 +82,7 @@ res = GetTiles(
     group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
 
     # Additional Tessera algorithm parameters
+    dims.use = 1:25,                                   # Choose how many embedding dimensions to use
     prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
     max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
     ...                      
@@ -106,6 +107,7 @@ res = GetTiles(
     group.by = 'sample_id',  # (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.
 
     # Additional Tessera algorithm parameters
+    dims.use = 1:25,                                   # Choose how many embedding dimensions to use
     prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
     max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
     ...

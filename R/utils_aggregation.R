@@ -78,9 +78,10 @@ init_scores = function(aggs, agg_mode, ...) {
         # GMM to decide which distances are good or bad 
         d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
         mres = mclust::Mclust(d, G=2)
-        stopifnot(mres$parameters$mean[1] < mres$parameters$mean[2])
-        d_sig = sqrt(mres$parameters$variance$sigmasq)[1]
-        d_mu = mres$parameters$mean[1] + d_sig
+        ord = order(mres$parameters$mean)
+        stopifnot(mres$parameters$mean[ord[1]] < mres$parameters$mean[ord[2]])
+        d_sig = sqrt(mres$parameters$variance$sigmasq)[ord[1]]
+        d_mu = mres$parameters$mean[ord[1]] + d_sig
         d_sig = alpha * d_sig
 
 
@@ -134,10 +135,11 @@ init_scores = function(aggs, agg_mode, ...) {
         # GMM to decide which distances are good or bad 
         d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
         mres = mclust::Mclust(d, G=2)
-        stopifnot(mres$parameters$mean[1] < mres$parameters$mean[2])
-        d_sig = sqrt(mres$parameters$variance$sigmasq)[1]
+        ord = order(mres$parameters$mean)
+        stopifnot(mres$parameters$mean[ord[1]] < mres$parameters$mean[ord[2]])
+        d_sig = sqrt(mres$parameters$variance$sigmasq)[ord[1]]
         d_sig = alpha * d_sig
-        d_mu = mres$parameters$mean[1] + d_sig
+        d_mu = mres$parameters$mean[ord[1]] + d_sig
         aggs$edges$w = 1 / (1 + exp(-(d - d_mu) / d_sig)) 
         aggs$edges$w = 1 - aggs$edges$w ## high distance = low probability 
 

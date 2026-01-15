@@ -258,6 +258,120 @@ estimate_field_cpp <- function(coords, embeddings, adj_i, adj_p) {
     .Call('_tessera_estimate_field_cpp', PACKAGE = 'tessera', coords, embeddings, adj_i, adj_p)
 }
 
+#' Compute a spatial gradient field along each edge
+#'
+#' Distance between neighboring cells is normalized to unit
+#' distance so that only the orientation of each edge matters.
+#' The gradient is then the difference in expression of each
+#' embedding dimension between the two endpoints of the edge.
+#'
+#' @param coords A `N` x `2` matrix of cell coordinates.
+#' @param embeddings A `N` x `D` matrix of cell embeddings.
+#' @param from_pt,to_pt A pair of `E`-length vectors indicating
+#'   the start and end points of each edge (0-indexed).
+#'
+#' @returns A `2` x `D` x `E` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` embedding dimensions at every edge.
+#'
+estimate_field_edges_cpp <- function(coords, embeddings, from_pt, to_pt) {
+    .Call('_tessera_estimate_field_edges_cpp', PACKAGE = 'tessera', coords, embeddings, from_pt, to_pt)
+}
+
+#' Compute the SVD of a spatial gradient field at each point (or edge/triangle)
+#'
+#' @param field A `2` x `D` x `N` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` embedding dimensions at every point (or edge/triangle).
+#'
+#' @returns A list with elements `u` (`2` x `2` x `N`), `s` (`2` x `N`), and
+#'   `v` (`D` x `2` x `N`) containing the left singular vectors, singular values,
+#'   and right singular vectors for each point (or edge/triangle).
+#'
+svd_field_cpp <- function(field) {
+    .Call('_tessera_svd_field_cpp', PACKAGE = 'tessera', field)
+}
+
+#' Inverse SVD transform to reconstruct spatial gradient field
+#'
+#' @param svd_list A list with elements `u` (`2` x `2` x `N`), `s` (`2` x `N`), and
+#'   `v` (`D` x `2` x `N`) containing the left singular vectors, singular values,
+#'   and right singular vectors for each point (or edge/triangle).
+#'
+#' @returns A `2` x `D` x `N` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` embedding dimensions at every point (or edge/triangle).
+#'
+inv_svd_field_cpp <- function(svd_list) {
+    .Call('_tessera_inv_svd_field_cpp', PACKAGE = 'tessera', svd_list)
+}
+
+#' Solves the orthogonal procrustes problem
+#'
+#' Solves the orthogonal procrustes problem
+#'     R = argmin ||R*A - B||_F
+#' where R is an orthonormal matrix.
+#'
+#' @param A,B Input matrices with same dimensions.
+#'
+#' @returns The orthonormal matrix R that best maps A to B.
+#'
+procrustes_mat <- function(A, B) {
+    .Call('_tessera_procrustes_mat', PACKAGE = 'tessera', A, B)
+}
+
+#' Computes the procrustes inner product between two matrices
+#' 
+#' Solves the orthogonal procrustes problem
+#'     R = argmin ||R*A - B||_F
+#' where R is an orthonormal matrix.
+#' Then computes the frobenius inner product
+#'     <R*A, B> = <R, B*A^T>,
+#' which is maximized by R.
+#'
+#' @param A,B Input matrices with same dimensions.
+#'
+#' @returns The procrustes inner product <R*A, B> between A and B.
+#'
+procrustes_inner <- function(A, B) {
+    .Call('_tessera_procrustes_inner', PACKAGE = 'tessera', A, B)
+}
+
+#' Bilateral / anisotropic filtering of gradient field
+#' 
+#' Gradient fields are smoothed using bilateral filtering,
+#' in which the smoothed gradient of each edge is computed as
+#' the weighted average of the neighboring edges' gradients, considering
+#' both distance in space and also similarity in gradients.
+#' 
+#' @param from_pt,to_pt A pair of `E`-length vectors indicating
+#'   the start and end points of each edge (0-indexed).
+#' @param field A `2` x `D` x `E` array in column-major ordering
+#'   containing the spatial gradient in expression for each of
+#'   `D` latent variables at every edge.
+#' @param edges_svd A list with elements `u` (`2` x `2` x `E`), `s` (`2` x `E`), and
+#'   `v` (`D` x `2` x `E`) containing the left singular vectors, singular values,
+#'   and right singular vectors for each edge.
+#' @param coords A `N` x `2` matrix of cell coordinates.
+#' @param adj_idx A `N` x `N` sparse adjacency matrix in dgCMatrix format,
+#'   containing the mapping from cells to edges. In particular, `adj_idx@x`
+#'   should store the 1-indexed edge indices corresponding to each cell-cell pair.
+#'   The adjacency matrix is assumed to be symmetric and have zeros on the diagonal.
+#'   Importantly, note that the stored edge indices are 1-indexed (*not* 0-indexed here)
+#'   in order to avoid problems with R's sparse matrix representation.
+#' @param distance Method for computing distance score in weighted average.
+#'   See description for details. Defaults to `'euclidean'`.
+#' @param similarity Method for computing similarity score in weighted average.
+#'   See description for details. Defaults to `'euclidean'`.
+#' 
+#' @returns A `2` x `D` x `E` array in column-major ordering
+#'   containing the smoothed spatial gradient in expression for each of
+#'   `D` latent variables at every edge.
+#'
+smooth_field_edges_cpp <- function(from_pt, to_pt, field, edges_svd, coords, adj_idx, distance, similarity) {
+    .Call('_tessera_smooth_field_edges_cpp', PACKAGE = 'tessera', from_pt, to_pt, field, edges_svd, coords, adj_idx, distance, similarity)
+}
+
 #' Assigns a unique ID to each point with distinct X,Y coordinates
 #'
 #' @param X,Y A pair of numeric vectors with the coordinates for each point.

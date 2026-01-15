@@ -8,7 +8,8 @@ compute_gradients(
   dmt,
   smooth_distance = "none",
   smooth_similarity = "none",
-  smooth_iter = 1
+  smooth_iter = 1,
+  on_edges = FALSE
 )
 }
 \arguments{
