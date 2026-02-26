@@ -32,7 +32,7 @@ dmt_get_separatrices = function(dmt) {
 
 #' Set DMT scalar field values as the Frobenius norm of the total derivative
 #' 
-#' @inheritParams compute_gradients
+#' @inheritParams compute_field
 #' @param field A gradient field with the compressed representations `pts_svd`,
 #'   `tris_svd`, `edges_pts_svd`, and `edges_tris_svd`. Each of these
 #'   is a `N` x `6` matrix with the following columns for each location:

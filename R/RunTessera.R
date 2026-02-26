@@ -120,8 +120,7 @@ RunTessera.Seurat = function(
 #' Orchestrates four pipeline stages: (1) Delaunay mesh construction and
 #' pruning, (2) spatial gradient field estimation with optional bilateral
 #' smoothing, (3) Discrete Morse Theory segmentation, and (4) agglomerative
-#' tile merging. Returns a backward-compatible output matching
-#' [GetTiles.default()].
+#' tile merging.
 #'
 #' Internally calls [make_cells()], [make_mesh()], [compute_field()],
 #' [compute_morse()], [run_dmt()], and [make_tiles()].
@@ -242,7 +241,7 @@ RunTessera.default = function(
 			stop('group.by must be a column of meta_data')
 		} else if (!(group.by %in% colnames(meta_vars_include))) {
 			# NOTE: colnames(character_vector) == NULL, so this branch always
-			# fires, mirroring the same behaviour in GetTiles.default.
+			# fires when meta_vars_include is a plain character vector.
 			meta_vars_include = c(meta_vars_include, group.by)
 		}
 	}
@@ -355,7 +354,7 @@ RunTessera.default = function(
 			adj       = tiles$adj
 		)
 
-		# Set group labels, mirroring GetTiles.default
+		# Set group labels
 		stopifnot(all(dmt_compat$pts[[group.by]] == group))
 		aggs_compat$meta_data[[group.by]] = group
 		dmt_compat$pts[[group.by]]        = group

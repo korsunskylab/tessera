@@ -106,8 +106,7 @@ group.
 Orchestrates four pipeline stages: (1) Delaunay mesh construction and
 pruning, (2) spatial gradient field estimation with optional bilateral
 smoothing, (3) Discrete Morse Theory segmentation, and (4) agglomerative
-tile merging. Returns a backward-compatible output matching
-\code{\link[=GetTiles.default]{GetTiles.default()}}.
+tile merging.
 }
 \details{
 Internally calls \code{\link[=make_cells]{make_cells()}}, \code{\link[=make_mesh]{make_mesh()}}, \code{\link[=compute_field]{compute_field()}},

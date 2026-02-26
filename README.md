@@ -70,55 +70,27 @@ demonstrates using `tessera` in standalone mode on a single sample.
 
 The basic usage is as follows:
 ```R
-res = GetTiles(
+tiles = RunTessera(
     X = meta_data$X,         # Vector of cell spatial coordinates
     Y = meta_data$Y,         # Vector of cell spatial coordinates
     counts = counts,         # Gene-by-cell matrix of transcript counts
 
-    embeddings = embeddings, # (Optional) Cell-by-embedding matrix of pre-computed cell embeddings. If missing, embeddings are calculated using PCA.
     meta_data = meta_data,   # (Optional) Additional cell meta data
-    meta_vars_include = meta_vars_include, # (Optional) Cell meta data to include in output
-
     group.by = 'sample_id',  # (Optional) Name of meta_data column that provides sample IDs. If missing, treated as a single sample.
-
-    # Additional Tessera algorithm parameters
-    prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
-    max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
-    ...                      
-)
-dmt = res$dmt                # Mesh data structures with results from segmentation
-aggs = res$aggs              # Tiles resulting from DMT-based segmentation and agglomeration
-```
-
-### Seurat Objects (Multi-sample)
-Tessera can also be applied directly to a Seurat object containing single cells with spatial coordinates.
-The `GetTiles` function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples).
-By default, the output is a pair of Seurat objects: 1) a single-cell Seurat object updated with tile assignments for each cell, and 2) a Seurat object
-where each entry represents an individual Tessera tile.
-```R
-options(future.globals.maxSize= 4*1024^3)   # For larger datasets, the memory allowance may need to be increased for parallelization
-future::plan(future::multicore)             # Parallelize over multiple samples (if doing multi-sample analysis)
-res = GetTiles(
-    obj,        # Single-cell Seurat object
-    'spatial',  # Name of dimesional reduction where x/y coordinates are stored
-
-    embeddings = 'harmony',  # (Optional) Name of dimensional reduction where pre-computed single-cell embeddings are stored
-    group.by = 'sample_id',  # (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.
 
     # Additional Tessera algorithm parameters
     prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
     max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
     ...
 )
-obj = res$obj                # Seurat object of single-cells (with cell-to-tile mapping)
-tile_obj = res$tile_obj      # Seurat object of Tessera tiles
+tiles$meta_data              # One row per tile: centroid, npts, shape, area, perimeter
+tiles$counts                 # Genes x tiles sparse count matrix
+tiles$cell_ids               # Cell-to-tile mapping (ORIG_ID → tile_id)
 ```
 
-## Vignettes: 
+## Vignettes:
 (1) Quickstart (approx. runtime: <10 sec): `vignette("vignette_basic")`
-
-https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_basic.ipynb
 
 (2) Walkthrough (approx. runtime: <10 sec): `vignette("vignette_stepthrough")`
 
-https://github.com/korsunskylab/tessera/blob/main/vignettes/vignette_stepthrough.ipynb
+(3) Data structures reference: `vignette("vignette_data_structures")`
