@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jupyter-lab",
+      "runtimeExecutable": "/Users/ik936/miniconda3/envs/r_env/bin/jupyter",
+      "runtimeArgs": ["lab", "--port", "8888", "--no-browser", "--NotebookApp.token=''"],
+      "port": 8888
+    },
+    {
+      "name": "pkgdown-docs",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "--directory", "docs", "4321"],
+      "port": 4321
+    }
+  ]
+}
