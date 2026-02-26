@@ -33,3 +33,26 @@ data(tessera_warmup)
 	d = prune_graph(d)
 	add_exterior_triangles(d)
 })
+
+# ── Block 3 golden reference: field from old pipeline ─────────────────────────
+# PCA is run on PRUNED cells only, matching the old GetTiles.default pipeline.
+.test_mesh        = make_mesh(.test_cells)
+.test_pca_pruned  = do_pca(.test_counts[, .test_mesh$pts$ORIG_ID], npcs = 10)
+
+# cells object with embeddings aligned to the pruned mesh (nrow = nrow(mesh$pts))
+.test_cells_field = local({
+	cells            = .test_cells
+	cells$embeddings = list(pca = .test_pca_pruned$embeddings)
+	cells
+})
+
+# old-pipeline field output (compute_gradients + compress_gradients_svd)
+.test_field_old = local({
+	dmt            = .test_mesh_old
+	dmt$udv_cells  = list(embeddings = .test_pca_pruned$embeddings)
+	field = compute_gradients(dmt,
+		smooth_distance  = 'projected',
+		smooth_similarity = 'projected',
+		smooth_iter      = 1)
+	compress_gradients_svd(field)
+})
