@@ -56,3 +56,18 @@ data(tessera_warmup)
 		smooth_iter      = 1)
 	compress_gradients_svd(field)
 })
+
+# ── Block 4 golden reference: morse from old pipeline ─────────────────────────
+# data.table::copy prevents dmt_set_f from mutating .test_mesh_old slots
+.test_morse_old = local({
+	dmt = list(
+		pts   = data.table::copy(.test_mesh_old$pts),
+		tris  = data.table::copy(.test_mesh_old$tris),
+		edges = data.table::copy(.test_mesh_old$edges)
+	)
+	dmt       = dmt_set_f(dmt, .test_field_old)
+	dmt$prim  = do_primary_forest(dmt)
+	dmt$dual  = do_dual_forest(dmt)
+	dmt$e_sep = dmt_get_separatrices(dmt)
+	dmt
+})
