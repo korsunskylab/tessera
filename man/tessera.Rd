@@ -15,6 +15,7 @@ analysis to label and define tissue regions across samples.
 Useful links:
 \itemize{
   \item \url{https://github.com/korsunskylab/tessera}
+  \item \url{https://korsunskylab.github.io/tessera/}
   \item Report bugs at \url{https://github.com/korsunskylab/tessera/issues}
 }
 

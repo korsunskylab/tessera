@@ -35,6 +35,8 @@ agglomerative clustering phase.}
 agglomerative clustering phase.}
     \item{\code{alpha}}{Parameter for scoring transcriptional similarity between adjacent tiles during
 the agglomerative clustering phase. For \code{alpha}, 0.2 = conservative merging, 2 = liberal merging.}
+    \item{\code{future.globals.maxSize}}{Maximum allowed size (in bytes) of global variables that are exported to each parallel worker.
+Increase this value if you get an error about global object size. Default is 8*1024^3 (8 GB).}
     \item{\code{consolidate}}{Whether to consolidate results from multiple groups into a single collection of
 points and tiles (TRUE) or to return a list of separate results for each group (FALSE).}
     \item{\code{verbose}}{Whether to print progress messages for each stage of the segmentation pipeline.}
