@@ -23,3 +23,13 @@ data(tessera_warmup)
 # ── Block 1 golden reference: PCA embeddings ──────────────────────────────────
 .test_pca        = do_pca(.test_counts, npcs = 10)
 .test_embeddings = list(pca = .test_pca$embeddings)
+
+# Pre-built cells object reused across blocks (avoids re-running PCA each time)
+.test_cells = make_cells(.test_coords, .test_embeddings, .test_counts, .test_meta)
+
+# ── Block 2 golden reference: mesh from old pipeline ──────────────────────────
+.test_mesh_old = local({
+	d = init_data(.test_X, .test_Y, .test_counts)
+	d = prune_graph(d)
+	add_exterior_triangles(d)
+})
