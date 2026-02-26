@@ -68,21 +68,21 @@ Some coarse grained cell types are predefined here, to help interpret the tiles 
 table(meta_data$type)
 ```
 
-# Get Tiles
+# Run Tessera
 
-Run the Tessera algorithm to get tiles in one function. The result is returns in two structures: 
+Run the Tessera algorithm to get tiles in one function. The result is returned in two structures:
 
-1) dmt: cell-level information. 
-2) aggs: tile-level information. 
+1) dmt: cell-level information.
+2) aggs: tile-level information.
 
 The two are tied together through `dmt$pts$agg_id`
 
 ```{r}
-res = GetTiles(
-    X = meta_data$X, 
-    Y = meta_data$Y, 
-    counts = counts, 
-    meta_data = meta_data, 
+res = RunTessera(
+    X = meta_data$X,
+    Y = meta_data$Y,
+    counts = counts,
+    meta_data = meta_data,
     meta_vars_include = meta_vars_include,
 )
 dmt = res$dmt
