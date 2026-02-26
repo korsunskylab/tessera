@@ -279,11 +279,21 @@ dmt_init_tiles = function(dmt) {
         )
     ][]
     
-    aggs$meta_data$shape = trace_polygons(dmt, aggs)  
+    aggs$meta_data$shape = trace_polygons(dmt, aggs)
     aggs$meta_data[
         , `:=`(
-            area = sf::st_area(shape), 
-            perimeter = sf::st_length(sf::st_boundary(shape))
+            area = sf::st_area(shape),
+            # BUG: sf::st_length(sf::st_boundary(shape)) segfaults in sf 1.0.x when any
+            # shape is MULTIPOLYGON (C-level CPL_length null-pointer, not catchable by
+            # tryCatch alone).  For MULTIPOLYGON, fall back to coordinate-based perimeter.
+            perimeter = purrr::map_dbl(shape, function(s) tryCatch({
+                if (!inherits(s, "MULTIPOLYGON"))
+                    return(as.numeric(sf::st_length(sf::st_boundary(sf::st_sfc(s)))))
+                total = 0
+                for (poly in unclass(s))
+                    for (ring in poly) { dx = diff(ring[,1]); dy = diff(ring[,2]); total = total + sum(sqrt(dx^2 + dy^2)) }
+                total
+            }, error = function(e) NA_real_))
         )
     ]
     
