@@ -58,6 +58,7 @@ data(tessera_warmup)
 })
 
 # ── Block 4 golden reference: morse from old pipeline ─────────────────────────
+# (also used as the base for Block 5)
 # data.table::copy prevents dmt_set_f from mutating .test_mesh_old slots
 .test_morse_old = local({
 	dmt = list(
@@ -70,4 +71,27 @@ data(tessera_warmup)
 	dmt$dual  = do_dual_forest(dmt)
 	dmt$e_sep = dmt_get_separatrices(dmt)
 	dmt
+})
+
+# ── Block 5 golden reference: tile assignment from old separatrices ───────────
+# dmt_assign_tiles uses old igraph API (broken in igraph 2.x); build the
+# equivalent reference with the modern make_empty_graph + add_edges approach.
+.test_dmt_old = local({
+	n_pts    = nrow(.test_morse_old$pts)
+	n_edges  = nrow(.test_morse_old$edges)
+	e_keep   = setdiff(seq_len(n_edges), .test_morse_old$e_sep)
+	edge_vec = c(rbind(
+		.test_morse_old$edges$from_pt[e_keep],
+		.test_morse_old$edges$to_pt[e_keep]
+	))
+	g = igraph::make_empty_graph(n = n_pts, directed = FALSE)
+	if (length(edge_vec) > 0) g = igraph::add_edges(g, edge_vec)
+	list(agg_id = igraph::components(g)$membership)
+})
+
+# mesh with morse populated — reused in Block 5 tests to avoid recomputing
+.test_mesh_morse = local({
+	m        = .test_mesh
+	m$morse  = compute_morse(compute_field(.test_cells_field, .test_mesh), .test_mesh)
+	m
 })
