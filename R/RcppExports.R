@@ -16,6 +16,29 @@ scaleRows_dgc <- function(x, p, i, ncol, nrow, thresh) {
     .Call('_tessera_scaleRows_dgc', PACKAGE = 'tessera', x, p, i, ncol, nrow, thresh)
 }
 
+#' Updates information for tiles after merging two tiles
+#'
+#' Uses the information from the shared edge to update the merged PCs,
+#' area, number of points, and perimeter. Mutates the `e_merge_from`th value
+#' within the `V_pcs`, `V_npts`, `V_perimeter`, `V_area` input data structures.
+#'
+NULL
+
+#' Updates information for boundaries after merging two tiles
+#'
+#' For every boundary that exists between the new merged tile and other tiles,
+#' the following values must be updated:
+#'  * `E_pcs_merge[e_update,]`: PCs that would result from future merging.
+#'  * `E_perimeter_merge[e_update]`: Perimeters that would result from future merging.
+#'  * `E_w[e_update]`: Expression similarity score.
+#'  * `E_score_size[e_update]`: Size of merged tile score.
+#'  * `dC[e_update]`: Delta shape compactness score for merged tile.
+#'  * `E_dscore[e_update]`: Overall merging score (product of `w`, `score_size`, `dC`)
+#' Note that `E_npts` and `E_area` should already have been previously updated.
+#'
+#' @param e_update Edges that should be updated.
+NULL
+
 st_mats_perimeter <- function(Xvec) {
     .Call('_tessera_st_mats_perimeter', PACKAGE = 'tessera', Xvec)
 }
@@ -49,33 +72,6 @@ findDuplicates <- function(input) {
     .Call('_tessera_findDuplicates', PACKAGE = 'tessera', input)
 }
 
-#' Updates information for tiles after merging two tiles
-#'
-#' Uses the information from the shared edge to update the merged PCs,
-#' area, number of points, and perimeter. Mutates the `e_merge_from`th value
-#' within the `V_pcs`, `V_npts`, `V_perimeter`, `V_area` input data structures.
-#'
-update_V_cpp <- function(V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode) {
-    invisible(.Call('_tessera_update_V_cpp', PACKAGE = 'tessera', V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode))
-}
-
-#' Updates information for boundaries after merging two tiles
-#'
-#' For every boundary that exists between the new merged tile and other tiles,
-#' the following values must be updated:
-#'  * `E_pcs_merge[e_update,]`: PCs that would result from future merging.
-#'  * `E_perimeter_merge[e_update]`: Perimeters that would result from future merging.
-#'  * `E_w[e_update]`: Expression similarity score.
-#'  * `E_score_size[e_update]`: Size of merged tile score.
-#'  * `dC[e_update]`: Delta shape compactness score for merged tile.
-#'  * `E_dscore[e_update]`: Overall merging score (product of `w`, `score_size`, `dC`)
-#' Note that `E_npts` and `E_area` should already have been previously updated.
-#'
-#' @param e_update Edges that should be updated.
-update_E_cpp <- function(V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts) {
-    invisible(.Call('_tessera_update_E_cpp', PACKAGE = 'tessera', V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts))
-}
-
 #' Merges tiles using single-linkage agglomerative clustering
 #'
 #' Note that this function mutates many of the inputs to keep
@@ -83,22 +79,23 @@ update_E_cpp <- function(V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npt
 #' each successive merge. Every merge of adjacent tiles has an
 #' associated score (higher means merging is more favorable).
 #' Merging is conducted greedily, one step of a time, updating
-#' the score associated with pair of tiles at each step. 
+#' the score associated with pair of tiles at each step.
 #'
-#' @param V_pcs,V_area,V_perimeter,V_npts Metadata associated with each each tile.
-#'   (Updated)
-#' @param E_from,E_to Length `num_edges` vectors associated with each pair of
-#'   adjacent tiles. Specifies the two tiles that each border (0-indexed). (Updated)
-#' @param E_npts,E_area,E_edge_length,E_pcs_merge Metadata associated with each pair of
-#'   adjacent tiles. (Updated)
-#' @param E_w,E_perimeter_merge,E_score_size,E_dscore Scores associated with merging
-#'   each pair of adjacent tiles. (Updated)
+#' @param aggs A named R list produced by [init_scores()] containing:
+#'   `pcs`, `meta_data` (with `area`, `perimeter`, `npts`),
+#'   `edges` (with `from`, `to`, `npts`, `area`, `edge_length`, `w`,
+#'   `perimeter_merge`, `score_size`, `dscore`),
+#'   `pcs_merged`, `d_mu`, `d_sig`.
+#' @param iter_max Maximum number of merge iterations.
+#' @param agg_mode Aggregation scoring mode (1, 2, or 3).
+#' @param dscore_thresh Stop merging when best score falls below this threshold.
+#' @param min_npts,max_npts Minimum / maximum tile size constraints.
 #'
-#' @returns A list of `orig_num_tiles` vectors, disjoint sets specifying the IDs for which
-#'   of the original tiles have been merged together. Some vectors will have length 0.
+#' @returns A named list with `memory` (disjoint-set merge history) and
+#'   updated copies of all tile and edge data structures.
 #'
-merge_aggs_cpp <- function(V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts) {
-    .Call('_tessera_merge_aggs_cpp', PACKAGE = 'tessera', V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
+merge_aggs_cpp <- function(aggs, iter_max, agg_mode, dscore_thresh, min_npts, max_npts) {
+    .Call('_tessera_merge_aggs_cpp', PACKAGE = 'tessera', aggs, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
 }
 
 foo_triplets_edges <- function(triplets, edges) {
@@ -189,30 +186,31 @@ prune_e_sep <- function(edges, ntris, is_tri_external, e_sep) {
 }
 
 #' Bilateral / anisotropic filtering of gradient field
-#' 
+#'
 #' Gradient fields are smoothed using bilateral filtering,
 #' in which the smoothed gradient of each point is computed as
 #' the weighted average of the neighbors' gradients, considering
 #' both distance in space and also similarity in gradients.
-#' 
+#'
+#' @param pts A data.frame or data.table with columns `X` and `Y`
+#'   containing the spatial coordinates of each cell.
 #' @param pvec,adj_i,adj_p A `N` x `N` sparse adjacency matrix
 #'   in dgCMatrix format: `pvec = diff(adj@p)`, `adj_i = adj@i`,
 #'   and `adj_p = adj@p`
 #' @param field A `2` x `D` x `N` array in column-major ordering
 #'   containing the spatial gradient in expression for each of
 #'   `D` latent variables at every point in space.
-#' @param coords A `N` x `2` matrix of cell coordinates.
 #' @param distance Method for computing distance score in weighted average.
-#'   See description for details. Defaults to `'euclidean'`.
+#'   One of `"euclidean"`, `"projected"`, or `"constant"`.
 #' @param similarity Method for computing similarity score in weighted average.
-#'   See description for details. Defaults to `'euclidean'`.
-#' 
+#'   One of `"euclidean"`, `"projected"`, or `"constant"`.
+#'
 #' @returns A `2` x `D` x `N` array in column-major ordering
 #'   containing the smoothed spatial gradient in expression for each of
 #'   `D` latent variables at every point in space.
-#' 
-smooth_field_cpp <- function(pvec, adj_i, adj_p, field, coords, distance, similarity) {
-    .Call('_tessera_smooth_field_cpp', PACKAGE = 'tessera', pvec, adj_i, adj_p, field, coords, distance, similarity)
+#'
+smooth_field_cpp <- function(pts, pvec, adj_i, adj_p, field, distance, similarity) {
+    .Call('_tessera_smooth_field_cpp', PACKAGE = 'tessera', pts, pvec, adj_i, adj_p, field, distance, similarity)
 }
 
 #' Compress a gradient field using SVD
@@ -245,7 +243,8 @@ compress_field_cpp <- function(field) {
 #' The gradient is then the average gradient in expression of each
 #' embedding dimension between the index cell and its neighbors.
 #'
-#' @param coords A `N` x `2` matrix of cell coordinates.
+#' @param pts A data.frame or data.table with columns `X` and `Y`
+#'   containing the spatial coordinates of each cell.
 #' @param embeddings A `N` x `D` matrix of cell embeddings.
 #' @param adj_i,adj_p A `N` x `N` sparse adjacency matrix
 #'   in dgCMatrix format.
@@ -254,8 +253,8 @@ compress_field_cpp <- function(field) {
 #'   containing the spatial gradient in expression for each of
 #'   `D` embedding dimensions at every point in space.
 #'
-estimate_field_cpp <- function(coords, embeddings, adj_i, adj_p) {
-    .Call('_tessera_estimate_field_cpp', PACKAGE = 'tessera', coords, embeddings, adj_i, adj_p)
+estimate_field_cpp <- function(pts, embeddings, adj_i, adj_p) {
+    .Call('_tessera_estimate_field_cpp', PACKAGE = 'tessera', pts, embeddings, adj_i, adj_p)
 }
 
 #' Assigns a unique ID to each point with distinct X,Y coordinates

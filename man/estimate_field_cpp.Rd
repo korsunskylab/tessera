@@ -4,10 +4,11 @@
 \alias{estimate_field_cpp}
 \title{Compute a spatial gradient field at each point (cell)}
 \usage{
-estimate_field_cpp(coords, embeddings, adj_i, adj_p)
+estimate_field_cpp(pts, embeddings, adj_i, adj_p)
 }
 \arguments{
-\item{coords}{A \code{N} x \code{2} matrix of cell coordinates.}
+\item{pts}{A data.frame or data.table with columns \code{X} and \code{Y}
+containing the spatial coordinates of each cell.}
 
 \item{embeddings}{A \code{N} x \code{D} matrix of cell embeddings.}
 

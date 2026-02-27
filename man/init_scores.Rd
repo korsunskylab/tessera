@@ -4,12 +4,14 @@
 \alias{init_scores}
 \title{Initialize tile scores for aggregation}
 \usage{
-init_scores(aggs, agg_mode, ...)
+init_scores(aggs, agg_mode, seed = 1L, ...)
 }
 \arguments{
 \item{aggs}{A tile data structure.}
 
 \item{agg_mode}{Method to use to calculate aggregation scores (1, 2, or 3).}
+
+\item{seed}{Random seed for reproducible GMM fitting (modes 2 and 3). Defaults to \code{1}.}
 
 \item{...}{Additional parameters for different modes:
 \enumerate{

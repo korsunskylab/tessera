@@ -49,40 +49,15 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
     } else {
         diag(adj) = 0
     }
-
-    ## method to compute distance between points 
-    if (distance == "euclidean") {
-        ## Euclidean distance
-        dist_mode = 0
-    } else if (distance == "projected") {
-        ## Projected distance (anisotropic)
-        dist_mode = 1
-    } else if (distance == "constant") {
-        dist_mode = 2
-    } else {
-        stop("Invalid distance method")
-    }
-
-    ## compute similarity between fields
-    if (similarity == "euclidean") {
-        ## Euclidean distance
-        sim_mode = 0
-    } else if (similarity == "projected") {
-        sim_mode = 1
-    } else if (similarity == "constant") {
-        sim_mode = 2
-    } else {
-        stop("Invalid similarity method")
-    }
-    
+    pts = list(X = coords[, 1], Y = coords[, 2])
     res = smooth_field_cpp(
-        pvec = diff(adj@p), 
-        adj_i = adj@i, ## keep it 0-indexed
+        pts = pts,
+        pvec = diff(adj@p),
+        adj_i = adj@i,
         adj_p = adj@p,
         field = field,
-        coords = coords,
-        distance = dist_mode,
-        similarity = sim_mode
+        distance = distance,
+        similarity = similarity
     )
     return(res)
 }
@@ -252,11 +227,12 @@ compress_gradients_svd = function(field) {
 #'
 #' @export
 estimate_field = function(coords, adj, embeddings) {
-    diag(adj) = 0 ## cannot include self by definition 
+    diag(adj) = 0 ## cannot include self by definition
+    pts = list(X = coords[, 1], Y = coords[, 2])
     res = estimate_field_cpp(
-        coords = coords, 
-        embeddings = embeddings, 
-        adj_i = adj@i, 
+        pts = pts,
+        embeddings = embeddings,
+        adj_i = adj@i,
         adj_p = adj@p
     )
     return(res)

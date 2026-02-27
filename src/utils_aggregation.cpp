@@ -126,7 +126,6 @@ arma::uvec findDuplicates(const arma::uvec& input) {
 //' area, number of points, and perimeter. Mutates the `e_merge_from`th value
 //' within the `V_pcs`, `V_npts`, `V_perimeter`, `V_area` input data structures.
 //'
-// [[Rcpp::export]]
 void update_V_cpp(
     arma::mat & V_pcs, 
     arma::vec & V_npts,
@@ -202,7 +201,6 @@ void update_V_cpp(
 //' Note that `E_npts` and `E_area` should already have been previously updated.
 //'
 //' @param e_update Edges that should be updated.
-// [[Rcpp::export]]
 void update_E_cpp(
     arma::mat & V_pcs, 
     arma::vec & V_perimeter,
@@ -340,49 +338,53 @@ void update_E_cpp(
 //' each successive merge. Every merge of adjacent tiles has an
 //' associated score (higher means merging is more favorable).
 //' Merging is conducted greedily, one step of a time, updating
-//' the score associated with pair of tiles at each step. 
+//' the score associated with pair of tiles at each step.
 //'
-//' @param V_pcs,V_area,V_perimeter,V_npts Metadata associated with each each tile.
-//'   (Updated)
-//' @param E_from,E_to Length `num_edges` vectors associated with each pair of
-//'   adjacent tiles. Specifies the two tiles that each border (0-indexed). (Updated)
-//' @param E_npts,E_area,E_edge_length,E_pcs_merge Metadata associated with each pair of
-//'   adjacent tiles. (Updated)
-//' @param E_w,E_perimeter_merge,E_score_size,E_dscore Scores associated with merging
-//'   each pair of adjacent tiles. (Updated)
+//' @param aggs A named R list produced by [init_scores()] containing:
+//'   `pcs`, `meta_data` (with `area`, `perimeter`, `npts`),
+//'   `edges` (with `from`, `to`, `npts`, `area`, `edge_length`, `w`,
+//'   `perimeter_merge`, `score_size`, `dscore`),
+//'   `pcs_merged`, `d_mu`, `d_sig`.
+//' @param iter_max Maximum number of merge iterations.
+//' @param agg_mode Aggregation scoring mode (1, 2, or 3).
+//' @param dscore_thresh Stop merging when best score falls below this threshold.
+//' @param min_npts,max_npts Minimum / maximum tile size constraints.
 //'
-//' @returns A list of `orig_num_tiles` vectors, disjoint sets specifying the IDs for which
-//'   of the original tiles have been merged together. Some vectors will have length 0.
+//' @returns A named list with `memory` (disjoint-set merge history) and
+//'   updated copies of all tile and edge data structures.
 //'
 // [[Rcpp::export]]
-std::vector<std::list<unsigned> > merge_aggs_cpp(
-    arma::mat & V_pcs, 
-    arma::vec & V_area,
-    arma::vec & V_perimeter,
-    arma::vec & V_npts,
-    
-    
-    arma::uvec & E_from, 
-    arma::uvec & E_to, 
-    arma::vec & E_npts, 
-    arma::vec & E_area, 
-    arma::vec & E_edge_length, 
-    arma::mat & E_pcs_merge, 
-    
-    arma::vec & E_w, 
-    arma::vec & E_perimeter_merge, 
-    arma::vec & E_score_size,
-    
-    arma::vec & E_dscore,
-    
-    double d_mu, 
-    double d_sig, 
+Rcpp::List merge_aggs_cpp(
+    const List aggs,
     unsigned iter_max,
     int agg_mode,
     double dscore_thresh,
-    double min_npts, 
+    double min_npts,
     double max_npts
 ) {
+    // Extract vertex (tile) data
+    arma::mat V_pcs         = as<arma::mat>(aggs["pcs"]);
+    const List meta_data    = as<List>(aggs["meta_data"]);
+    arma::vec V_area        = as<arma::vec>(meta_data["area"]);
+    arma::vec V_perimeter   = as<arma::vec>(meta_data["perimeter"]);
+    arma::vec V_npts        = as<arma::vec>(meta_data["npts"]);
+
+    // Extract edge data (from/to are 1-indexed in R; convert to 0-indexed)
+    const List edges           = as<List>(aggs["edges"]);
+    arma::uvec E_from          = as<arma::uvec>(edges["from"]) - 1;
+    arma::uvec E_to            = as<arma::uvec>(edges["to"])   - 1;
+    arma::vec  E_npts          = as<arma::vec>(edges["npts"]);
+    arma::vec  E_area          = as<arma::vec>(edges["area"]);
+    arma::vec  E_edge_length   = as<arma::vec>(edges["edge_length"]);
+    arma::mat  E_pcs_merge     = as<arma::mat>(aggs["pcs_merged"]);
+    arma::vec  E_w             = as<arma::vec>(edges["w"]);
+    arma::vec  E_perimeter_merge = as<arma::vec>(edges["perimeter_merge"]);
+    arma::vec  E_score_size    = as<arma::vec>(edges["score_size"]);
+    arma::vec  E_dscore        = as<arma::vec>(edges["dscore"]);
+
+    double d_mu = aggs.containsElementNamed("d_mu") ? as<double>(aggs["d_mu"]) : 0.0;
+    double d_sig = aggs.containsElementNamed("d_sig") ? as<double>(aggs["d_sig"]) : 1.0;
+
     // // Load GMM 
     // arma::gmm_diag gmm; 
     // gmm.load(fname_gmm); 
@@ -544,7 +546,23 @@ std::vector<std::list<unsigned> > merge_aggs_cpp(
 
         
     }
-    return memory; 
+    return Rcpp::List::create(
+        Named("memory")            = memory,
+        Named("V_pcs")             = V_pcs,
+        Named("V_area")            = V_area,
+        Named("V_perimeter")       = V_perimeter,
+        Named("V_npts")            = V_npts,
+        Named("E_from")            = E_from + 1,  // back to 1-indexed
+        Named("E_to")              = E_to   + 1,
+        Named("E_npts")            = E_npts,
+        Named("E_area")            = E_area,
+        Named("E_edge_length")     = E_edge_length,
+        Named("E_pcs_merge")       = E_pcs_merge,
+        Named("E_w")               = E_w,
+        Named("E_perimeter_merge") = E_perimeter_merge,
+        Named("E_score_size")      = E_score_size,
+        Named("E_dscore")          = E_dscore
+    );
 }
 
 

@@ -86,85 +86,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_V_cpp
-void update_V_cpp(arma::mat& V_pcs, arma::vec& V_npts, arma::vec& V_perimeter, arma::vec& V_area, unsigned e_merge_from, unsigned e_merge_to, double e_merge_edge_length, double e_merge_area, double e_merge_npts, const arma::rowvec& e_merge_pcs, int agg_mode);
-RcppExport SEXP _tessera_update_V_cpp(SEXP V_pcsSEXP, SEXP V_nptsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP e_merge_fromSEXP, SEXP e_merge_toSEXP, SEXP e_merge_edge_lengthSEXP, SEXP e_merge_areaSEXP, SEXP e_merge_nptsSEXP, SEXP e_merge_pcsSEXP, SEXP agg_modeSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type V_pcs(V_pcsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_npts(V_nptsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_perimeter(V_perimeterSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_area(V_areaSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type e_merge_from(e_merge_fromSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type e_merge_to(e_merge_toSEXP);
-    Rcpp::traits::input_parameter< double >::type e_merge_edge_length(e_merge_edge_lengthSEXP);
-    Rcpp::traits::input_parameter< double >::type e_merge_area(e_merge_areaSEXP);
-    Rcpp::traits::input_parameter< double >::type e_merge_npts(e_merge_nptsSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type e_merge_pcs(e_merge_pcsSEXP);
-    Rcpp::traits::input_parameter< int >::type agg_mode(agg_modeSEXP);
-    update_V_cpp(V_pcs, V_npts, V_perimeter, V_area, e_merge_from, e_merge_to, e_merge_edge_length, e_merge_area, e_merge_npts, e_merge_pcs, agg_mode);
-    return R_NilValue;
-END_RCPP
-}
-// update_E_cpp
-void update_E_cpp(arma::mat& V_pcs, arma::vec& V_perimeter, arma::vec& V_area, arma::vec& V_npts, arma::uvec& E_from, arma::uvec& E_to, arma::vec& E_npts, arma::vec& E_area, arma::vec& E_edge_length, arma::mat& E_pcs_merge, arma::vec& E_w, arma::vec& E_perimeter_merge, arma::vec& E_score_size, arma::vec& E_dscore, arma::uvec& e_update, std::vector<std::list<unsigned> >& V_to_E_from, std::vector<std::list<unsigned> >& V_to_E_to, double d_mu, double d_sig, int agg_mode, double min_npts, double max_npts);
-RcppExport SEXP _tessera_update_E_cpp(SEXP V_pcsSEXP, SEXP V_perimeterSEXP, SEXP V_areaSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP e_updateSEXP, SEXP V_to_E_fromSEXP, SEXP V_to_E_toSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP agg_modeSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type V_pcs(V_pcsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_perimeter(V_perimeterSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_area(V_areaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_npts(V_nptsSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type E_from(E_fromSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type E_to(E_toSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_npts(E_nptsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_area(E_areaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_edge_length(E_edge_lengthSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type E_pcs_merge(E_pcs_mergeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_w(E_wSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_perimeter_merge(E_perimeter_mergeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_score_size(E_score_sizeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_dscore(E_dscoreSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type e_update(e_updateSEXP);
-    Rcpp::traits::input_parameter< std::vector<std::list<unsigned> >& >::type V_to_E_from(V_to_E_fromSEXP);
-    Rcpp::traits::input_parameter< std::vector<std::list<unsigned> >& >::type V_to_E_to(V_to_E_toSEXP);
-    Rcpp::traits::input_parameter< double >::type d_mu(d_muSEXP);
-    Rcpp::traits::input_parameter< double >::type d_sig(d_sigSEXP);
-    Rcpp::traits::input_parameter< int >::type agg_mode(agg_modeSEXP);
-    Rcpp::traits::input_parameter< double >::type min_npts(min_nptsSEXP);
-    Rcpp::traits::input_parameter< double >::type max_npts(max_nptsSEXP);
-    update_E_cpp(V_pcs, V_perimeter, V_area, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, e_update, V_to_E_from, V_to_E_to, d_mu, d_sig, agg_mode, min_npts, max_npts);
-    return R_NilValue;
-END_RCPP
-}
 // merge_aggs_cpp
-std::vector<std::list<unsigned> > merge_aggs_cpp(arma::mat& V_pcs, arma::vec& V_area, arma::vec& V_perimeter, arma::vec& V_npts, arma::uvec& E_from, arma::uvec& E_to, arma::vec& E_npts, arma::vec& E_area, arma::vec& E_edge_length, arma::mat& E_pcs_merge, arma::vec& E_w, arma::vec& E_perimeter_merge, arma::vec& E_score_size, arma::vec& E_dscore, double d_mu, double d_sig, unsigned iter_max, int agg_mode, double dscore_thresh, double min_npts, double max_npts);
-RcppExport SEXP _tessera_merge_aggs_cpp(SEXP V_pcsSEXP, SEXP V_areaSEXP, SEXP V_perimeterSEXP, SEXP V_nptsSEXP, SEXP E_fromSEXP, SEXP E_toSEXP, SEXP E_nptsSEXP, SEXP E_areaSEXP, SEXP E_edge_lengthSEXP, SEXP E_pcs_mergeSEXP, SEXP E_wSEXP, SEXP E_perimeter_mergeSEXP, SEXP E_score_sizeSEXP, SEXP E_dscoreSEXP, SEXP d_muSEXP, SEXP d_sigSEXP, SEXP iter_maxSEXP, SEXP agg_modeSEXP, SEXP dscore_threshSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
+Rcpp::List merge_aggs_cpp(const List aggs, unsigned iter_max, int agg_mode, double dscore_thresh, double min_npts, double max_npts);
+RcppExport SEXP _tessera_merge_aggs_cpp(SEXP aggsSEXP, SEXP iter_maxSEXP, SEXP agg_modeSEXP, SEXP dscore_threshSEXP, SEXP min_nptsSEXP, SEXP max_nptsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type V_pcs(V_pcsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_area(V_areaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_perimeter(V_perimeterSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type V_npts(V_nptsSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type E_from(E_fromSEXP);
-    Rcpp::traits::input_parameter< arma::uvec& >::type E_to(E_toSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_npts(E_nptsSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_area(E_areaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_edge_length(E_edge_lengthSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type E_pcs_merge(E_pcs_mergeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_w(E_wSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_perimeter_merge(E_perimeter_mergeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_score_size(E_score_sizeSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type E_dscore(E_dscoreSEXP);
-    Rcpp::traits::input_parameter< double >::type d_mu(d_muSEXP);
-    Rcpp::traits::input_parameter< double >::type d_sig(d_sigSEXP);
+    Rcpp::traits::input_parameter< const List >::type aggs(aggsSEXP);
     Rcpp::traits::input_parameter< unsigned >::type iter_max(iter_maxSEXP);
     Rcpp::traits::input_parameter< int >::type agg_mode(agg_modeSEXP);
     Rcpp::traits::input_parameter< double >::type dscore_thresh(dscore_threshSEXP);
     Rcpp::traits::input_parameter< double >::type min_npts(min_nptsSEXP);
     Rcpp::traits::input_parameter< double >::type max_npts(max_nptsSEXP);
-    rcpp_result_gen = Rcpp::wrap(merge_aggs_cpp(V_pcs, V_area, V_perimeter, V_npts, E_from, E_to, E_npts, E_area, E_edge_length, E_pcs_merge, E_w, E_perimeter_merge, E_score_size, E_dscore, d_mu, d_sig, iter_max, agg_mode, dscore_thresh, min_npts, max_npts));
+    rcpp_result_gen = Rcpp::wrap(merge_aggs_cpp(aggs, iter_max, agg_mode, dscore_thresh, min_npts, max_npts));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -252,19 +186,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // smooth_field_cpp
-arma::cube smooth_field_cpp(arma::uvec& pvec, arma::uvec& adj_i, arma::uvec& adj_p, arma::cube& field, arma::mat& coords, unsigned distance, unsigned similarity);
-RcppExport SEXP _tessera_smooth_field_cpp(SEXP pvecSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP, SEXP fieldSEXP, SEXP coordsSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
+arma::cube smooth_field_cpp(const List pts, arma::uvec& pvec, arma::uvec& adj_i, arma::uvec& adj_p, arma::cube& field, std::string distance, std::string similarity);
+RcppExport SEXP _tessera_smooth_field_cpp(SEXP ptsSEXP, SEXP pvecSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP, SEXP fieldSEXP, SEXP distanceSEXP, SEXP similaritySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List >::type pts(ptsSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type pvec(pvecSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type adj_i(adj_iSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type adj_p(adj_pSEXP);
     Rcpp::traits::input_parameter< arma::cube& >::type field(fieldSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type coords(coordsSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type distance(distanceSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type similarity(similaritySEXP);
-    rcpp_result_gen = Rcpp::wrap(smooth_field_cpp(pvec, adj_i, adj_p, field, coords, distance, similarity));
+    Rcpp::traits::input_parameter< std::string >::type distance(distanceSEXP);
+    Rcpp::traits::input_parameter< std::string >::type similarity(similaritySEXP);
+    rcpp_result_gen = Rcpp::wrap(smooth_field_cpp(pts, pvec, adj_i, adj_p, field, distance, similarity));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -280,16 +214,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // estimate_field_cpp
-arma::cube estimate_field_cpp(arma::mat& coords, arma::mat& embeddings, arma::uvec& adj_i, arma::uvec& adj_p);
-RcppExport SEXP _tessera_estimate_field_cpp(SEXP coordsSEXP, SEXP embeddingsSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP) {
+arma::cube estimate_field_cpp(const List pts, arma::mat& embeddings, arma::uvec& adj_i, arma::uvec& adj_p);
+RcppExport SEXP _tessera_estimate_field_cpp(SEXP ptsSEXP, SEXP embeddingsSEXP, SEXP adj_iSEXP, SEXP adj_pSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< const List >::type pts(ptsSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type embeddings(embeddingsSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type adj_i(adj_iSEXP);
     Rcpp::traits::input_parameter< arma::uvec& >::type adj_p(adj_pSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimate_field_cpp(coords, embeddings, adj_i, adj_p));
+    rcpp_result_gen = Rcpp::wrap(estimate_field_cpp(pts, embeddings, adj_i, adj_p));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -437,9 +371,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tessera_is_in_list", (DL_FUNC) &_tessera_is_in_list, 2},
     {"_tessera_mergeListsToArmaUVec", (DL_FUNC) &_tessera_mergeListsToArmaUVec, 2},
     {"_tessera_findDuplicates", (DL_FUNC) &_tessera_findDuplicates, 1},
-    {"_tessera_update_V_cpp", (DL_FUNC) &_tessera_update_V_cpp, 11},
-    {"_tessera_update_E_cpp", (DL_FUNC) &_tessera_update_E_cpp, 22},
-    {"_tessera_merge_aggs_cpp", (DL_FUNC) &_tessera_merge_aggs_cpp, 21},
+    {"_tessera_merge_aggs_cpp", (DL_FUNC) &_tessera_merge_aggs_cpp, 6},
     {"_tessera_foo_triplets_edges", (DL_FUNC) &_tessera_foo_triplets_edges, 2},
     {"_tessera_do_dmt_forest_cpp", (DL_FUNC) &_tessera_do_dmt_forest_cpp, 4},
     {"_tessera_trace_back_cpp", (DL_FUNC) &_tessera_trace_back_cpp, 4},
