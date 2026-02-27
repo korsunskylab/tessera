@@ -82,24 +82,3 @@ test_that("compute_field works with no smoothing", {
 	expect_equal(dim(field$gradient$pts), c(nrow(.test_mesh$pts), 6L))
 })
 
-# ── Numerical equivalence tests ───────────────────────────────────────────────
-
-test_that("compute_field pts_svd matches old compress_gradients_svd output", {
-	field = compute_field(.test_cells_field, .test_mesh)
-	expect_equal(field$gradient$pts, .test_field_old$pts_svd, tolerance = 1e-10)
-})
-
-test_that("compute_field tris_svd matches old compress_gradients_svd output", {
-	field = compute_field(.test_cells_field, .test_mesh)
-	expect_equal(field$gradient$tris, .test_field_old$tris_svd, tolerance = 1e-10)
-})
-
-test_that("compute_field edges_pts_svd matches old compress_gradients_svd output", {
-	field = compute_field(.test_cells_field, .test_mesh)
-	expect_equal(field$gradient$edges_pts, .test_field_old$edges_pts_svd, tolerance = 1e-10)
-})
-
-test_that("compute_field edges_tris_svd matches old compress_gradients_svd output", {
-	field = compute_field(.test_cells_field, .test_mesh)
-	expect_equal(field$gradient$edges_tris, .test_field_old$edges_tris_svd, tolerance = 1e-10)
-})

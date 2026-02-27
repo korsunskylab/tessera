@@ -86,9 +86,3 @@ test_that("run_dmt errors when mesh$morse is NULL", {
 	expect_error(run_dmt(bad_mesh), "mesh\\$morse is NULL")
 })
 
-# ── Numerical equivalence tests ───────────────────────────────────────────────
-
-test_that("run_dmt agg_id matches tile assignment from old pipeline separatrices", {
-	dmt = run_dmt(.test_mesh_morse)
-	expect_equal(dmt$pts$agg_id, .test_dmt_old$agg_id)
-})

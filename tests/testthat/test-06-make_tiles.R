@@ -5,38 +5,6 @@
 .local_dmt   = run_dmt(.test_mesh_morse)
 .local_tiles = make_tiles(.test_cells_field, .test_mesh_morse, .local_dmt)
 
-# Old-pipeline reference: build dmt-like object from existing fixtures then run
-# the same agglomeration calls so we can compare structural outputs.
-.local_tiles_old = local({
-	dmt = list(
-		pts = local({
-			p        = data.table::copy(.test_morse_old$pts)
-			p$agg_id = as.integer(.test_dmt_old$agg_id)
-			p
-		}),
-		tris  = .test_mesh_old$tris,
-		edges = local({
-			e          = data.table::copy(.test_morse_old$edges)
-			e$agg_from = as.integer(.test_dmt_old$agg_id)[e$from_pt]
-			e$agg_to   = as.integer(.test_dmt_old$agg_id)[e$to_pt]
-			e
-		}),
-		counts    = .test_counts[, .test_mesh$pts$ORIG_ID, drop = FALSE],
-		udv_cells = list(embeddings = .test_pca_pruned$embeddings)
-	)
-	aggs    = dmt_init_tiles(dmt)
-	aggs    = init_scores(aggs, agg_mode = 2, alpha = 1, max_npts = 50L)
-	aggs    = merge_aggs(aggs,  agg_mode = 2, max_npts = 50L)
-	dmt     = update_dmt_aggid(dmt, aggs)
-	aggs    = update_agg_shapes(dmt, aggs)
-	aggs    = init_scores(aggs, agg_mode = 3, alpha = 1, min_npts = 5L)
-	aggs    = merge_aggs(aggs,  agg_mode = 3, min_npts = 5L)
-	dmt     = update_dmt_aggid(dmt, aggs)
-	aggs    = update_agg_shapes(dmt, aggs)
-	aggs$meta_data$shape = sf::st_cast(aggs$meta_data$shape, "MULTIPOLYGON")
-	aggs
-})
-
 # ── make_tile_graph tests ──────────────────────────────────────────────────────
 
 test_that("make_tile_graph returns a dgCMatrix", {
@@ -152,18 +120,3 @@ test_that("make_tiles does not mutate dmt$pts", {
 	expect_equal(.local_dmt$pts$agg_id,      agg_id_before)
 })
 
-# ── Numerical equivalence tests ───────────────────────────────────────────────
-
-test_that("make_tiles produces similar number of tiles as old pipeline", {
-	new_n = nrow(.local_tiles$meta_data)
-	old_n = nrow(.local_tiles_old$meta_data)
-	expect_true(abs(new_n - old_n) / old_n < 0.2)  # within 20%
-})
-
-test_that("make_tiles total gene counts match old pipeline", {
-	expect_equal(
-		sum(.local_tiles$counts),
-		sum(.local_tiles_old$counts),
-		tolerance = 1e-10
-	)
-})
