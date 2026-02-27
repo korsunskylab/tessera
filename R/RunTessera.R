@@ -304,10 +304,14 @@ RunTessera.default = function(
 		mesh$morse = compute_morse(field, mesh)
 		dmt_run    = run_dmt(mesh)
 
-		## ── STEP 3: AGGREGATION ───────────────────────────────────────────────
-		if (verbose) message('STEP 3: AGGREGATION')
-		tiles = make_tiles(
-			cells, mesh, dmt_run,
+		## ── STEP 3: TILE EXTRACTION ──────────────────────────────────────────
+		if (verbose) message('STEP 3: TILE EXTRACTION')
+		tiles_init = make_tiles(cells, mesh, dmt_run)
+
+		## ── STEP 4: TILE MERGING ─────────────────────────────────────────────
+		if (verbose) message('STEP 4: TILE MERGING')
+		tiles = merge_tiles(
+			tiles_init,
 			list(alpha = alpha, max_npts = max_npts, min_npts = min_npts)
 		)
 

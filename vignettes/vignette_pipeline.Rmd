@@ -26,7 +26,8 @@ make_mesh()     →  mesh
 compute_field() →  field
 compute_morse() →  mesh$morse   (assigned back onto mesh)
 run_dmt()       →  dmt_run
-make_tiles()    →  tiles
+make_tiles()    →  tiles_init   (initial DMT tiles)
+merge_tiles()   →  tiles        (agglomeratively merged)
 ```
 
 This vignette runs each stage on a small example dataset, inspects every
@@ -555,14 +556,32 @@ ggplot() +
 
 ---
 
-# 7. `tiles` — final merged tiles {#tiles}
+# 7. `tiles_init` — initial DMT tiles {#tiles_init}
 
-`make_tiles()` agglomeratively merges initial tiles into final spatial tiles,
-first splitting tiles larger than `max_npts` and then absorbing tiles smaller
-than `min_npts` into their most similar neighbour.
+`make_tiles()` extracts one tile per connected component from the DMT
+segmentation.  These are the raw, unmerged tiles — typically many more and
+smaller than the final tiles.
 
 ```{r}
-tiles = make_tiles(cells, mesh, dmt_run, list(
+tiles_init = make_tiles(cells, mesh, dmt_run)
+cat('Initial tiles:', nrow(tiles_init$meta_data), '\n')
+summary(tiles_init$meta_data$npts)
+```
+
+The initial tiles have the same structure as the final tiles (meta_data,
+edges, pcs, counts, adj, cell_ids), so you can already inspect or visualise
+them before merging.
+
+---
+
+# 8. `tiles` — final merged tiles {#tiles}
+
+`merge_tiles()` agglomeratively merges the initial tiles into final spatial
+tiles, first merging tiles larger than `max_npts` and then absorbing tiles
+smaller than `min_npts` into their most similar neighbour.
+
+```{r}
+tiles = merge_tiles(tiles_init, list(
     alpha    = alpha,
     max_npts = max_npts,
     min_npts = min_npts
@@ -703,10 +722,10 @@ cat('Surviving cells:', nrow(surviving_meta), 'of', nrow(meta_data), '\n')
 
 ```{r}
 cat(sprintf(
-    'Input cells:          %d\nSurviving (pruned):   %d\nInitial tiles (DMT):  %d\nFinal tiles:          %d\n',
+    'Input cells:          %d\nSurviving (pruned):   %d\nInitial tiles (DMT):  %d\nFinal tiles (merged): %d\n',
     nrow(meta_data),
     nrow(mesh$pts),
-    length(unique(dmt_run$pts$agg_id)),
+    nrow(tiles_init$meta_data),
     nrow(tiles$meta_data)
 ))
 ```

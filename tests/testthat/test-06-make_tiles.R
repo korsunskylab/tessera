@@ -1,9 +1,10 @@
 # ── File-local fixtures (computed once on load, not in shared helper) ─────────
-# Agglomeration takes ~30-60 s; keeping these here avoids slowing every other
-# test file.
+# Tile extraction and agglomeration take ~30-60 s combined; keeping these here
+# avoids slowing every other test file.
 
-.local_dmt   = run_dmt(.test_mesh_morse)
-.local_tiles = make_tiles(.test_cells_field, .test_mesh_morse, .local_dmt)
+.local_dmt        = run_dmt(.test_mesh_morse)
+.local_tiles_init = make_tiles(.test_cells_field, .test_mesh_morse, .local_dmt)
+.local_tiles      = merge_tiles(.local_tiles_init)
 
 # ── make_tile_graph tests ──────────────────────────────────────────────────────
 
@@ -28,95 +29,152 @@ test_that("make_tile_graph diagonal is zero", {
 	expect_true(all(Matrix::diag(adj) == 0))
 })
 
-# ── make_tiles structure tests ─────────────────────────────────────────────────
+# ── make_tiles (initial extraction) structure tests ──────────────────────────
 
 test_that("make_tiles returns list with correct top-level slots", {
-	expect_type(.local_tiles, "list")
+	expect_type(.local_tiles_init, "list")
 	expect_true(all(c("meta_data", "edges", "pcs", "counts", "adj",
-	                  "cell_ids", "params", "meta") %in% names(.local_tiles)))
+	                  "cell_ids", "params", "meta") %in% names(.local_tiles_init)))
 })
 
 test_that("make_tiles meta_data has required columns", {
 	expect_true(all(c("id", "X", "Y", "npts", "shape", "area", "perimeter") %in%
-	                  names(.local_tiles$meta_data)))
+	                  names(.local_tiles_init$meta_data)))
 })
 
 test_that("make_tiles adj is a dgCMatrix", {
-	expect_s4_class(.local_tiles$adj, "dgCMatrix")
+	expect_s4_class(.local_tiles_init$adj, "dgCMatrix")
 })
 
-test_that("make_tiles adj dimensions match number of tiles", {
-	n = nrow(.local_tiles$meta_data)
-	expect_equal(dim(.local_tiles$adj), c(n, n))
+test_that("make_tiles adj dimensions match number of initial tiles", {
+	n = nrow(.local_tiles_init$meta_data)
+	expect_equal(dim(.local_tiles_init$adj), c(n, n))
 })
 
 test_that("make_tiles cell_ids has ORIG_ID and tile_id columns", {
-	expect_named(.local_tiles$cell_ids, c("ORIG_ID", "tile_id"))
+	expect_named(.local_tiles_init$cell_ids, c("ORIG_ID", "tile_id"))
 })
 
 test_that("make_tiles cell_ids has one row per pruned cell", {
-	expect_equal(nrow(.local_tiles$cell_ids), nrow(.test_mesh_morse$pts))
+	expect_equal(nrow(.local_tiles_init$cell_ids), nrow(.test_mesh_morse$pts))
 })
 
-test_that("make_tiles params records alpha, max_npts, min_npts", {
-	expect_equal(.local_tiles$params$alpha,    1)
-	expect_equal(.local_tiles$params$max_npts, 50L)
-	expect_equal(.local_tiles$params$min_npts, 5L)
-})
-
-test_that("make_tiles meta is an empty list", {
-	expect_type(.local_tiles$meta, "list")
-	expect_length(.local_tiles$meta, 0L)
-})
-
-# ── make_tiles property tests ──────────────────────────────────────────────────
-
-test_that("make_tiles produces at least 2 tiles", {
-	expect_gte(nrow(.local_tiles$meta_data), 2L)
+test_that("make_tiles produces more initial tiles than final merged tiles", {
+	expect_gt(nrow(.local_tiles_init$meta_data), nrow(.local_tiles$meta_data))
 })
 
 test_that("make_tiles total cells equals number of pruned mesh points", {
-	expect_equal(sum(.local_tiles$meta_data$npts), nrow(.test_mesh_morse$pts))
+	expect_equal(sum(.local_tiles_init$meta_data$npts), nrow(.test_mesh_morse$pts))
 })
 
-test_that("make_tiles most tiles have at least min_npts cells", {
-	below_min = sum(.local_tiles$meta_data$npts < .local_tiles$params$min_npts)
-	expect_lte(below_min, 5L)  # heuristic merging may leave a few small tiles
+test_that("make_tiles includes .dmt_tmp for merge_tiles", {
+	expect_type(.local_tiles_init$.dmt_tmp, "list")
+	expect_true(all(c("pts", "tris", "edges", "counts", "udv_cells") %in%
+	                  names(.local_tiles_init$.dmt_tmp)))
 })
 
-test_that("make_tiles most tiles do not exceed max_npts cells", {
-	above_max = sum(.local_tiles$meta_data$npts > .local_tiles$params$max_npts)
-	expect_lte(above_max, 5L)  # heuristic splitting may leave a few large tiles
-})
-
-test_that("make_tiles pcs dimensions are tiles x npcs", {
-	n_tiles = nrow(.local_tiles$meta_data)
-	npcs    = ncol(.test_pca_pruned$embeddings)
-	expect_equal(dim(.local_tiles$pcs), c(n_tiles, npcs))
-})
-
-test_that("make_tiles counts dimensions are genes x tiles", {
-	n_genes = nrow(.test_counts)
-	n_tiles = nrow(.local_tiles$meta_data)
-	expect_equal(dim(.local_tiles$counts), c(n_genes, n_tiles))
-})
-
-test_that("make_tiles tile IDs are positive consecutive integers", {
-	ids = .local_tiles$meta_data$id
-	expect_equal(sort(ids), seq_len(length(ids)))
-})
-
-test_that("make_tiles cell_ids tile_id values are valid tile IDs", {
-	valid_ids = .local_tiles$meta_data$id
-	expect_true(all(.local_tiles$cell_ids$tile_id %in% valid_ids))
+test_that("make_tiles params is empty list (no agglomeration yet)", {
+	expect_type(.local_tiles_init$params, "list")
+	expect_length(.local_tiles_init$params, 0L)
 })
 
 test_that("make_tiles does not mutate dmt$pts", {
 	pts_cols_before = names(.local_dmt$pts)
 	agg_id_before   = .local_dmt$pts$agg_id
-	# re-run make_tiles with the same dmt
 	make_tiles(.test_cells_field, .test_mesh_morse, .local_dmt)
 	expect_equal(names(.local_dmt$pts),      pts_cols_before)
 	expect_equal(.local_dmt$pts$agg_id,      agg_id_before)
 })
 
+# ── merge_tiles structure tests ──────────────────────────────────────────────
+
+test_that("merge_tiles returns list with correct top-level slots", {
+	expect_type(.local_tiles, "list")
+	expect_true(all(c("meta_data", "edges", "pcs", "counts", "adj",
+	                  "cell_ids", "params", "meta") %in% names(.local_tiles)))
+})
+
+test_that("merge_tiles strips .dmt_tmp from output", {
+	expect_null(.local_tiles$.dmt_tmp)
+})
+
+test_that("merge_tiles meta_data has required columns", {
+	expect_true(all(c("id", "X", "Y", "npts", "shape", "area", "perimeter") %in%
+	                  names(.local_tiles$meta_data)))
+})
+
+test_that("merge_tiles adj is a dgCMatrix", {
+	expect_s4_class(.local_tiles$adj, "dgCMatrix")
+})
+
+test_that("merge_tiles adj dimensions match number of tiles", {
+	n = nrow(.local_tiles$meta_data)
+	expect_equal(dim(.local_tiles$adj), c(n, n))
+})
+
+test_that("merge_tiles cell_ids has ORIG_ID and tile_id columns", {
+	expect_named(.local_tiles$cell_ids, c("ORIG_ID", "tile_id"))
+})
+
+test_that("merge_tiles cell_ids has one row per pruned cell", {
+	expect_equal(nrow(.local_tiles$cell_ids), nrow(.test_mesh_morse$pts))
+})
+
+test_that("merge_tiles params records alpha, max_npts, min_npts", {
+	expect_equal(.local_tiles$params$alpha,    1)
+	expect_equal(.local_tiles$params$max_npts, 50L)
+	expect_equal(.local_tiles$params$min_npts, 5L)
+})
+
+test_that("merge_tiles meta is an empty list", {
+	expect_type(.local_tiles$meta, "list")
+	expect_length(.local_tiles$meta, 0L)
+})
+
+# ── merge_tiles property tests ───────────────────────────────────────────────
+
+test_that("merge_tiles produces at least 2 tiles", {
+	expect_gte(nrow(.local_tiles$meta_data), 2L)
+})
+
+test_that("merge_tiles total cells equals number of pruned mesh points", {
+	expect_equal(sum(.local_tiles$meta_data$npts), nrow(.test_mesh_morse$pts))
+})
+
+test_that("merge_tiles most tiles have at least min_npts cells", {
+	below_min = sum(.local_tiles$meta_data$npts < .local_tiles$params$min_npts)
+	expect_lte(below_min, 10L)  # heuristic merging may leave a few small tiles
+})
+
+test_that("merge_tiles most tiles do not exceed max_npts cells", {
+	above_max = sum(.local_tiles$meta_data$npts > .local_tiles$params$max_npts)
+	expect_lte(above_max, 10L)  # heuristic splitting may leave a few large tiles
+})
+
+test_that("merge_tiles pcs dimensions are tiles x npcs", {
+	n_tiles = nrow(.local_tiles$meta_data)
+	npcs    = ncol(.test_pca_pruned$embeddings)
+	expect_equal(dim(.local_tiles$pcs), c(n_tiles, npcs))
+})
+
+test_that("merge_tiles counts dimensions are genes x tiles", {
+	n_genes = nrow(.test_counts)
+	n_tiles = nrow(.local_tiles$meta_data)
+	expect_equal(dim(.local_tiles$counts), c(n_genes, n_tiles))
+})
+
+test_that("merge_tiles tile IDs are positive consecutive integers", {
+	ids = .local_tiles$meta_data$id
+	expect_equal(sort(ids), seq_len(length(ids)))
+})
+
+test_that("merge_tiles cell_ids tile_id values are valid tile IDs", {
+	valid_ids = .local_tiles$meta_data$id
+	expect_true(all(.local_tiles$cell_ids$tile_id %in% valid_ids))
+})
+
+test_that("merge_tiles errors when .dmt_tmp is missing", {
+	bad_tiles = .local_tiles_init
+	bad_tiles$.dmt_tmp = NULL
+	expect_error(merge_tiles(bad_tiles), "dmt_tmp is NULL")
+})
