@@ -1,0 +1,720 @@
+---
+title: "Pipeline Walkthrough: Tessera Step-by-Step"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Pipeline Walkthrough: Tessera Step-by-Step}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width='80%',
+  fig.align='center'
+)
+```
+
+# Overview
+
+The Tessera pipeline produces six intermediate data structures, one per stage:
+
+```
+make_cells()    →  cells
+make_mesh()     →  mesh
+compute_field() →  field
+compute_morse() →  mesh$morse   (assigned back onto mesh)
+run_dmt()       →  dmt_run
+make_tiles()    →  tiles
+```
+
+This vignette runs each stage on a small example dataset, inspects every
+slot, and visualises intermediate results so you can see exactly what each
+object contains, how they relate to one another, and what the algorithm is
+doing at each step.
+
+# Libraries and data
+
+```{r}
+suppressPackageStartupMessages({
+    library(tessera)
+
+    ## Plotting (not imported by tessera)
+    library(ggplot2)
+    library(ggthemes)
+    library(viridis)
+    library(patchwork)
+})
+
+## Jupyter plot sizing helper
+fig.size <- function(h, w) {
+    options(repr.plot.height = h, repr.plot.width = w)
+}
+
+## Helper: convert sf tile shapes to geom_polygon-compatible data.table
+sf_to_poly <- function(df, shape_col = "shape") {
+    shapes <- df[[shape_col]]
+    coords_list <- lapply(seq_along(shapes), function(i) {
+        co <- sf::st_coordinates(shapes[[i]])
+        data.table::data.table(x = co[, 1], y = co[, 2], .tile_group = i)
+    })
+    coords_dt <- data.table::rbindlist(coords_list)
+    meta <- data.table::as.data.table(df)[, !..shape_col]
+    meta[, .tile_group := .I]
+    merge(coords_dt, meta, by = ".tile_group")
+}
+```
+
+```{r}
+data('tessera_warmup')
+counts    = tessera_warmup$counts
+meta_data = tessera_warmup$meta_data
+cat('Input: ', nrow(meta_data), 'cells,', nrow(counts), 'genes\n')
+```
+
+```{r}
+## Parameters used throughout
+npcs                  = 10
+prune_thresh_quantile = 0.95
+prune_min_cells       = 10
+smooth_distance       = 'projected'
+smooth_similarity     = 'projected'
+max_npts              = 50
+min_npts              = 5
+alpha                 = 1
+```
+
+```{r fig.height = 8, fig.width = 8}
+fig.size(8, 8)
+ggplot() +
+    geom_point(data = meta_data, aes(X, Y, color = type)) +
+    theme_void() +
+    scale_color_tableau() +
+    coord_fixed() +
+    labs(title = 'Input: cell types in physical space') +
+    NULL
+```
+
+```{r}
+table(meta_data$type)
+```
+
+---
+
+# 1. `cells` — raw inputs {#cells}
+
+`make_cells()` packages raw inputs into a canonical container that all
+downstream stages consume.
+
+```{r}
+coords = matrix(
+    c(meta_data$X, meta_data$Y), ncol = 2,
+    dimnames = list(NULL, c('x', 'y'))
+)
+cells = make_cells(coords, NULL, counts, data.table::as.data.table(meta_data))
+names(cells)
+```
+
+| Slot | Type | Description |
+|------|------|-------------|
+| `coords` | N × 2 matrix | Spatial coordinates (x, y) |
+| `embeddings` | named list | `NULL` until PCA is computed after pruning |
+| `counts` | G × N dgCMatrix | Raw gene counts |
+| `meta` | data.table (N rows) | Per-cell metadata |
+
+```{r}
+dim(cells$coords)
+head(cells$coords)
+```
+
+```{r}
+cells$embeddings    # NULL until we call do_pca below
+```
+
+```{r}
+dim(cells$counts)   # genes x cells
+cells$counts[1:4, 1:4]
+```
+
+```{r}
+dim(cells$meta)
+head(cells$meta)
+```
+
+---
+
+# 2. `mesh` — Delaunay triangulation {#mesh}
+
+`make_mesh()` triangulates cell coordinates, prunes long edges and small
+connected components, and adds degenerate exterior triangles along the
+boundary.
+
+```{r}
+mesh = make_mesh(cells, list(
+    prune_thresh_quantile = prune_thresh_quantile,
+    prune_mincells        = prune_min_cells
+))
+names(mesh)
+```
+
+## `mesh$pts` — surviving cells
+
+Data.table of cells that survived pruning — fewer rows than `cells$coords`
+when outlier cells are removed.
+
+```{r}
+dim(mesh$pts)
+names(mesh$pts)
+head(mesh$pts)
+```
+
+`ORIG_ID` is a 1-based index into the original `cells$coords` and
+`cells$meta`:
+
+```{r}
+cells$meta$type[mesh$pts$ORIG_ID[1:6]]
+```
+
+## `mesh$edges` — primal and dual edges
+
+One row per edge of the triangulation. Every edge has a **primal** form
+(connecting two points) and a **dual** form (connecting the centroids of its
+two flanking triangles).
+
+```{r}
+dim(mesh$edges)
+names(mesh$edges)
+```
+
+| Column | Description |
+|--------|-------------|
+| `from_pt`, `to_pt` | Row indices into `mesh$pts` |
+| `from_tri`, `to_tri` | Row indices into `mesh$triangles` |
+| `x0_pt`, `y0_pt`, `x1_pt`, `y1_pt` | Primal endpoint coordinates |
+| `x0_tri`, `y0_tri`, `x1_tri`, `y1_tri` | Dual endpoint coordinates |
+| `boundary` | `TRUE` for edges on the convex-hull boundary |
+
+```{r}
+table(mesh$edges$boundary)
+```
+
+## `mesh$triangles`
+
+One row per triangle, including degenerate exterior triangles.
+
+```{r}
+dim(mesh$triangles)
+names(mesh$triangles)
+table(mesh$triangles$external)
+```
+
+| Column | Description |
+|--------|-------------|
+| `X`, `Y` | Triangle centroid |
+| `area` | Triangle area |
+| `height` | Circumradius (used for pruning) |
+| `external` | `TRUE` for degenerate boundary triangles |
+
+## `mesh$tri_to_pt` and `mesh$adj`
+
+```{r}
+dim(mesh$tri_to_pt)   # num_tris x num_pts — sparse incidence matrix
+dim(mesh$adj)         # num_pts x num_pts — symmetric adjacency matrix
+```
+
+## Visualising the mesh
+
+The pruned adjacency graph (black) with boundary edges highlighted (red).
+Points that were pruned as outliers are absent.
+
+```{r fig.height = 15, fig.width = 15}
+fig.size(15, 15)
+ggplot() +
+    geom_segment(data = mesh$edges,
+                 aes(x = x0_pt, y = y0_pt, xend = x1_pt, yend = y1_pt),
+                 color = 'black', lwd = .2) +
+    geom_segment(data = mesh$edges[boundary == TRUE],
+                 aes(x = x0_pt, y = y0_pt, xend = x1_pt, yend = y1_pt),
+                 color = 'red', lwd = .2) +
+    geom_point(data = mesh$pts, aes(X, Y), size = .5) +
+    theme_void(base_size = 20) +
+    coord_cartesian(expand = FALSE) +
+    labs(title = 'Pruned Delaunay mesh (boundary edges in red)') +
+    NULL
+```
+
+---
+
+# 3. PCA on pruned cells
+
+**Important:** PCA must be computed on the *pruned* cells (those that
+survived `make_mesh()`), not the full input.  The resulting embedding matrix
+has `nrow(mesh$pts)` rows — one per surviving cell.
+
+```{r}
+pca              = do_pca(cells$counts[, mesh$pts$ORIG_ID, drop = FALSE], npcs)
+cells$embeddings = list(pca = pca$embeddings)
+dim(cells$embeddings$pca)   # num_surviving_cells x npcs
+```
+
+---
+
+# 4. `field` — spatial gradient field {#field}
+
+`compute_field()` estimates the transcriptional gradient at every mesh
+element (points, triangles, edges) and SVD-compresses each gradient to six
+scalars.
+
+```{r}
+field = compute_field(cells, mesh, list(
+    smooth_distance   = smooth_distance,
+    smooth_similarity = smooth_similarity
+))
+names(field)
+names(field$gradient)
+```
+
+## SVD gradient columns
+
+Every gradient matrix has the same six columns:
+
+```{r}
+colnames(field$gradient$pts)
+```
+
+| Column | Description |
+|--------|-------------|
+| `dx_grad`, `dy_grad` | Principal direction of transcriptional change |
+| `dx_ortho`, `dy_ortho` | Direction orthogonal to gradient (isovalue direction) |
+| `len_grad` | Gradient magnitude — large near tissue boundaries |
+| `len_ortho` | Orthogonal singular value |
+
+## Gradient matrix dimensions
+
+| Slot | Rows | Content |
+|------|------|---------|
+| `gradient$pts` | num_pts | One gradient per surviving cell |
+| `gradient$tris` | num_tris | Weighted average of vertex gradients |
+| `gradient$edges_pts` | num_edges | Primal edge gradient |
+| `gradient$edges_tris` | num_edges | Dual edge gradient |
+
+```{r}
+dim(field$gradient$pts)
+dim(field$gradient$tris)
+dim(field$gradient$edges_pts)
+dim(field$gradient$edges_tris)
+```
+
+```{r}
+head(field$gradient$pts)
+```
+
+## Visualising the gradient field
+
+Triangle gradients visualised as line segments whose length is proportional
+to `len_grad + len_ortho`.  Strong gradients (long segments) appear at tissue
+boundaries where gene expression changes rapidly.
+
+```{r fig.height = 15, fig.width = 15}
+len_plot_constant = .8
+fig.size(15, 15)
+ggplot() +
+    geom_point(data = mesh$pts, aes(X, Y), size = .5) +
+    geom_segment(data = mesh$edges[boundary == TRUE, ],
+                 aes(x = x0_pt, y = y0_pt, xend = x1_pt, yend = y1_pt),
+                 color = 'red') +
+    geom_segment(
+        data = data.table(mesh$triangles, field$gradient$tris),
+        aes(
+            x    = X - len_plot_constant * (len_grad + len_ortho) * dx_ortho,
+            y    = Y - len_plot_constant * (len_grad + len_ortho) * dy_ortho,
+            xend = X + len_plot_constant * (len_grad + len_ortho) * dx_ortho,
+            yend = Y + len_plot_constant * (len_grad + len_ortho) * dy_ortho
+        ),
+        linewidth = .4, alpha = 1,
+        color = 'blue'
+    ) +
+    theme_void() +
+    coord_fixed(expand = FALSE) +
+    labs(title = 'Gradient field (blue) with boundary edges (red)') +
+    NULL
+```
+
+---
+
+# 5. `mesh$morse` — Discrete Morse Theory {#morse}
+
+`compute_morse()` derives a scalar field `f` from gradient magnitudes, builds
+two spanning forests (primal on points, dual on triangles), and traces the
+separatrix edges that define tile boundaries.
+
+The result is stored back on the mesh as `mesh$morse`.
+
+```{r}
+mesh$morse = compute_morse(field, mesh)
+names(mesh$morse)
+```
+
+## `mesh$morse$f` — scalar boundary-score field
+
+`f = len_grad + len_ortho`.  High values indicate tissue boundaries.
+
+```{r}
+names(mesh$morse$f)
+```
+
+| Slot | Length | Description |
+|------|--------|-------------|
+| `f$pts` | num_pts | Boundary score at each cell |
+| `f$tris` | num_tris | Boundary score at each triangle |
+| `f$edges_prim` | num_edges | Primal edge boundary score |
+| `f$edges_dual` | num_edges | Dual edge boundary score |
+
+```{r}
+length(mesh$morse$f$pts)
+summary(mesh$morse$f$pts)
+```
+
+Visualising the scalar field as a heatmap on the triangulation.  Bright
+(yellow) regions are tissue boundaries; dark (purple) regions are interior:
+
+```{r fig.height = 15, fig.width = 15}
+ntri = max(which(mesh$triangles$external == FALSE))
+i = Matrix::t(mesh$tri_to_pt[1:ntri, ])@i + 1
+plt_df = data.table::data.table(
+    X = mesh$pts$X[i],
+    Y = mesh$pts$Y[i],
+    f = rep(mesh$morse$f$tris[1:ntri], each = 3)
+)[
+    , id := rep(1:ntri, each = 3)
+][]
+
+fig.size(15, 15)
+ggplot() +
+    geom_polygon(data = plt_df, aes(X, Y, group = id, fill = f, color = f)) +
+    theme_void() +
+    coord_fixed(expand = FALSE) +
+    scale_fill_viridis() +
+    scale_color_viridis() +
+    labs(title = 'Scalar field f (boundary score) on triangles') +
+    NULL
+```
+
+## `mesh$morse$prim` and `mesh$morse$dual` — spanning forests
+
+* **Primal forest** (red): minimum spanning forest on points.  Its minima are
+  the "seed" cells — one per initial tile.
+* **Dual forest** (blue): maximum spanning forest on triangles.  Its maxima
+  are the "ridge" triangles sitting at peaks of the boundary score field.
+
+```{r}
+names(mesh$morse$prim)
+length(mesh$morse$prim$minima)   # number of initial tile seeds
+```
+
+```{r}
+names(mesh$morse$dual)
+length(mesh$morse$dual$maxima)   # number of ridge triangles
+```
+
+```{r fig.height = 15, fig.width = 15}
+fig.size(15, 15)
+ggplot() +
+    ## dual forest (blue)
+    geom_point(data = mesh$triangles[mesh$morse$dual$maxima, ],
+               aes(X, Y), color = 'blue', size = 2) +
+    geom_segment(data = mesh$morse$dual$edges,
+                 aes(x = x0, y = y0, xend = x1, yend = y1), color = 'blue') +
+    ## primal forest (red)
+    geom_point(data = mesh$pts[mesh$morse$prim$minima, ],
+               aes(X, Y), color = 'red', size = 2) +
+    geom_segment(data = mesh$morse$prim$edges,
+                 aes(x = x0, y = y0, xend = x1, yend = y1), color = 'red') +
+    theme_void() +
+    coord_cartesian(expand = FALSE) +
+    labs(title = 'Primal forest (red, on points) and dual forest (blue, on triangles)') +
+    NULL
+```
+
+## `mesh$morse$e_sep` — separatrix edges
+
+Integer vector of 1-based indices into `mesh$edges`.  These edges run along
+tissue boundaries and are removed by `run_dmt()` to partition cells into
+initial tiles.
+
+```{r}
+length(mesh$morse$e_sep)
+## Separatrix edges as a fraction of all edges:
+length(mesh$morse$e_sep) / nrow(mesh$edges)
+```
+
+After DMT, we have the separatrix (blue) cutting through high-f regions, and
+the primal forest (red) connecting cells within each tile:
+
+```{r fig.height = 15, fig.width = 15}
+fig.size(15, 15)
+ggplot() +
+    ## separatrix (blue)
+    geom_segment(data = mesh$edges[mesh$morse$e_sep, ],
+                 aes(x = x0_tri, y = y0_tri, xend = x1_tri, yend = y1_tri),
+                 lwd = 1, color = 'blue') +
+    geom_segment(data = mesh$edges[boundary == TRUE],
+                 aes(x = x0_pt, y = y0_pt, xend = x1_pt, yend = y1_pt),
+                 color = 'blue', lwd = 1) +
+    ## primal forest (red)
+    geom_point(data = mesh$pts[mesh$morse$prim$minima, ],
+               aes(X, Y), color = 'red', size = 2) +
+    geom_segment(data = mesh$morse$prim$edges,
+                 aes(x = x0, y = y0, xend = x1, yend = y1), color = 'red') +
+    theme_void() +
+    coord_cartesian(expand = FALSE) +
+    labs(title = 'Separatrices (blue) and primal forest (red)') +
+    NULL
+```
+
+---
+
+# 6. `dmt_run` — initial tile assignments {#dmt_run}
+
+`run_dmt()` removes the separatrix edges from the mesh graph and labels each
+resulting connected component as a distinct initial tile.
+
+```{r}
+dmt_run = run_dmt(mesh)
+names(dmt_run)
+```
+
+## `dmt_run$pts` — cells with tile IDs
+
+Copy of `mesh$pts` with one added column:
+
+| Column | Description |
+|--------|-------------|
+| `agg_id` | Integer initial tile ID |
+
+```{r}
+names(dmt_run$pts)
+head(dmt_run$pts)
+```
+
+```{r}
+cat('Surviving cells: ', nrow(dmt_run$pts), '\n')
+cat('Initial tiles:   ', length(unique(dmt_run$pts$agg_id)), '\n')
+```
+
+The initial tiles are fine-grained — many will be merged in `make_tiles()`.
+
+## `dmt_run$edges` — edges with tile labels
+
+Copy of `mesh$edges` with two added columns:
+
+| Column | Description |
+|--------|-------------|
+| `agg_from` | Tile ID of the `from_pt` endpoint |
+| `agg_to` | Tile ID of the `to_pt` endpoint |
+
+```{r}
+setdiff(names(dmt_run$edges), names(mesh$edges))
+head(dmt_run$edges[, .(from_pt, to_pt, agg_from, agg_to)])
+```
+
+## Visualising initial tiles
+
+Each colour is one initial tile.  Note how the separatrices from the previous
+step form the boundaries between tiles:
+
+```{r fig.height = 15, fig.width = 20}
+set.seed(2)
+fig.size(15, 20)
+ggplot() +
+    geom_point(data = dmt_run$pts, aes(X, Y, color = factor(agg_id)), size = 1) +
+    theme_void() +
+    coord_cartesian(expand = FALSE) +
+    guides(color = 'none') +
+    labs(title = 'Initial DMT tiles (one colour per tile)') +
+    NULL
+```
+
+For comparison, here are the original cell types — the initial tiles should
+roughly respect cell-type boundaries:
+
+```{r fig.height = 15, fig.width = 20}
+pts_with_meta = data.table::copy(dmt_run$pts)
+pts_with_meta[, type := meta_data$type[ORIG_ID]]
+set.seed(2)
+fig.size(15, 20)
+ggplot() +
+    geom_point(data = pts_with_meta, aes(X, Y, color = type)) +
+    theme_void() +
+    coord_cartesian(expand = FALSE) +
+    scale_color_tableau() +
+    labs(title = 'Cell types (for comparison with initial tiles)') +
+    NULL
+```
+
+---
+
+# 7. `tiles` — final merged tiles {#tiles}
+
+`make_tiles()` agglomeratively merges initial tiles into final spatial tiles,
+first splitting tiles larger than `max_npts` and then absorbing tiles smaller
+than `min_npts` into their most similar neighbour.
+
+```{r}
+tiles = make_tiles(cells, mesh, dmt_run, list(
+    alpha    = alpha,
+    max_npts = max_npts,
+    min_npts = min_npts
+))
+names(tiles)
+```
+
+## `tiles$meta_data` — one row per tile
+
+```{r}
+names(tiles$meta_data)
+head(dplyr::select(tiles$meta_data, -shape))
+```
+
+| Column | Description |
+|--------|-------------|
+| `id` | Tile identifier |
+| `X`, `Y` | Tile centroid |
+| `npts` | Number of constituent cells |
+| `shape` | `sf` MULTIPOLYGON tile boundary |
+| `area`, `perimeter` | Tile geometry summaries |
+
+```{r}
+cat('Final tiles:', nrow(tiles$meta_data), '\n')
+summary(tiles$meta_data$npts)
+```
+
+`shape` is an `sf` geometry column:
+
+```{r}
+class(tiles$meta_data$shape)
+tiles$meta_data$shape[1]
+```
+
+## `tiles$counts` — pooled gene counts
+
+Genes × num_tiles sparse matrix.  Column names match `tiles$meta_data$id`.
+
+```{r}
+dim(tiles$counts)
+identical(colnames(tiles$counts), tiles$meta_data$id)
+tiles$counts[1:4, 1:4]
+```
+
+## `tiles$pcs` — per-tile PCA embeddings
+
+num_tiles × D matrix.  Each row is the mean of the constituent cells'
+PC embeddings.  Row names match `tiles$meta_data$id`.
+
+```{r}
+dim(tiles$pcs)
+head(tiles$pcs[, 1:4])
+```
+
+## `tiles$adj` — tile adjacency matrix
+
+Symmetric dgCMatrix (num_tiles × num_tiles).  Entry (i, j) = 1 if tiles i
+and j share a border.
+
+```{r}
+dim(tiles$adj)
+mean(Matrix::colSums(tiles$adj > 0))   # average number of tile neighbours
+```
+
+## `tiles$edges` — inter-tile edges
+
+Data.table with one row per pair of adjacent tiles.
+
+```{r}
+dim(tiles$edges)
+names(tiles$edges)
+head(dplyr::select(tiles$edges, from, to, npts, edge_length))
+```
+
+## `tiles$cell_ids` — cell-to-tile mapping
+
+The primary way to transfer tile labels back to individual cells.
+
+```{r}
+head(tiles$cell_ids)
+cat('Cells assigned to tiles:', nrow(tiles$cell_ids), 'of', nrow(meta_data), '\n')
+```
+
+| Column | Description |
+|--------|-------------|
+| `ORIG_ID` | 1-based index into original `cells$coords` / `meta_data` |
+| `tile_id` | Tile identifier (matches `tiles$meta_data$id`) |
+
+## Visualising final tiles
+
+The first three tile PCs capture the dominant spatial patterns of gene
+expression variation:
+
+```{r fig.height = 10, fig.width = 30}
+fig.size(10, 30)
+purrr::map(1:3, function(i) {
+    ggplot(sf_to_poly(cbind(tiles$meta_data, val = tiles$pcs[, i]))) +
+        geom_polygon(aes(x, y, group = .tile_group, fill = val)) +
+        theme_void(base_size = 16) +
+        coord_fixed() +
+        scale_fill_gradient2_tableau() +
+        guides(color = 'none') +
+        labs(title = paste0('PC', i)) +
+        NULL
+}) %>%
+    purrr::reduce(`|`)
+```
+
+---
+
+# Cross-referencing objects {#cross-ref}
+
+## Transfer tile labels to original cells
+
+```{r}
+meta_data$tile_id = NA
+meta_data$tile_id[tiles$cell_ids$ORIG_ID] = tiles$cell_ids$tile_id
+table(is.na(meta_data$tile_id))   # FALSE = assigned, TRUE = pruned as outlier
+```
+
+## All cells in a given tile
+
+```{r}
+first_tile = tiles$meta_data$id[1]
+cells_in_tile1 = tiles$cell_ids[tile_id == first_tile, ORIG_ID]
+meta_data[cells_in_tile1, ]
+```
+
+## Cells that survived mesh pruning
+
+```{r}
+## mesh$pts$ORIG_ID indexes into the original meta_data
+surviving_meta = meta_data[mesh$pts$ORIG_ID, ]
+cat('Surviving cells:', nrow(surviving_meta), 'of', nrow(meta_data), '\n')
+```
+
+## Object dimension summary
+
+```{r}
+cat(sprintf(
+    'Input cells:          %d\nSurviving (pruned):   %d\nInitial tiles (DMT):  %d\nFinal tiles:          %d\n',
+    nrow(meta_data),
+    nrow(mesh$pts),
+    length(unique(dmt_run$pts$agg_id)),
+    nrow(tiles$meta_data)
+))
+```
+
+---
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

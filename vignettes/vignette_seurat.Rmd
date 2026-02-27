@@ -1,0 +1,330 @@
+---
+title: "Tessera + Seurat: Spatial Clustering Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tessera + Seurat: Spatial Clustering Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width='80%',
+  fig.align='center'
+)
+```
+
+# Overview
+
+This vignette shows how to use **Tessera** tiles as the input to a standard
+**Seurat V5** clustering workflow.  The key idea is that Tessera partitions a
+spatial transcriptomics sample into contiguous tiles of 5–50 cells, and each
+tile can then be treated as one observation in Seurat — analogous to a single
+cell in scRNA-seq.  This unlocks all of Seurat's downstream tools (PCA, UMAP,
+`FindClusters`, differential expression, etc.) at the tile level.
+
+**Workflow at a glance:**
+
+1. Run Tessera on raw coordinates + counts → tiles
+2. Create a Seurat object from tile-level counts
+3. Cluster tiles in embedding space
+4. Visualise clusters in UMAP and physical space
+5. Transfer tile labels back to individual cells
+6. Inspect spatial cluster composition and gene expression
+
+# Libraries
+
+```{r}
+suppressPackageStartupMessages({
+    library(tessera)
+
+    ## Downstream analysis
+    library(Seurat)
+
+    ## Plotting (not imported by tessera)
+    library(ggplot2)
+    library(ggthemes)
+    library(viridis)
+    library(patchwork)
+})
+
+## Jupyter plot sizing helper (uses repr package under the hood)
+fig.size <- function(h, w) {
+    options(repr.plot.height = h, repr.plot.width = w)
+}
+
+## Helper: convert sf tile shapes to geom_polygon-compatible data.table.
+## We use geom_polygon + coord_fixed instead of geom_sf + coord_sf because
+## the latter requires GEOS to compute graticule lengths, which can fail on
+## planar (non-geographic) coordinates.
+sf_to_poly <- function(df, shape_col = "shape") {
+    shapes <- df[[shape_col]]
+    coords_list <- lapply(seq_along(shapes), function(i) {
+        co <- sf::st_coordinates(shapes[[i]])
+        data.table::data.table(x = co[, 1], y = co[, 2], .tile_group = i)
+    })
+    coords_dt <- data.table::rbindlist(coords_list)
+    meta <- data.table::as.data.table(df)[, !..shape_col]
+    meta[, .tile_group := .I]
+    merge(coords_dt, meta, by = ".tile_group")
+}
+
+```
+
+---
+
+# Load data
+
+Small MERFISH dataset (3 177 cells, 479 genes) from
+[Chen et al. (2023)](https://www.biorxiv.org/content/10.1101/2023.04.04.535379v1.abstract).
+
+```{r}
+data('tessera_warmup')
+counts    = tessera_warmup$counts
+meta_data = tessera_warmup$meta_data
+```
+
+Each cell has spatial coordinates (`X`, `Y`) and a coarse cell-type label
+(`type`) that we will use later to interpret tile clusters.
+
+```{r}
+dim(counts)           # genes x cells
+head(meta_data)
+table(meta_data$type)
+```
+
+```{r fig.height = 8, fig.width = 8}
+fig.size(8, 8)
+ggplot() +
+    geom_point(data = meta_data, aes(X, Y, color = type)) +
+    theme_void() +
+    scale_color_tableau() +
+    coord_fixed() +
+    labs(title = 'Cell types in physical space') +
+    NULL
+```
+
+---
+
+# Step 1 — Run Tessera
+
+`RunTessera()` is the one-call wrapper that runs the full pipeline:
+`make_cells → make_mesh → compute_field → compute_morse → run_dmt → make_tiles`.
+
+It returns two objects:
+
+| Object | Description |
+|--------|-------------|
+| `dmt` | Cell-level data: coordinates, mesh, PCA, and tile assignment (`dmt$pts$agg_id`) |
+| `aggs` | Tile-level data: pooled counts, PCA embeddings, shapes, adjacency |
+
+`meta_vars_include` specifies which columns of `meta_data` to carry forward
+into the tile-level summaries (here, cell-type proportions per tile).
+
+```{r}
+res = RunTessera(
+    X = meta_data$X,
+    Y = meta_data$Y,
+    counts = counts,
+    meta_data = meta_data,
+    meta_vars_include = c('type'),
+)
+dmt  = res$dmt
+aggs = res$aggs
+```
+
+The first three tile PCs capture the dominant spatial patterns of gene
+expression variation.  Each tile is coloured by its PC score:
+
+```{r fig.height = 10, fig.width = 30}
+fig.size(10, 30)
+purrr::map(1:3, function(i) {
+    ggplot(sf_to_poly(cbind(aggs$meta_data, val=aggs$pcs[, i]))) +
+        geom_polygon(aes(x, y, group = .tile_group, fill = val)) +
+        theme_void(base_size = 16) +
+        coord_fixed() +
+        scale_fill_gradient2_tableau() +
+        guides(color = 'none') +
+        labs(title = paste0('PC', i)) +
+        NULL
+}) %>%
+    purrr::reduce(`|`)
+```
+
+---
+
+# Step 2 — Build a Seurat object from tiles
+
+We treat each tile as an observation, just like a cell in scRNA-seq.
+
+* **Counts:** `aggs$counts` — genes × tiles sparse matrix of pooled raw counts.
+* **Metadata:** tile-level summaries (centroid, `npts`, area, etc.).
+* **PCA embeddings:** `aggs$pcs` — each tile represented by the mean of its
+  constituent cells' PCA scores.  This tends to give more biologically
+  meaningful clusters than re-running PCA on pooled counts, because it
+  preserves the continuous cell-level variation.
+
+```{r}
+## Create Seurat object from tile counts
+obj = Seurat::CreateSeuratObject(
+    counts = aggs$counts,
+    meta.data = tibble::column_to_rownames(
+        data.frame(dplyr::select(aggs$meta_data, -shape)),
+        'id'
+    )
+)
+
+## Store sf shapes separately (Seurat metadata doesn't handle sf well)
+obj@meta.data$shape = aggs$meta_data$shape
+
+## Inject pre-computed PCA as a DimReducObject
+rownames(aggs$pcs) = colnames(obj)
+obj[['pca']] = Seurat::CreateDimReducObject(
+    embeddings = aggs$pcs,
+    loadings   = dmt$udv_cells$loadings,
+    key        = 'pca_',
+    assay      = Seurat::DefaultAssay(obj)
+)
+```
+
+---
+
+# Step 3 — Cluster tiles with Seurat
+
+Standard Seurat pipeline: normalise counts → UMAP → shared-nearest-neighbour
+graph → Leiden/Louvain clustering.
+
+```{r}
+.verbose = FALSE
+obj = obj %>%
+    NormalizeData(
+        normalization.method = 'LogNormalize',
+        scale.factor = median(obj@meta.data$nCount_RNA),
+        verbose = .verbose
+    ) %>%
+    RunUMAP(verbose = .verbose, dims = 1:10, reduction = 'pca') %>%
+    Seurat::FindNeighbors(features = 1:10, reduction = 'pca', verbose = .verbose) %>%
+    Seurat::FindClusters(verbose = .verbose, resolution = c(2))
+```
+
+```{r}
+cat('Number of tile clusters:', length(levels(obj@meta.data$seurat_clusters)), '\n')
+table(obj@meta.data$seurat_clusters)
+```
+
+---
+
+# Step 4 — Visualise tile clusters
+
+Side-by-side: UMAP embedding (left) and physical tissue space (right).
+
+```{r fig.height = 6, fig.width = 12}
+p1 = DimPlot(obj, reduction = 'umap', group.by = 'seurat_clusters') +
+    scale_color_tableau('Classic 10')
+p2 = ggplot(sf_to_poly(obj@meta.data)) +
+    geom_polygon(aes(x, y, group = .tile_group, fill = seurat_clusters)) +
+    theme_void(base_size = 16) +
+    coord_fixed() +
+    scale_fill_tableau('Classic 10') +
+    labs(title = 'Tile clusters in tissue space') +
+    NULL
+
+fig.size(6, 12)
+(p1 | p2) + plot_layout(widths = c(1, 1))
+```
+
+---
+
+# Step 5 — Transfer tile labels to cells
+
+Every surviving cell in `dmt$pts` has an `agg_id` pointing to its tile.  We
+use this to propagate tile-level cluster labels down to individual cells.
+
+```{r}
+dmt$pts$spatial_cluster = obj@meta.data$seurat_clusters[dmt$pts$agg_id]
+```
+
+Now we can overlay cell-type annotations with tile boundaries and cluster
+colours to see how well the spatial clusters capture known biology.
+
+```{r fig.height = 8, fig.width = 20}
+tile_poly = sf_to_poly(obj@meta.data)
+p1 = ggplot() +
+    geom_polygon(data = tile_poly, aes(x, y, group = .tile_group),
+                 fill = NA, color = 'grey70') +
+    geom_point(data = dmt$pts, aes(X, Y, color = type)) +
+    scale_color_tableau() +
+    theme_void() +
+    coord_fixed() +
+    labs(title = 'Cell types + tile boundaries') +
+    NULL
+p2 = ggplot() +
+    geom_polygon(data = tile_poly,
+                 aes(x, y, group = .tile_group, fill = seurat_clusters),
+                 alpha = .2) +
+    geom_point(data = dmt$pts, aes(X, Y, color = spatial_cluster)) +
+    scale_color_tableau('Classic 10') +
+    scale_fill_tableau('Classic 10') +
+    theme_void() +
+    guides(fill = 'none') +
+    coord_fixed() +
+    labs(title = 'Spatial clusters (tiles + cells)') +
+    NULL
+fig.size(8, 20)
+p1 | p2
+```
+
+---
+
+# Step 6 — Interpret spatial clusters
+
+## Cell-type composition
+
+A stacked bar plot showing what fraction of each spatial cluster is made up
+of each cell type.  This tells us whether the spatial clusters are driven by
+cell-type composition (e.g., immune-enriched vs. epithelial regions).
+
+```{r fig.height = 8, fig.width = 10}
+fig.size(8, 10)
+dmt$pts %>%
+    with(table(type, spatial_cluster)) %>%
+    prop.table(2) %>%
+    data.table() %>%
+    ggplot(aes(spatial_cluster, 100 * N, fill = type)) +
+        geom_bar(stat = 'identity', position = position_stack()) +
+        scale_fill_tableau() +
+        theme_bw(base_size = 20) +
+        labs(y = '% of spatial cluster', fill = 'cell type',
+             title = 'Cell-type composition per spatial cluster') +
+        NULL
+```
+
+## Tile-level gene expression
+
+We can query individual genes at the tile level, just as we would at the
+cell level in standard scRNA-seq.  Each tile is coloured by its normalised
+expression of the queried gene.
+
+```{r fig.height = 8, fig.width = 10}
+feature = 'MKI67'    ## marker for dividing cells
+
+fig.size(8, 10)
+ggplot(sf_to_poly(cbind(obj@meta.data, FetchData(obj, feature)))) +
+    geom_polygon(aes(x, y, group = .tile_group, fill = !!sym(feature))) +
+    scale_fill_gradient(low = 'white', high = '#832424') +
+    theme_void() +
+    coord_fixed() +
+    labs(title = paste0('Tile-level expression: ', feature)) +
+    NULL
+
+```
+
+---
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
