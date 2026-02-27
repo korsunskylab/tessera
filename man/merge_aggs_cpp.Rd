@@ -4,46 +4,26 @@
 \alias{merge_aggs_cpp}
 \title{Merges tiles using single-linkage agglomerative clustering}
 \usage{
-merge_aggs_cpp(
-  V_pcs,
-  V_area,
-  V_perimeter,
-  V_npts,
-  E_from,
-  E_to,
-  E_npts,
-  E_area,
-  E_edge_length,
-  E_pcs_merge,
-  E_w,
-  E_perimeter_merge,
-  E_score_size,
-  E_dscore,
-  d_mu,
-  d_sig,
-  iter_max,
-  agg_mode,
-  dscore_thresh,
-  min_npts,
-  max_npts
-)
+merge_aggs_cpp(aggs, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
 }
 \arguments{
-\item{V_pcs, V_area, V_perimeter, V_npts}{Metadata associated with each each tile.
-(Updated)}
+\item{aggs}{A named R list produced by \code{\link[=init_scores]{init_scores()}} containing:
+\code{pcs}, \code{meta_data} (with \code{area}, \code{perimeter}, \code{npts}),
+\code{edges} (with \code{from}, \code{to}, \code{npts}, \code{area}, \code{edge_length}, \code{w},
+\code{perimeter_merge}, \code{score_size}, \code{dscore}),
+\code{pcs_merged}, \code{d_mu}, \code{d_sig}.}
 
-\item{E_from, E_to}{Length \code{num_edges} vectors associated with each pair of
-adjacent tiles. Specifies the two tiles that each border (0-indexed). (Updated)}
+\item{iter_max}{Maximum number of merge iterations.}
 
-\item{E_npts, E_area, E_edge_length, E_pcs_merge}{Metadata associated with each pair of
-adjacent tiles. (Updated)}
+\item{agg_mode}{Aggregation scoring mode (1, 2, or 3).}
 
-\item{E_w, E_perimeter_merge, E_score_size, E_dscore}{Scores associated with merging
-each pair of adjacent tiles. (Updated)}
+\item{dscore_thresh}{Stop merging when best score falls below this threshold.}
+
+\item{min_npts, max_npts}{Minimum / maximum tile size constraints.}
 }
 \value{
-A list of \code{orig_num_tiles} vectors, disjoint sets specifying the IDs for which
-of the original tiles have been merged together. Some vectors will have length 0.
+A named list with \code{memory} (disjoint-set merge history) and
+updated copies of all tile and edge data structures.
 }
 \description{
 Note that this function mutates many of the inputs to keep

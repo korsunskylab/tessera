@@ -42,9 +42,9 @@
 #' @seealso [make_mesh()], [compute_morse()]
 #' @export
 compute_field = function(cells, mesh, params = list()) {
-	smooth_distance  = params$smooth_distance   %||% 'projected'
-	smooth_similarity = params$smooth_similarity %||% 'projected'
-	smooth_iter      = params$smooth_iter        %||% 1L
+	smooth_distance   = params[["smooth_distance"]]   %||% 'projected'
+	smooth_similarity = params[["smooth_similarity"]] %||% 'projected'
+	smooth_iter       = params[["smooth_iter"]]       %||% 1L
 
 	embeddings = cells$embeddings$pca
 	if (is.null(embeddings))

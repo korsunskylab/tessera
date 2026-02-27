@@ -22,6 +22,7 @@ populated by \code{\link[=compute_morse]{compute_morse()}}.}
 \code{0.2} = conservative merging, \code{2} = liberal merging. Default \code{1}.
 \item \code{max_npts} — maximum cells per tile during the main merge. Default \code{50}.
 \item \code{min_npts} — minimum cells per tile during the cleanup pass. Default \code{5}.
+\item \code{seed} — random seed for reproducible GMM fitting. Default \code{1}.
 }}
 }
 \value{

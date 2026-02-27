@@ -4,9 +4,12 @@
 \alias{smooth_field_cpp}
 \title{Bilateral / anisotropic filtering of gradient field}
 \usage{
-smooth_field_cpp(pvec, adj_i, adj_p, field, coords, distance, similarity)
+smooth_field_cpp(pts, pvec, adj_i, adj_p, field, distance, similarity)
 }
 \arguments{
+\item{pts}{A data.frame or data.table with columns \code{X} and \code{Y}
+containing the spatial coordinates of each cell.}
+
 \item{pvec, adj_i, adj_p}{A \code{N} x \code{N} sparse adjacency matrix
 in dgCMatrix format: \code{pvec = diff(adj@p)}, \code{adj_i = adj@i},
 and \code{adj_p = adj@p}}
@@ -15,13 +18,11 @@ and \code{adj_p = adj@p}}
 containing the spatial gradient in expression for each of
 \code{D} latent variables at every point in space.}
 
-\item{coords}{A \code{N} x \code{2} matrix of cell coordinates.}
-
 \item{distance}{Method for computing distance score in weighted average.
-See description for details. Defaults to \code{'euclidean'}.}
+One of \code{"euclidean"}, \code{"projected"}, or \code{"constant"}.}
 
 \item{similarity}{Method for computing similarity score in weighted average.
-See description for details. Defaults to \code{'euclidean'}.}
+One of \code{"euclidean"}, \code{"projected"}, or \code{"constant"}.}
 }
 \value{
 A \code{2} x \code{D} x \code{N} array in column-major ordering

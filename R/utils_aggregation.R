@@ -21,11 +21,12 @@
 #' 
 #' @param aggs A tile data structure.
 #' @param agg_mode Method to use to calculate aggregation scores (1, 2, or 3).
+#' @param seed Random seed for reproducible GMM fitting (modes 2 and 3). Defaults to `1`.
 #' @param ... Additional parameters for different modes:
 #'  1. No additional parameters.
 #'  2. Requires `alpha` and `max_npts`. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
 #'  3. Requires `alpha` and `min_npts`. For `alpha`, 0.2 = conservative merging, 2 = liberal merging.
-#' 
+#'
 #' @returns `aggs` with scores for aggregation stored in attributes:
 #'   \item{edges}{Additional attributes are calculated:
 #'     * `dscore`: Overall score for merging two tiles. Product of `w`, `score_size`, and `dC`.
@@ -35,9 +36,9 @@
 #'   }
 #'   \item{d_mu,d_sig}{Parameters used to calculate `w`.}
 #'   \item{pcs_merged}{Average PCs for merged tile.}
-#' 
+#'
 #' @export
-init_scores = function(aggs, agg_mode, ...) {
+init_scores = function(aggs, agg_mode, seed=1L, ...) {
     ## (1) Gene expression Scores
     # aggs$edges$ll = as.numeric(get_edges_ll(
     #     aggs$pcs, 
@@ -75,8 +76,9 @@ init_scores = function(aggs, agg_mode, ...) {
         stopifnot(!is.null(max_npts))
         
         
-        # GMM to decide which distances are good or bad 
+        # GMM to decide which distances are good or bad
         d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
+        set.seed(seed)
         mres = mclust::Mclust(d, G=2)
         stopifnot(mres$parameters$mean[1] < mres$parameters$mean[2])
         d_sig = sqrt(mres$parameters$variance$sigmasq)[1]
@@ -131,8 +133,9 @@ init_scores = function(aggs, agg_mode, ...) {
         a1 = aggs$meta_data$npts[aggs$edges$to]
         atot = a0 + a1
 
-        # GMM to decide which distances are good or bad 
+        # GMM to decide which distances are good or bad
         d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
+        set.seed(seed)
         mres = mclust::Mclust(d, G=2)
         stopifnot(mres$parameters$mean[1] < mres$parameters$mean[2])
         d_sig = sqrt(mres$parameters$variance$sigmasq)[1]
@@ -372,76 +375,40 @@ merge_aggs = function(
         iter_max = min(nrow(aggs$meta_data) - 1, iter_max)        
     }
     
-    ## memory is a list of lists 
-    ##   disjoint sets 
-    ##   that results from iterative aggregation    
-    memory = merge_aggs_cpp(
-        V_pcs = aggs$pcs, 
-        V_area = aggs$meta_data$area,
-        V_perimeter = aggs$meta_data$perimeter,
-        V_npts = aggs$meta_data$npts,
-        # V_score = aggs$meta_data$score,
-        # V_score_size = aggs$meta_data$score_size, 
-        # V_compactness = aggs$meta_data$compactness, 
-        # V_f_min = aggs$meta_data$f_min, 
-        # V_nedges = aggs$meta_data$nedges, 
-        # V_nedges_internal = aggs$meta_data$nedges_internal, 
-        # V_f_dual_total = aggs$meta_data$f_dual_total, 
+    ## memory is a list of lists
+    ##   disjoint sets
+    ##   that results from iterative aggregation
+    res = merge_aggs_cpp(aggs, iter_max, agg_mode, dscore_thresh, min_npts, max_npts)
+    memory = res$memory
 
-        # V_wl_ext = aggs$meta_data$wl_ext, 
-        # V_w_ext = aggs$meta_data$w_ext, 
-        # V_w_int = aggs$meta_data$w_int, 
-        
-        
-        E_from = aggs$edges$from - 1,
-        E_to = aggs$edges$to - 1,
-        E_npts = aggs$edges$npts, 
-        E_area = aggs$edges$area, 
-        E_edge_length = aggs$edges$edge_length,
-        # E_f_dual_total = aggs$edges$f_dual_total, 
-        # E_nedges = aggs$edges$nedges, 
-        # E_f_min_merge = aggs$edges$f_min_merge, 
-        # E_nedges_merge = aggs$edges$nedges_merge, 
-        # E_nedges_internal_merge = aggs$edges$nedges_internal_merge, 
-        # E_f_dual_total_merge = aggs$edges$f_dual_total_merge, 
-        
-        E_pcs_merge = aggs$pcs_merge, 
-        E_w = aggs$edges$w, 
-        E_perimeter_merge = aggs$edges$perimeter_merge, 
-        # E_wl_ext_merge = aggs$edges$wl_ext_merge, 
-        # E_w_ext_merge = aggs$edges$w_ext_merge, 
-        # E_w_int_merge = aggs$edges$w_int_merge, 
-        E_score_size = aggs$edges$score_size,
-        
-        # E_score_merge = aggs$edges$score_merge,
-        E_dscore = aggs$edges$dscore,
-        
-        d_mu=aggs$d_mu, ## for PCA based scoring 
-        d_sig=aggs$d_sig, ## for PCA based scoring 
-        # weight_size,
-        # weight_compactness,
-        # size_mu,
-        # size_factor, 
-        iter_max, 
-        agg_mode,
-        dscore_thresh,
-        # min_area, 
-        # max_area, 
-        min_npts, 
-        max_npts
-    )
+    ## Unpack updated V (tile) and E (edge) data from C++ result
+    aggs$pcs                   = res$V_pcs
+    aggs$meta_data$area        = res$V_area
+    aggs$meta_data$perimeter   = res$V_perimeter
+    aggs$meta_data$npts        = res$V_npts
+    aggs$edges$from            = res$E_from  # already 1-indexed
+    aggs$edges$to              = res$E_to
+    aggs$edges$npts            = res$E_npts
+    aggs$edges$area            = res$E_area
+    aggs$edges$edge_length     = res$E_edge_length
+    aggs$pcs_merged            = res$E_pcs_merge
+    aggs$edges$w               = res$E_w
+    aggs$edges$perimeter_merge = res$E_perimeter_merge
+    aggs$edges$score_size      = res$E_score_size
+    aggs$edges$dscore          = res$E_dscore
+
     aggs_keep = which(purrr::map_int(memory, length) > 0)
     memory = memory[aggs_keep]
     memory = purrr::map(memory, `+`, 1)
-    
+
     o = order(Reduce(c, memory))
-    aggmap = rep(seq_len(length(memory)), purrr::map_int(memory, length))[o]                               
+    aggmap = rep(seq_len(length(memory)), purrr::map_int(memory, length))[o]
     aggs$meta_data = aggs$meta_data[aggs_keep, ]
     aggs$meta_data$id = seq_len(nrow(aggs$meta_data))
 
     ## save this for mapping to points
     aggs$aggmap = aggmap
-    
+
     e_keep = which(!is.infinite(aggs$edges$dscore))
     aggs$edges = aggs$edges[e_keep, ]
     aggs$pcs_merged = aggs$pcs_merged[e_keep, ]

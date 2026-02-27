@@ -54,6 +54,7 @@ make_tile_graph = function(tiles) {
 #'   `0.2` = conservative merging, `2` = liberal merging. Default `1`.
 #' * `max_npts` — maximum cells per tile during the main merge. Default `50`.
 #' * `min_npts` — minimum cells per tile during the cleanup pass. Default `5`.
+#' * `seed` — random seed for reproducible GMM fitting. Default `1`.
 #'
 #' @returns A tiles list with slots:
 #' * `meta_data` — data.table of tile metadata (id, X, Y, npts, shape,
@@ -71,9 +72,10 @@ make_tile_graph = function(tiles) {
 #' @seealso [run_dmt()], [make_tile_graph()]
 #' @export
 make_tiles = function(cells, mesh, dmt, params = list()) {
-	alpha    = params$alpha    %||% 1
-	max_npts = params$max_npts %||% 50L
-	min_npts = params$min_npts %||% 5L
+	alpha    = params[["alpha"]]    %||% 1
+	max_npts = params[["max_npts"]] %||% 50L
+	min_npts = params[["min_npts"]] %||% 5L
+	seed     = params[["seed"]]     %||% 1L
 
 	# ── Pruned counts (genes × pruned_cells) ──────────────────────────────────
 	counts_all = cells$counts %||% Matrix::sparseMatrix(
@@ -111,13 +113,13 @@ make_tiles = function(cells, mesh, dmt, params = list()) {
 	aggs = dmt_init_tiles(dmt_tmp)
 
 	# ── Round 1: merge until no tile exceeds max_npts ─────────────────────────
-	aggs    = init_scores(aggs, agg_mode = 2, alpha = alpha, max_npts = max_npts)
+	aggs    = init_scores(aggs, agg_mode = 2, seed = seed, alpha = alpha, max_npts = max_npts)
 	aggs    = merge_aggs(aggs, agg_mode = 2, max_npts = max_npts)
 	dmt_tmp = update_dmt_aggid(dmt_tmp, aggs)
 	aggs    = update_agg_shapes(dmt_tmp, aggs)
 
 	# ── Round 2: absorb stray small tiles ─────────────────────────────────────
-	aggs    = init_scores(aggs, agg_mode = 3, alpha = alpha, min_npts = min_npts)
+	aggs    = init_scores(aggs, agg_mode = 3, seed = seed, alpha = alpha, min_npts = min_npts)
 	aggs    = merge_aggs(aggs, agg_mode = 3, min_npts = min_npts)
 	dmt_tmp = update_dmt_aggid(dmt_tmp, aggs)
 	aggs    = update_agg_shapes(dmt_tmp, aggs)

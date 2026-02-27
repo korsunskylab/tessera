@@ -30,9 +30,9 @@
 #' @seealso [make_cells()], [compute_field()]
 #' @export
 make_mesh = function(cells, params = list()) {
-	prune_thresh_quantile = params$prune_thresh_quantile %||% 0.95
-	prune_mincells        = params$prune_mincells        %||% 10
-	prune_thresh          = params$prune_thresh          %||% NA
+	prune_thresh_quantile = params[["prune_thresh_quantile"]] %||% 0.95
+	prune_mincells        = params[["prune_mincells"]]        %||% 10
+	prune_thresh          = params[["prune_thresh"]]          %||% NA
 
 	# Placeholder counts when cells carries none (prune_graph needs a counts slot)
 	counts = cells$counts %||% Matrix::sparseMatrix(
