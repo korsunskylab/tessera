@@ -282,14 +282,16 @@ add_exterior_triangles = function(data) {
         edges[boundary == TRUE][, .(X=x0_tri, Y=y0_tri, area=0, height=0, external=TRUE)]
     ))
     
-    ## Add map from external tris to their points 
-    tri_to_pt_external = Matrix::sparseMatrix(
-        i = rep(1:n_boundary_edges, each = 2), 
-        j = as.numeric(t(as.matrix(edges[boundary == TRUE][, .(from_pt, to_pt)]))), 
-        x = 1, 
-        dims = c(n_boundary_edges, nrow(pts))
-    )
-    tri_to_pt = Matrix::rbind2(tri_to_pt, tri_to_pt_external)    
+    ## Add map from external tris to their points
+    if (n_boundary_edges > 0) {
+        tri_to_pt_external = Matrix::sparseMatrix(
+            i = rep(seq_len(n_boundary_edges), each = 2),
+            j = as.numeric(t(as.matrix(edges[boundary == TRUE][, .(from_pt, to_pt)]))),
+            x = 1,
+            dims = c(n_boundary_edges, nrow(pts))
+        )
+        tri_to_pt = Matrix::rbind2(tri_to_pt, tri_to_pt_external)
+    }    
     
     data$edges = edges
     data$tris = tris

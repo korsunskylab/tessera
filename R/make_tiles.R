@@ -72,10 +72,10 @@ make_tile_graph = function(tiles) {
 #' @seealso [run_dmt()], [make_tile_graph()]
 #' @export
 make_tiles = function(cells, mesh, dmt, params = list()) {
-	alpha    = params$alpha    %||% 1
-	max_npts = params$max_npts %||% 50L
-	min_npts = params$min_npts %||% 5L
-	seed     = params$seed     %||% 1L
+	alpha    = params[["alpha"]]    %||% 1
+	max_npts = params[["max_npts"]] %||% 50L
+	min_npts = params[["min_npts"]] %||% 5L
+	seed     = params[["seed"]]     %||% 1L
 
 	# ── Pruned counts (genes × pruned_cells) ──────────────────────────────────
 	counts_all = cells$counts %||% Matrix::sparseMatrix(
