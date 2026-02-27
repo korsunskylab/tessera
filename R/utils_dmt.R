@@ -239,6 +239,24 @@ get_boundary_shape = function(.SD, boundary) {
     }
 }
     
+# Compute perimeter of an sf geometry from ring coordinates.
+# Works for both POLYGON and MULTIPOLYGON without calling sf::st_length,
+# which segfaults on MULTIPOLYGON in sf 1.0.x (CPL_length null-pointer).
+perimeter_from_coords = function(s) {
+    coords_list = if (inherits(s, "MULTIPOLYGON")) {
+        unlist(unclass(s), recursive = FALSE)
+    } else {
+        unclass(s)
+    }
+    total = 0
+    for (ring in coords_list) {
+        dx = diff(ring[, 1])
+        dy = diff(ring[, 2])
+        total = total + sum(sqrt(dx^2 + dy^2))
+    }
+    total
+}
+
 #' Initialize tiles with shapes and other properties
 #' 
 #' @param dmt A DMT data structure with `pts`, `edges`, and `udv_cells` attributes.
@@ -283,17 +301,7 @@ dmt_init_tiles = function(dmt) {
     aggs$meta_data[
         , `:=`(
             area = sf::st_area(shape),
-            # BUG: sf::st_length(sf::st_boundary(shape)) segfaults in sf 1.0.x when any
-            # shape is MULTIPOLYGON (C-level CPL_length null-pointer, not catchable by
-            # tryCatch alone).  For MULTIPOLYGON, fall back to coordinate-based perimeter.
-            perimeter = purrr::map_dbl(shape, function(s) tryCatch({
-                if (!inherits(s, "MULTIPOLYGON"))
-                    return(as.numeric(sf::st_length(sf::st_boundary(sf::st_sfc(s)))))
-                total = 0
-                for (poly in unclass(s))
-                    for (ring in poly) { dx = diff(ring[,1]); dy = diff(ring[,2]); total = total + sum(sqrt(dx^2 + dy^2)) }
-                total
-            }, error = function(e) NA_real_))
+            perimeter = purrr::map_dbl(shape, perimeter_from_coords)
         )
     ]
     
