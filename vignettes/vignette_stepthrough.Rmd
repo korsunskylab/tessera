@@ -89,7 +89,7 @@ ggplot() +
     geom_point(data = meta_data, aes(X, Y, color = type)) +
     theme_void() +
     scale_color_tableau() +
-    coord_sf(expand = FALSE) +
+    coord_fixed() +
     NULL
 ```
 
@@ -309,7 +309,7 @@ if (show_plots) {
         ggplot(cbind(tiles$meta_data, val=tiles$pcs[, i])) +
             geom_sf(aes(geometry = shape, fill = val)) +
             theme_void(base_size = 16) +
-            coord_sf(expand = FALSE) +
+            coord_sf(datum = NA) +
             scale_fill_gradient2_tableau() +
             guides(color = 'none') +
             labs(title = paste0('PC', i)) +
