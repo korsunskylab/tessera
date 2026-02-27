@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_ui.R
 \name{AddAggsAdjacencyMatrix}
 \alias{AddAggsAdjacencyMatrix}
-\title{Construct tile adjacency matrix from consolidated GetTiles output.}
+\title{Construct tile adjacency matrix from consolidated RunTessera output.}
 \usage{
 AddAggsAdjacencyMatrix(aggs)
 }
@@ -10,5 +10,5 @@ AddAggsAdjacencyMatrix(aggs)
 \item{aggs}{Aggregated tile information after consolidation.}
 }
 \description{
-Construct tile adjacency matrix from consolidated GetTiles output.
+Construct tile adjacency matrix from consolidated RunTessera output.
 }

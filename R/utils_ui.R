@@ -4,7 +4,7 @@
 #' Consolidate Tessera results from multiple samples (groups) after constructing
 #' Tessera tiles separately on cells from each group.
 #' 
-#' @param res Output of running GetTiles (when consolidate == FALSE).
+#' @param res Output of running RunTessera (when consolidate == FALSE).
 #' @param group.by Name of metadata variable that identifies distinct groups.
 #' 
 #' @export
@@ -35,7 +35,7 @@ ConsolidateResults = function(res, group.by) {
     return(list(dmt=all_dmt, aggs=all_aggs))
 }
 
-#' Construct tile adjacency matrix from consolidated GetTiles output.
+#' Construct tile adjacency matrix from consolidated RunTessera output.
 #' 
 #' @param aggs Aggregated tile information after consolidation.
 #' 

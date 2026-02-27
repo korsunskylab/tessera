@@ -2,9 +2,9 @@
 % Please edit documentation in R/make_tiles.R
 \name{make_tiles}
 \alias{make_tiles}
-\title{Agglomerate initial DMT tiles into final spatial tiles}
+\title{Extract initial tiles from DMT segmentation}
 \usage{
-make_tiles(cells, mesh, dmt, params = list())
+make_tiles(cells, mesh, dmt)
 }
 \arguments{
 \item{cells}{A cells list as returned by \code{\link[=make_cells]{make_cells()}}, with
@@ -15,15 +15,6 @@ make_tiles(cells, mesh, dmt, params = list())
 populated by \code{\link[=compute_morse]{compute_morse()}}.}
 
 \item{dmt}{A dmt list as returned by \code{\link[=run_dmt]{run_dmt()}}.}
-
-\item{params}{Named list of agglomeration parameters:
-\itemize{
-\item \code{alpha} — GMM sigma multiplier for transcriptional similarity scoring.
-\code{0.2} = conservative merging, \code{2} = liberal merging. Default \code{1}.
-\item \code{max_npts} — maximum cells per tile during the main merge. Default \code{50}.
-\item \code{min_npts} — minimum cells per tile during the cleanup pass. Default \code{5}.
-\item \code{seed} — random seed for reproducible GMM fitting. Default \code{1}.
-}}
 }
 \value{
 A tiles list with slots:
@@ -31,26 +22,21 @@ A tiles list with slots:
 \item \code{meta_data} — data.table of tile metadata (id, X, Y, npts, shape,
 area, perimeter)
 \item \code{edges}     — data.table of inter-tile edges (from, to, coordinates,
-area, npts, edge_length, scores)
+area, npts, edge_length)
 \item \code{pcs}       — num_tiles × D matrix of per-tile mean embeddings
 \item \code{counts}    — genes × num_tiles sparse count matrix
 \item \code{adj}       — symmetric dgCMatrix tile adjacency (from \code{\link[=make_tile_graph]{make_tile_graph()}})
 \item \code{cell_ids}  — data.table with columns \code{ORIG_ID} and \code{tile_id} mapping
-each surviving cell to its final tile
-\item \code{params}    — list of agglomeration parameters used
+each surviving cell to its initial tile
+\item \code{params}    — list()
 \item \code{meta}      — list()
 }
 }
 \description{
-Takes the initial tile assignment from \code{\link[=run_dmt]{run_dmt()}} and merges tiles using
-two rounds of single-linkage agglomerative clustering:
-\enumerate{
-\item \strong{Main merge} — tiles are merged until none exceed \code{max_npts} cells.
-Each candidate merge is scored by transcriptional similarity (GMM-based),
-size penalty, and change in compactness.
-\item \strong{Cleanup} — remaining tiles with fewer than \code{min_npts} cells are
-absorbed into their best-scoring neighbour.
-}
+Builds one tile per connected component from the initial DMT tile assignment
+produced by \code{\link[=run_dmt]{run_dmt()}}.  Each tile gets a spatial polygon boundary, pooled
+gene counts, and mean PCA embeddings.  The resulting tiles list can be used
+directly or passed to \code{\link[=merge_tiles]{merge_tiles()}} for agglomerative merging.
 }
 \details{
 Typical usage:
@@ -58,9 +44,10 @@ Typical usage:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{field      = compute_field(cells, mesh)
 mesh$morse = compute_morse(field, mesh)
 dmt        = run_dmt(mesh)
-tiles      = make_tiles(cells, mesh, dmt, params)
+tiles_init = make_tiles(cells, mesh, dmt)
+tiles      = merge_tiles(tiles_init, params)
 }\if{html}{\out{</div>}}
 }
 \seealso{
-\code{\link[=run_dmt]{run_dmt()}}, \code{\link[=make_tile_graph]{make_tile_graph()}}
+\code{\link[=merge_tiles]{merge_tiles()}}, \code{\link[=run_dmt]{run_dmt()}}, \code{\link[=make_tile_graph]{make_tile_graph()}}
 }

@@ -8,7 +8,7 @@ Tessera tiles separately on cells from each group.}
 ConsolidateResults(res, group.by)
 }
 \arguments{
-\item{res}{Output of running GetTiles (when consolidate == FALSE).}
+\item{res}{Output of running RunTessera (when consolidate == FALSE).}
 
 \item{group.by}{Name of metadata variable that identifies distinct groups.}
 }

@@ -7,7 +7,7 @@
 make_tile_graph(tiles)
 }
 \arguments{
-\item{tiles}{A tiles list as returned by \code{\link[=make_tiles]{make_tiles()}}.}
+\item{tiles}{A tiles list as returned by \code{\link[=make_tiles]{make_tiles()}} or \code{\link[=merge_tiles]{merge_tiles()}}.}
 }
 \value{
 A \verb{num_tiles × num_tiles} symmetric dgCMatrix where entry (i, j)
@@ -19,5 +19,5 @@ Constructs a symmetric sparse adjacency matrix from the edge list in
 names.
 }
 \seealso{
-\code{\link[=make_tiles]{make_tiles()}}
+\code{\link[=make_tiles]{make_tiles()}}, \code{\link[=merge_tiles]{merge_tiles()}}
 }
