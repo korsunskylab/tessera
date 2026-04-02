@@ -155,6 +155,7 @@ AddSubClusterLabels = function(
 #' @param meta.vars.include Metadata variables to include in the sub-clustered object.
 #' @param harmony.group.by.vars Metadata variables to use for Harmony integration.
 #' @param early_stop Whether to use early stopping in Harmony.
+#' @param ... Additional parameters to pass to `harmony::RunHarmony`. Ignored if `harmony.group.by.vars` is NULL.
 #' 
 #' @returns A Seurat object for the sub-clustered cells.
 #'
@@ -169,7 +170,8 @@ MakeSubClusterObj = function(
     use.existing.embeddings = NULL,
     meta.vars.include = NULL,
     harmony.group.by.vars = NULL,
-    early_stop = TRUE
+    early_stop = TRUE,
+    ...
 ) {
     if (is.null(assay)) {
         assay = Seurat::DefaultAssay(obj)
@@ -208,7 +210,9 @@ MakeSubClusterObj = function(
             obj_sub, harmony.group.by.vars,
             early_stop = early_stop,
             reduction.use = reduction,
-            reduction.save = paste0(reduction, '_harmony'))
+            reduction.save = paste0(reduction, '_harmony'),
+            ...
+        )
         reduction = paste0(reduction, '_harmony')
     }
 
@@ -372,6 +376,7 @@ MakeTileSubClusterObj = function(
 #' @param harmony.group.by.vars Metadata variables to use for Harmony integration.
 #' @param early_stop Whether to use early stopping in Harmony.
 #' @param return_obj_sub If TRUE, return a list with the updated `obj` and the sub-clustered object.
+#' @param ... Additional parameters to pass to `harmony::RunHarmony`. Ignored if `harmony.group.by.vars` is NULL.
 #' 
 #' @returns The input Seurat object with sub-cluster labels added to metadata.
 #' 
@@ -389,7 +394,8 @@ FindSubClusterCustom = function(
     meta.vars.include = NULL,
     harmony.group.by.vars = NULL,
     early_stop = TRUE,
-    return_obj_sub = FALSE
+    return_obj_sub = FALSE,
+    ...
 ) {
     obj_sub = MakeSubClusterObj(obj, cluster, clusters.name = clusters.name,
                                 npcs = npcs, n_neighbors = n_neighbors,
@@ -398,7 +404,9 @@ FindSubClusterCustom = function(
                                 meta.vars.include = meta.vars.include,
                                 harmony.group.by.vars = harmony.group.by.vars,
                                 early_stop = early_stop,
-                                fast_sgd = fast_sgd)
+                                fast_sgd = fast_sgd,
+                                ...
+    )
     if (algorithm == 4) {
         suppressWarnings({    # the igraph conversion spits out a lot of warnings, which is slow if printed
             obj_sub <- Seurat::FindClusters(object = obj_sub, resolution = resolution, algorithm = algorithm,

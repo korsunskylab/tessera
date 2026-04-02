@@ -16,7 +16,8 @@ MakeSubClusterObj(
   use.existing.embeddings = NULL,
   meta.vars.include = NULL,
   harmony.group.by.vars = NULL,
-  early_stop = TRUE
+  early_stop = TRUE,
+  ...
 )
 }
 \arguments{
@@ -42,6 +43,8 @@ to use for sub-clustering. If NULL, compute PCA on the subsetted data.}
 \item{harmony.group.by.vars}{Metadata variables to use for Harmony integration.}
 
 \item{early_stop}{Whether to use early stopping in Harmony.}
+
+\item{...}{Additional parameters to pass to \code{harmony::RunHarmony}. Ignored if \code{harmony.group.by.vars} is NULL.}
 }
 \value{
 A Seurat object for the sub-clustered cells.

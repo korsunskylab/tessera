@@ -20,7 +20,8 @@ FindSubClusterCustom(
   meta.vars.include = NULL,
   harmony.group.by.vars = NULL,
   early_stop = TRUE,
-  return_obj_sub = FALSE
+  return_obj_sub = FALSE,
+  ...
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ to use for sub-clustering. If NULL, compute PCA on the subsetted data.}
 \item{early_stop}{Whether to use early stopping in Harmony.}
 
 \item{return_obj_sub}{If TRUE, return a list with the updated \code{obj} and the sub-clustered object.}
+
+\item{...}{Additional parameters to pass to \code{harmony::RunHarmony}. Ignored if \code{harmony.group.by.vars} is NULL.}
 }
 \value{
 The input Seurat object with sub-cluster labels added to metadata.
