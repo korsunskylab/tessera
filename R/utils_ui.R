@@ -34,6 +34,7 @@ GetTiles = function(...) {
 #' @param embeddings Name of dimensional reduction where pre-computed single-cell embeddings are stored
 #'   (a `num_cells` x `num_dim` matrix of cell embeddings across all latent dimensions).
 #'   If missing, cell embeddings are calculated using PCA. If provided, the `npcs` parameter is ignored.
+#' @param loadings (Optional) Name of dimensional reduction where pre-computed gene loadings are stored.
 #' @param assay Seurat assay to pull data for when using the cell counts. Defaults to the DefaultAssay.
 #' @param group.by Name of column in `obj@meta.data` to use for grouping cells into separate samples.
 #' @param raw_results Whether to return the raw results from [GetTiles.default()].
@@ -54,6 +55,7 @@ GetTiles.Seurat = function(
     obj,
     spatial,
     embeddings = NULL,
+    loadings = NULL,
     dims.use = NULL,
     assay = NULL,
     group.by = NULL,
@@ -61,6 +63,7 @@ GetTiles.Seurat = function(
     tile.id.name = 'tile_id',
     reduction.name = 'pca',
     graph.name = 'tile_adj',
+    graph.name.cells = 'cell_adj',
     add.isolated.cells = TRUE,
     ...
 ) {
@@ -76,13 +79,18 @@ GetTiles.Seurat = function(
 
     if (!is.null(embeddings)) {
         emb <- Seurat::Embeddings(obj, reduction = embeddings)
-        load <- Seurat::Loadings(obj, reduction = embeddings)
         
         if (is.null(dims.use)) {
             dims.use = seq_len(ncol(emb))
         }
         emb = emb[,dims.use,drop=FALSE]
-        load = load[,dims.use,drop=FALSE]
+
+        if (!is.null(loadings)) {
+            load <- Seurat::Loadings(obj, reduction = loadings)
+            load = load[,dims.use,drop=FALSE]
+        } else {
+            load = NULL
+        }
     } else {
         emb <- NULL
         load <- NULL
@@ -135,6 +143,18 @@ GetTiles.Seurat = function(
     }
     obj@meta.data[[tile.id.name]] = as.character(NA)
     obj@meta.data[[tile.id.name]][res$dmt$pts$ORIG_ID] = res$dmt$pts$agg_id
+
+    # Add cell-level embeddings used for Tessera to input Seurat object
+    if (!is.null(embeddings)) {
+        dmt_emb = res$dmt$udv_cells$embeddings
+        emb_tessera = do.call(cbind, replicate(ncol(dmt_emb) / ncol(emb), emb, simplify=FALSE))
+        colnames(emb_tessera) = paste0('PC_', 1:ncol(emb_tessera))
+        emb_tessera[res$dmt$pts$ORIG_ID,] = dmt_emb
+
+        embeddings.name = paste0(embeddings, '_tessera')
+        embeddings.name = tail(make.unique(c(Seurat::Reductions(obj), embeddings.name)), n = 1)
+        obj[[embeddings.name]] <- Seurat::CreateDimReducObject(embeddings = emb_tessera, key = embeddings.name)
+    }
 
     # (Optional) Add back isolated single cells that were pruned out
     if (add.isolated.cells & !is.null(embeddings)) {
@@ -191,10 +211,17 @@ GetTiles.Seurat = function(
     tile_obj[[graph.name]] = Seurat::as.Graph(res$aggs$adj)
 
     # Match tile_id factor levels to order in tile_obj
+    tile_obj@meta.data$id = as.character(tile_obj@meta.data$id)
     obj@meta.data[[tile.id.name]] = factor(
         obj@meta.data[[tile.id.name]],
         levels=tile_obj@meta.data$id
     )
+
+    # Add cell adjacency graph
+    adj_cells = res$dmt$adj
+    rownames(adj_cells) = colnames(obj)
+    colnames(adj_cells) = colnames(obj)
+    obj[[graph.name.cells]] = Seurat::as.Graph(adj_cells)
 
     return(list(obj=obj, tile_obj=tile_obj))
 }
@@ -300,6 +327,12 @@ GetTiles.Seurat = function(
 #'   If either `smooth_distance` or `smooth_similarity` is `'none'`,
 #'   then no smoothing of the gradient field is conducted. Defaults to `'projected'`.
 #' @param smooth_iter Number of rounds of gradient smoothing.
+#' @param on_edges Whether to compute gradients on edges instead of points. Defaults to TRUE.
+#' @param edge_from_tri If `on_edges` is TRUE, whether to update edge gradients from triangles. Defaults to FALSE.
+#' @param edge_from_pt If `on_edges` is TRUE, whether to update edge gradients from points. Defaults to FALSE.
+#' @param f_norm If `TRUE`, set field values to the Frobenius norm of the total derivative.
+#'   If `FALSE`, set field values to the sum of the magnitudes of the directional derivatives
+#'   in the gradient and orthogonal directions.
 #' @param max_npts Maximum number of cells allowed in each tile during the
 #'   agglomerative clustering phase.
 #' @param min_npts Minimum number of cells allowed in each tile during the
@@ -442,9 +475,12 @@ GetTiles.default = function(
     smooth_distance = c('none', 'euclidean', 'projected', 'constant')[3],
     smooth_similarity = c('none', 'euclidean', 'projected', 'constant')[3],
     smooth_iter = 1,
-    on_edges = FALSE,
+    on_edges = TRUE,
+    edge_from_tri = FALSE,
+    edge_from_pt = FALSE,
 
     ###### STEP 2: DMT ######
+    f_norm = FALSE,
 
     ###### STEP 3: AGGREGATION ######
     max_npts = 50,
@@ -529,12 +565,15 @@ GetTiles.default = function(
         if (verbose) message('STEP 1: GRADIENTS ')
         field = compute_gradients(
             dmt, smooth_distance, smooth_similarity,
-            smooth_iter = smooth_iter, on_edges = on_edges)
+            smooth_iter = smooth_iter,
+            on_edges = on_edges,
+            edge_from_tri = edge_from_tri,
+            edge_from_pt = edge_from_pt)
         field = compress_gradients_svd(field)
 
         ## STEP 2: DMT
         if (verbose) message('STEP 2: DMT')
-        dmt = dmt_set_f(dmt, field)
+        dmt = dmt_set_f(dmt, field, f_norm = f_norm)
         dmt$prim = do_primary_forest(dmt)
         dmt$dual = do_dual_forest(dmt)
         dmt$e_sep = dmt_get_separatrices(dmt)
@@ -567,12 +606,31 @@ GetTiles.default = function(
     }, .progress=.progress, .options=.options)
 
     if (consolidate) {
+
+        # Collect cell adjacency matrix used for DMT
+        from_ids = do.call(c, lapply(names(res), function(group) {
+            res[[group]]$dmt$pts$ORIG_ID[res[[group]]$dmt$edges$from_pt]
+        }))
+        to_ids = do.call(c, lapply(names(res), function(group) {
+            res[[group]]$dmt$pts$ORIG_ID[res[[group]]$dmt$edges$to_pt]
+        }))
+        stopifnot(all(from_ids < to_ids))
+        dmt_adj = Matrix::sparseMatrix(
+            i = c(from_ids, to_ids),
+            j = c(to_ids, from_ids),
+            x = 1,
+            dims = c(length(X), length(X))
+        )
+
         if (length(res) > 1) {
             res = ConsolidateResults(res, group.by)
         } else {
             res = res[[1]]
         }
+
         res$aggs = AddAggsAdjacencyMatrix(res$aggs)
+        res$dmt$adj = dmt_adj
+
         return(res)
     } else {
         return(res)
@@ -609,6 +667,10 @@ ConsolidateResults = function(res, group.by) {
     all_dmt$pts = rbindlist(lapply(names(res), function(group) {res[[group]]$dmt$pts}))
     all_dmt$pts[[group.by]] = factor(all_dmt$pts[[group.by]])
     all_dmt$pts$agg_id = paste0(all_dmt$pts[[group.by]], '_', all_dmt$pts$agg_id)
+
+    all_dmt$udv_cells = list(
+        embeddings = do.call(rbind, lapply(names(res), function(group) {res[[group]]$dmt$udv_cells$embeddings}))
+    )
 
     return(list(dmt=all_dmt, aggs=all_aggs))
 }

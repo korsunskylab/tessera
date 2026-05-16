@@ -8,7 +8,9 @@ compute_gradients_edges(
   dmt,
   smooth_distance = "projected",
   smooth_similarity = "euclidean",
-  smooth_iter = 3
+  smooth_iter = 1,
+  edge_from_tri = FALSE,
+  edge_from_pt = FALSE
 )
 }
 \description{

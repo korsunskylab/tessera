@@ -8,6 +8,7 @@
   obj,
   spatial,
   embeddings = NULL,
+  loadings = NULL,
   dims.use = NULL,
   assay = NULL,
   group.by = NULL,
@@ -15,6 +16,7 @@
   tile.id.name = "tile_id",
   reduction.name = "pca",
   graph.name = "tile_adj",
+  graph.name.cells = "cell_adj",
   add.isolated.cells = TRUE,
   ...
 )
@@ -28,6 +30,8 @@ single cell embeddings) stored as dimensional reductions.}
 \item{embeddings}{Name of dimensional reduction where pre-computed single-cell embeddings are stored
 (a \code{num_cells} x \code{num_dim} matrix of cell embeddings across all latent dimensions).
 If missing, cell embeddings are calculated using PCA. If provided, the \code{npcs} parameter is ignored.}
+
+\item{loadings}{(Optional) Name of dimensional reduction where pre-computed gene loadings are stored.}
 
 \item{assay}{Seurat assay to pull data for when using the cell counts. Defaults to the DefaultAssay.}
 
@@ -69,6 +73,12 @@ then no smoothing of the gradient field is conducted. Defaults to \code{'project
 If either \code{smooth_distance} or \code{smooth_similarity} is \code{'none'},
 then no smoothing of the gradient field is conducted. Defaults to \code{'projected'}.}
     \item{\code{smooth_iter}}{Number of rounds of gradient smoothing.}
+    \item{\code{on_edges}}{Whether to compute gradients on edges instead of points. Defaults to TRUE.}
+    \item{\code{edge_from_tri}}{If \code{on_edges} is TRUE, whether to update edge gradients from triangles. Defaults to FALSE.}
+    \item{\code{edge_from_pt}}{If \code{on_edges} is TRUE, whether to update edge gradients from points. Defaults to FALSE.}
+    \item{\code{f_norm}}{If \code{TRUE}, set field values to the Frobenius norm of the total derivative.
+If \code{FALSE}, set field values to the sum of the magnitudes of the directional derivatives
+in the gradient and orthogonal directions.}
     \item{\code{max_npts}}{Maximum number of cells allowed in each tile during the
 agglomerative clustering phase.}
     \item{\code{min_npts}}{Minimum number of cells allowed in each tile during the

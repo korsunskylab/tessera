@@ -4,7 +4,7 @@
 \alias{dmt_set_f}
 \title{Set DMT scalar field values as the Frobenius norm of the total derivative}
 \usage{
-dmt_set_f(dmt, field)
+dmt_set_f(dmt, field, f_norm = FALSE)
 }
 \arguments{
 \item{dmt}{A list containing the mesh data structures:
@@ -36,6 +36,10 @@ to the direction of greatest change (second singular vector).
 \item \verb{len_grad,len_ortho}: Magnitude of directional derivative in the
 gradient and orthogonal directions (singular values).
 }}
+
+\item{f_norm}{If \code{TRUE}, set field values to the Frobenius norm of the total derivative.
+If \code{FALSE}, set field values to the sum of the magnitudes of the
+directional derivatives in the gradient and orthogonal directions.}
 }
 \value{
 \code{dmt} with the following additional attributes:

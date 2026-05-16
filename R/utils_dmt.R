@@ -42,16 +42,26 @@ dmt_get_separatrices = function(dmt) {
 #'     to the direction of greatest change (second singular vector).
 #'   * `len_grad,len_ortho`: Magnitude of directional derivative in the
 #'     gradient and orthogonal directions (singular values).
+#' @param f_norm If `TRUE`, set field values to the Frobenius norm of the total derivative.
+#'   If `FALSE`, set field values to the sum of the magnitudes of the
+#'   directional derivatives in the gradient and orthogonal directions.
 #' 
 #' @returns `dmt` with the following additional attributes:
 #'   `dmt$pts$f`, `dmt$tris$f`, `dmt$edges$f_prim`, and `dmt$edges$f_dual`
 #' 
 #' @export
-dmt_set_f = function(dmt, field) {
-    dmt$pts$f = rowSums(field$pts_svd[, 5:6])
-    dmt$tris$f = rowSums(field$tris_svd[, 5:6])
-    dmt$edges$f_prim = rowSums(field$edges_pts_svd[, 5:6])
-    dmt$edges$f_dual = rowSums(field$edges_tris_svd[, 5:6])
+dmt_set_f = function(dmt, field, f_norm = FALSE) {
+    if (f_norm) {
+        dmt$pts$f = norm(field$pts_svd[, 5:6], type = "F")
+        dmt$tris$f = norm(field$tris_svd[, 5:6], type = "F")
+        dmt$edges$f_prim = norm(field$edges_pts_svd[, 5:6], type = "F")
+        dmt$edges$f_dual = norm(field$edges_tris_svd[, 5:6], type = "F")
+    } else {
+        dmt$pts$f = rowSums(field$pts_svd[, 5:6])
+        dmt$tris$f = rowSums(field$tris_svd[, 5:6])
+        dmt$edges$f_prim = rowSums(field$edges_pts_svd[, 5:6])
+        dmt$edges$f_dual = rowSums(field$edges_tris_svd[, 5:6])
+    }
     return(dmt)
 }
 

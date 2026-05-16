@@ -141,14 +141,16 @@ smooth_field = function(coords, field, adj, include_self=TRUE,
 compute_gradients = function(
     dmt,
     smooth_distance='none', smooth_similarity='none', smooth_iter=1,
-    on_edges = FALSE
+    on_edges = FALSE, edge_from_tri = FALSE, edge_from_pt = FALSE
 ) {
     if (on_edges) {
         return(compute_gradients_edges(
             dmt,
             smooth_distance=smooth_distance,
             smooth_similarity=smooth_similarity,
-            smooth_iter=smooth_iter
+            smooth_iter=smooth_iter,
+            edge_from_tri = edge_from_tri,
+            edge_from_pt = edge_from_pt
         ))
     }
 
