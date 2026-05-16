@@ -6,7 +6,7 @@ derivative
 ## Usage
 
 ``` r
-dmt_set_f(dmt, field)
+dmt_set_f(dmt, field, f_norm = FALSE)
 ```
 
 ## Arguments
@@ -50,6 +50,13 @@ dmt_set_f(dmt, field)
 
   - `len_grad,len_ortho`: Magnitude of directional derivative in the
     gradient and orthogonal directions (singular values).
+
+- f_norm:
+
+  If `TRUE`, set field values to the Frobenius norm of the total
+  derivative. If `FALSE`, set field values to the sum of the magnitudes
+  of the directional derivatives in the gradient and orthogonal
+  directions.
 
 ## Value
 

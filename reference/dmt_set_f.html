@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dmt_set_f</span><span class="op">(</span><span class="va">dmt</span>, <span class="va">field</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dmt_set_f</span><span class="op">(</span><span class="va">dmt</span>, <span class="va">field</span>, f_norm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,6 +78,12 @@ to the direction of greatest change (second singular vector).</p></li>
 <li><p><code>len_grad,len_ortho</code>: Magnitude of directional derivative in the
 gradient and orthogonal directions (singular values).</p></li>
 </ul></dd>
+
+
+<dt id="arg-f-norm">f_norm<a class="anchor" aria-label="anchor" href="#arg-f-norm"></a></dt>
+<dd><p>If <code>TRUE</code>, set field values to the Frobenius norm of the total derivative.
+If <code>FALSE</code>, set field values to the sum of the magnitudes of the
+directional derivatives in the gradient and orthogonal directions.</p></dd>
 
 </dl></div>
     <div class="section level2">

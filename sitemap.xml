@@ -6,10 +6,17 @@
 <url><loc>https://korsunskylab.github.io/tessera/authors.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/index.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/AddAggsAdjacencyMatrix.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/AddSubClusterLabels.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/AddTileMetadata.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/ConsolidateResults.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/FindSubClusterCustom.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/FindTileSubCluster.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/GetTiles.Seurat.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/GetTiles.default.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/GetTiles.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/MakeSubClusterObj.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/MakeTileSubClusterObj.html</loc></url>
+<url><loc>https://korsunskylab.github.io/tessera/reference/MergeClusters.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/RunUMAPCustom.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/add_exterior_triangles.html</loc></url>
 <url><loc>https://korsunskylab.github.io/tessera/reference/assign_unique_rowid_cpp.html</loc></url>

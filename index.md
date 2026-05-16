@@ -71,6 +71,7 @@ for R and C++ integraion.
 Open R and run:
 
 ``` r
+
 devtools::install_github('korsunskylab/tessera')
 ```
 
@@ -101,6 +102,7 @@ mamba install -c conda-forge r-seurat r-ggthemes r-patchwork r-viridis jupyterla
 Next, in an R console:
 
 ``` r
+
 devtools::install_github('korsunskylab/tessera', dependencies = FALSE)  # ~1 min
 ```
 
@@ -116,6 +118,7 @@ standalone mode on a single sample.
 The basic usage is as follows:
 
 ``` r
+
 res = GetTiles(
     X = meta_data$X,         # Vector of cell spatial coordinates
     Y = meta_data$Y,         # Vector of cell spatial coordinates
@@ -148,6 +151,7 @@ for each cell, and 2) a Seurat object where each entry represents an
 individual Tessera tile.
 
 ``` r
+
 options(future.globals.maxSize= 4*1024^3)   # For larger datasets, the memory allowance may need to be increased for parallelization
 future::plan(future::multicore)             # Parallelize over multiple samples (if doing multi-sample analysis)
 res = GetTiles(

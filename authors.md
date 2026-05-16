@@ -14,7 +14,7 @@ Source:
 
 Stein DJ, Tran M, Korsunsky I (2025). “Accurate tiling of spatial
 single-cell data with Tessera.” *bioRxiv*.
-[doi:10.1101/2025.01.17.633630](https://doi.org/10.1101/2025.01.17.633630),
+[doi:10.1101/2025.01.17.633630](https://doi.org/10.1101/2025.01.17.633630).
 https://www.biorxiv.org/content/early/2025/01/22/2025.01.17.633630.full.pdf,
 <https://www.biorxiv.org/content/early/2025/01/22/2025.01.17.633630>.
 

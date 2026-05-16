@@ -17,7 +17,9 @@ compute_gradients(
   smooth_distance = "none",
   smooth_similarity = "none",
   smooth_iter = 1,
-  on_edges = FALSE
+  on_edges = FALSE,
+  edge_from_tri = FALSE,
+  edge_from_pt = FALSE
 )
 ```
 

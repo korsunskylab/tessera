@@ -4,9 +4,18 @@
 
 - [`AddAggsAdjacencyMatrix()`](https://korsunskylab.github.io/tessera/reference/AddAggsAdjacencyMatrix.md)
   : Construct tile adjacency matrix from consolidated GetTiles output.
+- [`AddSubClusterLabels()`](https://korsunskylab.github.io/tessera/reference/AddSubClusterLabels.md)
+  : Add sub-cluster labels to a Seurat object
+- [`AddTileMetadata()`](https://korsunskylab.github.io/tessera/reference/AddTileMetadata.md)
+  : Add tile-level metadata to a matching cell-level Seurat object
 - [`ConsolidateResults()`](https://korsunskylab.github.io/tessera/reference/ConsolidateResults.md)
   : Consolidate Tessera results from multiple samples (groups) after
   constructing Tessera tiles separately on cells from each group.
+- [`FindSubClusterCustom()`](https://korsunskylab.github.io/tessera/reference/FindSubClusterCustom.md)
+  : Find sub-clusters within a specific cluster of a Seurat object
+- [`FindTileSubCluster()`](https://korsunskylab.github.io/tessera/reference/FindTileSubCluster.md)
+  : Find sub-clusters within a specific cluster of a Seurat object using
+  matching tile and cell data
 - [`GetTiles()`](https://korsunskylab.github.io/tessera/reference/GetTiles.md)
   : Generic function that runs the Tessera algorithm on single-cell
   spatial data
@@ -15,6 +24,13 @@
 - [`GetTiles(`*`<default>`*`)`](https://korsunskylab.github.io/tessera/reference/GetTiles.default.md)
   : Run full DMT segmentation pipeline to make aggregated tiles from
   cells
+- [`MakeSubClusterObj()`](https://korsunskylab.github.io/tessera/reference/MakeSubClusterObj.md)
+  : Create a Seurat object for sub-clustering a specific cluster
+- [`MakeTileSubClusterObj()`](https://korsunskylab.github.io/tessera/reference/MakeTileSubClusterObj.md)
+  : Create a Seurat object for sub-clustering a specific cluster from
+  matching tile and cell data
+- [`MergeClusters()`](https://korsunskylab.github.io/tessera/reference/MergeClusters.md)
+  : Merge clusters in a Seurat object
 - [`RunUMAPCustom()`](https://korsunskylab.github.io/tessera/reference/RunUMAPCustom.md)
   : Run UMAP and save fgraph and embeddings in Seurat object
 - [`add_exterior_triangles()`](https://korsunskylab.github.io/tessera/reference/add_exterior_triangles.md)

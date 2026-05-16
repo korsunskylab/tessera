@@ -49,7 +49,7 @@ of cells in order to prioritize favorable merges in each agglomerative clusterin
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,7 +121,10 @@ of cells in order to prioritize favorable merges in each agglomerative clusterin
 <span>  smooth_distance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"euclidean"</span>, <span class="st">"projected"</span>, <span class="st">"constant"</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,</span>
 <span>  smooth_similarity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"euclidean"</span>, <span class="st">"projected"</span>, <span class="st">"constant"</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,</span>
 <span>  smooth_iter <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  on_edges <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  on_edges <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  edge_from_tri <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  edge_from_pt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  f_norm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  max_npts <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  min_npts <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -210,6 +213,24 @@ then no smoothing of the gradient field is conducted. Defaults to <code>'project
 
 <dt id="arg-smooth-iter">smooth_iter<a class="anchor" aria-label="anchor" href="#arg-smooth-iter"></a></dt>
 <dd><p>Number of rounds of gradient smoothing.</p></dd>
+
+
+<dt id="arg-on-edges">on_edges<a class="anchor" aria-label="anchor" href="#arg-on-edges"></a></dt>
+<dd><p>Whether to compute gradients on edges instead of points. Defaults to TRUE.</p></dd>
+
+
+<dt id="arg-edge-from-tri">edge_from_tri<a class="anchor" aria-label="anchor" href="#arg-edge-from-tri"></a></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from triangles. Defaults to FALSE.</p></dd>
+
+
+<dt id="arg-edge-from-pt">edge_from_pt<a class="anchor" aria-label="anchor" href="#arg-edge-from-pt"></a></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from points. Defaults to FALSE.</p></dd>
+
+
+<dt id="arg-f-norm">f_norm<a class="anchor" aria-label="anchor" href="#arg-f-norm"></a></dt>
+<dd><p>If <code>TRUE</code>, set field values to the Frobenius norm of the total derivative.
+If <code>FALSE</code>, set field values to the sum of the magnitudes of the directional derivatives
+in the gradient and orthogonal directions.</p></dd>
 
 
 <dt id="arg-max-npts">max_npts<a class="anchor" aria-label="anchor" href="#arg-max-npts"></a></dt>

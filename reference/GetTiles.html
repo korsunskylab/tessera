@@ -17,7 +17,7 @@ GetTiles interfaces."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,6 +108,20 @@ then no smoothing of the gradient field is conducted. Defaults to <code>'project
 
     <dt><code>smooth_iter</code></dt>
 <dd><p>Number of rounds of gradient smoothing.</p></dd>
+
+    <dt><code>on_edges</code></dt>
+<dd><p>Whether to compute gradients on edges instead of points. Defaults to TRUE.</p></dd>
+
+    <dt><code>edge_from_tri</code></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from triangles. Defaults to FALSE.</p></dd>
+
+    <dt><code>edge_from_pt</code></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from points. Defaults to FALSE.</p></dd>
+
+    <dt><code>f_norm</code></dt>
+<dd><p>If <code>TRUE</code>, set field values to the Frobenius norm of the total derivative.
+If <code>FALSE</code>, set field values to the sum of the magnitudes of the directional derivatives
+in the gradient and orthogonal directions.</p></dd>
 
     <dt><code>max_npts</code></dt>
 <dd><p>Maximum number of cells allowed in each tile during the

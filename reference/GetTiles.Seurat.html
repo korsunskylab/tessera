@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tessera</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@
 <span>  <span class="va">obj</span>,</span>
 <span>  <span class="va">spatial</span>,</span>
 <span>  embeddings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  loadings <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dims.use <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  assay <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group.by <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -55,6 +56,7 @@
 <span>  tile.id.name <span class="op">=</span> <span class="st">"tile_id"</span>,</span>
 <span>  reduction.name <span class="op">=</span> <span class="st">"pca"</span>,</span>
 <span>  graph.name <span class="op">=</span> <span class="st">"tile_adj"</span>,</span>
+<span>  graph.name.cells <span class="op">=</span> <span class="st">"cell_adj"</span>,</span>
 <span>  add.isolated.cells <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -77,6 +79,10 @@ single cell embeddings) stored as dimensional reductions.</p></dd>
 <dd><p>Name of dimensional reduction where pre-computed single-cell embeddings are stored
 (a <code>num_cells</code> x <code>num_dim</code> matrix of cell embeddings across all latent dimensions).
 If missing, cell embeddings are calculated using PCA. If provided, the <code>npcs</code> parameter is ignored.</p></dd>
+
+
+<dt id="arg-loadings">loadings<a class="anchor" aria-label="anchor" href="#arg-loadings"></a></dt>
+<dd><p>(Optional) Name of dimensional reduction where pre-computed gene loadings are stored.</p></dd>
 
 
 <dt id="arg-assay">assay<a class="anchor" aria-label="anchor" href="#arg-assay"></a></dt>
@@ -148,6 +154,20 @@ then no smoothing of the gradient field is conducted. Defaults to <code>'project
 
     <dt><code>smooth_iter</code></dt>
 <dd><p>Number of rounds of gradient smoothing.</p></dd>
+
+    <dt><code>on_edges</code></dt>
+<dd><p>Whether to compute gradients on edges instead of points. Defaults to TRUE.</p></dd>
+
+    <dt><code>edge_from_tri</code></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from triangles. Defaults to FALSE.</p></dd>
+
+    <dt><code>edge_from_pt</code></dt>
+<dd><p>If <code>on_edges</code> is TRUE, whether to update edge gradients from points. Defaults to FALSE.</p></dd>
+
+    <dt><code>f_norm</code></dt>
+<dd><p>If <code>TRUE</code>, set field values to the Frobenius norm of the total derivative.
+If <code>FALSE</code>, set field values to the sum of the magnitudes of the directional derivatives
+in the gradient and orthogonal directions.</p></dd>
 
     <dt><code>max_npts</code></dt>
 <dd><p>Maximum number of cells allowed in each tile during the

@@ -3,6 +3,7 @@
 ## Libs
 
 ``` r
+
 suppressPackageStartupMessages({
     library(tessera)
 
@@ -29,6 +30,7 @@ Small sample MERFISH dataset from Chen et al:
 <https://www.biorxiv.org/content/10.1101/2023.04.04.535379v1.abstract>
 
 ``` r
+
 data('tessera_warmup')
 counts = tessera_warmup$counts
 meta_data = tessera_warmup$meta_data
@@ -36,6 +38,7 @@ meta_vars_include = c('type')
 ```
 
 ``` r
+
 fig.size(8, 8)
 ggplot() + 
     geom_point(data = meta_data, aes(X, Y, color = type)) + 
@@ -51,6 +54,7 @@ Some coarse grained cell types are predefined here, to help interpret
 the tiles we get below.
 
 ``` r
+
 table(meta_data$type)
 #> 
 #> Epithelial Fibroblast Lymphocyte       Mast    Myeloid     Plasma   Vascular 
@@ -68,6 +72,7 @@ returns in two structures:
 The two are tied together through `dmt$pts$agg_id`
 
 ``` r
+
 res = GetTiles(
     X = meta_data$X, 
     Y = meta_data$Y, 
@@ -84,6 +89,7 @@ aggs = res$aggs
 ```
 
 ``` r
+
 fig.size(10, 30)
 purrr::map(1:3, function(i) {
     ggplot(cbind(aggs$meta_data, val=aggs$pcs[, i])) + 
@@ -105,6 +111,7 @@ purrr::map(1:3, function(i) {
 Let’s treat each aggregate as a unit of analysis.
 
 ``` r
+
 obj = Seurat::CreateSeuratObject(
     counts = aggs$counts, 
     meta.data = tibble::column_to_rownames(data.frame(dplyr::select(aggs$meta_data, -shape)), 'id')
@@ -122,6 +129,7 @@ obj[['pca']] = Seurat::CreateDimReducObject(embeddings = aggs$pcs, loadings = dm
 Do all the typical steps for Seurat clustering.
 
 ``` r
+
 .verbose = FALSE
 obj = obj %>% 
     NormalizeData(normalization.method = 'LogNormalize', scale.factor = median(obj@meta.data$nCount_RNA), verbose = .verbose) %>% 
@@ -136,6 +144,7 @@ obj = obj %>%
 Let’s see the aggregate clusters in UMAP and physical space.
 
 ``` r
+
 p1 = DimPlot(obj, reduction = 'umap', group.by = 'seurat_clusters') + scale_color_tableau('Classic 10') 
 p2 = ggplot(obj@meta.data) + 
     geom_sf(aes(geometry = shape, fill = seurat_clusters)) + 
@@ -153,10 +162,12 @@ fig.size(6, 12)
 ## Transfer agg information to cells
 
 ``` r
+
 dmt$pts$spatial_cluster = obj@meta.data$seurat_clusters[dmt$pts$agg_id]
 ```
 
 ``` r
+
 p1 = ggplot() + 
     geom_sf(data = obj@meta.data, aes(geometry = shape), fill = NA) + 
     geom_point(data = dmt$pts, aes(X, Y, color = type)) + 
@@ -182,6 +193,7 @@ p1 | p2
 Let’s look at the composition of the spatial clusters.
 
 ``` r
+
 fig.size(8, 10)
 dmt$pts %>% 
     with(table(type, spatial_cluster)) %>% 
@@ -200,6 +212,7 @@ dmt$pts %>%
 We can also query genes in space as we usually do in cells.
 
 ``` r
+
 feature = 'MKI67' ## dividing cells 
 # feature = 'CD3E' ## T cells 
 
@@ -217,10 +230,11 @@ ggplot() +
 ## Session Info
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.6.0 (2026-04-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -239,51 +253,51 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#>  [1] purrr_1.2.1        future_1.68.0      patchwork_1.3.2    viridis_0.6.5     
-#>  [5] viridisLite_0.4.2  ggthemes_5.2.0     ggplot2_4.0.1      Seurat_5.4.0      
-#>  [9] SeuratObject_5.3.0 sp_2.2-0           tessera_0.1.10     Rcpp_1.1.1        
-#> [13] data.table_1.18.0 
+#>  [1] purrr_1.2.2        future_1.70.0      patchwork_1.3.2    viridis_0.6.5     
+#>  [5] viridisLite_0.4.3  ggthemes_5.2.0     ggplot2_4.0.3      Seurat_5.5.0      
+#>  [9] SeuratObject_5.4.0 sp_2.2-1           tessera_0.1.12     Rcpp_1.1.1-1.1    
+#> [13] data.table_1.18.4 
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] RColorBrewer_1.1-3     jsonlite_2.0.0         magrittr_2.0.4        
-#>   [4] spatstat.utils_3.2-1   farver_2.1.2           rmarkdown_2.30        
-#>   [7] fs_1.6.6               ragg_1.5.0             vctrs_0.6.5           
-#>  [10] ROCR_1.0-11            spatstat.explore_3.6-0 htmltools_0.5.9       
-#>  [13] sass_0.4.10            sctransform_0.4.3      parallelly_1.46.1     
-#>  [16] KernSmooth_2.23-26     bslib_0.9.0            htmlwidgets_1.6.4     
+#>   [1] RColorBrewer_1.1-3     jsonlite_2.0.0         magrittr_2.0.5        
+#>   [4] spatstat.utils_3.2-3   farver_2.1.2           rmarkdown_2.31        
+#>   [7] fs_2.1.0               ragg_1.5.2             vctrs_0.7.3           
+#>  [10] ROCR_1.0-12            spatstat.explore_3.8-0 htmltools_0.5.9       
+#>  [13] sass_0.4.10            sctransform_0.4.3      parallelly_1.47.0     
+#>  [16] KernSmooth_2.23-26     bslib_0.10.0           htmlwidgets_1.6.4     
 #>  [19] desc_1.4.3             ica_1.0-3              plyr_1.8.9            
-#>  [22] plotly_4.11.0          zoo_1.8-15             cachem_1.1.0          
-#>  [25] igraph_2.2.1           mime_0.13              lifecycle_1.0.5       
-#>  [28] pkgconfig_2.0.3        Matrix_1.7-4           R6_2.6.1              
-#>  [31] fastmap_1.2.0          magic_1.6-1            fitdistrplus_1.2-4    
-#>  [34] shiny_1.12.1           digest_0.6.39          furrr_0.3.1           
-#>  [37] tensor_1.5.1           RSpectra_0.16-2        irlba_2.3.5.1         
-#>  [40] textshaping_1.0.4      labeling_0.4.3         progressr_0.18.0      
-#>  [43] spatstat.sparse_3.1-0  httr_1.4.7             polyclip_1.10-7       
-#>  [46] abind_1.4-8            compiler_4.5.2         proxy_0.4-29          
-#>  [49] withr_3.0.2            S7_0.2.1               DBI_1.2.3             
-#>  [52] fastDummies_1.7.5      MASS_7.3-65            classInt_0.4-11       
-#>  [55] tools_4.5.2            units_1.0-0            lmtest_0.9-40         
-#>  [58] otel_0.2.0             httpuv_1.6.16          future.apply_1.20.1   
-#>  [61] goftest_1.2-3          glue_1.8.0             nlme_3.1-168          
-#>  [64] promises_1.5.0         grid_4.5.2             sf_1.0-24             
-#>  [67] Rtsne_0.17             cluster_2.1.8.1        reshape2_1.4.5        
+#>  [22] plotly_4.12.0          zoo_1.8-15             cachem_1.1.0          
+#>  [25] igraph_2.3.1           mime_0.13              lifecycle_1.0.5       
+#>  [28] pkgconfig_2.0.3        Matrix_1.7-5           R6_2.6.1              
+#>  [31] fastmap_1.2.0          magic_1.6-1            fitdistrplus_1.2-6    
+#>  [34] shiny_1.13.0           digest_0.6.39          furrr_0.4.0           
+#>  [37] tensor_1.5.1           RSpectra_0.16-2        irlba_2.3.7           
+#>  [40] textshaping_1.0.5      labeling_0.4.3         progressr_0.19.0      
+#>  [43] spatstat.sparse_3.1-0  httr_1.4.8             polyclip_1.10-7       
+#>  [46] abind_1.4-8            compiler_4.6.0         proxy_0.4-29          
+#>  [49] withr_3.0.2            S7_0.2.2               DBI_1.3.0             
+#>  [52] fastDummies_1.7.6      MASS_7.3-65            classInt_0.4-11       
+#>  [55] tools_4.6.0            units_1.0-1            lmtest_0.9-40         
+#>  [58] otel_0.2.0             httpuv_1.6.17          future.apply_1.20.2   
+#>  [61] goftest_1.2-3          glue_1.8.1             nlme_3.1-169          
+#>  [64] promises_1.5.0         grid_4.6.0             sf_1.1-1              
+#>  [67] Rtsne_0.17             cluster_2.1.8.2        reshape2_1.4.5        
 #>  [70] generics_0.1.4         gtable_0.3.6           spatstat.data_3.1-9   
-#>  [73] class_7.3-23           tidyr_1.3.2            spatstat.geom_3.6-1   
-#>  [76] RcppAnnoy_0.0.23       ggrepel_0.9.6          RANN_2.6.2            
+#>  [73] class_7.3-23           tidyr_1.3.2            spatstat.geom_3.7-3   
+#>  [76] RcppAnnoy_0.0.23       ggrepel_0.9.8          RANN_2.6.2            
 #>  [79] pillar_1.11.1          stringr_1.6.0          spam_2.11-3           
-#>  [82] RcppHNSW_0.6.0         later_1.4.5            splines_4.5.2         
-#>  [85] dplyr_1.1.4            lattice_0.22-7         survival_3.8-3        
+#>  [82] RcppHNSW_0.6.0         later_1.4.8            splines_4.6.0         
+#>  [85] dplyr_1.2.1            lattice_0.22-9         survival_3.8-6        
 #>  [88] deldir_2.0-4           tidyselect_1.2.1       miniUI_0.1.2          
 #>  [91] pbapply_1.7-4          knitr_1.51             gridExtra_2.3         
-#>  [94] scattermore_1.2        xfun_0.55              matrixStats_1.5.0     
-#>  [97] stringi_1.8.7          lazyeval_0.2.2         yaml_2.3.12           
+#>  [94] scattermore_1.2        xfun_0.57              matrixStats_1.5.0     
+#>  [97] stringi_1.8.7          lazyeval_0.2.3         yaml_2.3.12           
 #> [100] evaluate_1.0.5         codetools_0.2-20       tibble_3.3.1          
-#> [103] cli_3.6.5              uwot_0.2.4             geometry_0.5.2        
-#> [106] xtable_1.8-4           reticulate_1.44.1      systemfonts_1.3.1     
-#> [109] jquerylib_0.1.4        globals_0.18.0         spatstat.random_3.4-3 
-#> [112] png_0.1-8              spatstat.univar_3.1-5  parallel_4.5.2        
+#> [103] cli_3.6.6              uwot_0.2.4             geometry_0.5.2        
+#> [106] xtable_1.8-8           reticulate_1.46.0      systemfonts_1.3.2     
+#> [109] jquerylib_0.1.4        globals_0.19.1         spatstat.random_3.4-5 
+#> [112] png_0.1-9              spatstat.univar_3.1-7  parallel_4.6.0        
 #> [115] pkgdown_2.2.0          dotCall64_1.2          mclust_6.1.2          
-#> [118] listenv_0.10.0         scales_1.4.0           e1071_1.7-17          
-#> [121] ggridges_0.5.7         rlang_1.1.7            cowplot_1.2.0
+#> [118] listenv_0.10.1         scales_1.4.0           e1071_1.7-17          
+#> [121] ggridges_0.5.7         rlang_1.2.0            cowplot_1.2.0
 ```
