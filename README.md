@@ -97,8 +97,8 @@ The `GetTiles` function can use cell embeddings that have already been pre-compu
 By default, the output is a pair of Seurat objects: 1) a single-cell Seurat object updated with tile assignments for each cell, and 2) a Seurat object
 where each entry represents an individual Tessera tile.
 ```R
-options(future.globals.maxSize= 4*1024^3)   # For larger datasets, the memory allowance may need to be increased for parallelization
-future::plan(future::multicore)             # Parallelize over multiple samples (if doing multi-sample analysis)
+future::plan(future::multicore)             # Parallelize over multiple samples (if doing multi-sample analysis),
+                                            # see future.globals.maxSize parameter in GetTiles below
 res = GetTiles(
     obj,        # Single-cell Seurat object
     'spatial',  # Name of dimesional reduction where x/y coordinates are stored
@@ -110,6 +110,8 @@ res = GetTiles(
     dims.use = 1:25,                                   # Choose how many embedding dimensions to use
     prune_thresh_quantile = 0.99, prune_min_cells = 1, # Control pruning of long edges and disconnected cells
     max_npts = 50, min_npts = 5,                       # Control size of Tessera tiles
+
+    future.globals.maxSize = 4*1024^3       # For larger datasets, the memory allowance may need to be increased for parallelization
     ...
 )
 obj = res$obj                # Seurat object of single-cells (with cell-to-tile mapping)
