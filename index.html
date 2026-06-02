@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Accurate Tiling of Spatial Single-Cell Data • tessera</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Accurate Tiling of Spatial Single-Cell Data">
 <meta name="description" content="An algorithm for segmenting single-cell resolution spatial omics data into small multicellular tiles whose edges track with natural tissue boundaries. These tiles can then be used in downstream analysis to label and define tissue regions across samples.">
@@ -158,24 +158,25 @@
 <h3 id="seurat-objects-multi-sample">Seurat Objects (Multi-sample)<a class="anchor" aria-label="anchor" href="#seurat-objects-multi-sample"></a>
 </h3>
 <p>Tessera can also be applied directly to a Seurat object containing single cells with spatial coordinates. The <code>GetTiles</code> function can use cell embeddings that have already been pre-computed (and integrated, if there are multiple samples). By default, the output is a pair of Seurat objects: 1) a single-cell Seurat object updated with tile assignments for each cell, and 2) a Seurat object where each entry represents an individual Tessera tile.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>future.globals.maxSize<span class="op">=</span> <span class="fl">4</span><span class="op">*</span><span class="fl">1024</span><span class="op">^</span><span class="fl">3</span><span class="op">)</span>   <span class="co"># For larger datasets, the memory allowance may need to be increased for parallelization</span></span>
-<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multicore.html" class="external-link">multicore</a></span><span class="op">)</span>             <span class="co"># Parallelize over multiple samples (if doing multi-sample analysis)</span></span>
-<span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="reference/GetTiles.html">GetTiles</a></span><span class="op">(</span></span>
-<span>    <span class="va">obj</span>,        <span class="co"># Single-cell Seurat object</span></span>
-<span>    <span class="st">'spatial'</span>,  <span class="co"># Name of dimesional reduction where x/y coordinates are stored</span></span>
-<span></span>
-<span>    embeddings <span class="op">=</span> <span class="st">'harmony'</span>,  <span class="co"># (Optional) Name of dimensional reduction where pre-computed single-cell embeddings are stored</span></span>
-<span>    group.by <span class="op">=</span> <span class="st">'sample_id'</span>,  <span class="co"># (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.</span></span>
-<span></span>
-<span>    <span class="co"># Additional Tessera algorithm parameters</span></span>
-<span>    dims.use <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">25</span>,                                   <span class="co"># Choose how many embedding dimensions to use</span></span>
-<span>    prune_thresh_quantile <span class="op">=</span> <span class="fl">0.99</span>, prune_min_cells <span class="op">=</span> <span class="fl">1</span>, <span class="co"># Control pruning of long edges and disconnected cells</span></span>
-<span>    max_npts <span class="op">=</span> <span class="fl">50</span>, min_npts <span class="op">=</span> <span class="fl">5</span>,                       <span class="co"># Control size of Tessera tiles</span></span>
-<span>    <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">obj</span> <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">obj</span>                <span class="co"># Seurat object of single-cells (with cell-to-tile mapping)</span></span>
-<span><span class="va">tile_obj</span> <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">tile_obj</span>      <span class="co"># Seurat object of Tessera tiles</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multicore)             <span class="co"># Parallelize over multiple samples (if doing multi-sample analysis),</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                                            <span class="co"># see future.globals.maxSize parameter in GetTiles below</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">GetTiles</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    obj,        <span class="co"># Single-cell Seurat object</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="st">'spatial'</span>,  <span class="co"># Name of dimesional reduction where x/y coordinates are stored</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="at">embeddings =</span> <span class="st">'harmony'</span>,  <span class="co"># (Optional) Name of dimensional reduction where pre-computed single-cell embeddings are stored</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    <span class="at">group.by =</span> <span class="st">'sample_id'</span>,  <span class="co"># (Optional) Name of meta.data column that provides sample IDs. If missing, treated as a single sample.</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    <span class="co"># Additional Tessera algorithm parameters</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="at">dims.use =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>,                                   <span class="co"># Choose how many embedding dimensions to use</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">prune_thresh_quantile =</span> <span class="fl">0.99</span>, <span class="at">prune_min_cells =</span> <span class="dv">1</span>, <span class="co"># Control pruning of long edges and disconnected cells</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    <span class="at">max_npts =</span> <span class="dv">50</span>, <span class="at">min_npts =</span> <span class="dv">5</span>,                       <span class="co"># Control size of Tessera tiles</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    <span class="at">future.globals.maxSize =</span> <span class="dv">4</span><span class="sc">*</span><span class="dv">1024</span><span class="sc">^</span><span class="dv">3</span>       <span class="co"># For larger datasets, the memory allowance may need to be increased for parallelization</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    ...</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>)</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>obj <span class="ot">=</span> res<span class="sc">$</span>obj                <span class="co"># Seurat object of single-cells (with cell-to-tile mapping)</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>tile_obj <span class="ot">=</span> res<span class="sc">$</span>tile_obj      <span class="co"># Seurat object of Tessera tiles</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

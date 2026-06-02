@@ -504,7 +504,7 @@ sessionInfo()
 #> [5] ggplot2_4.0.3     tessera_0.1.12    Rcpp_1.1.1-1.1    data.table_1.18.4
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6       xfun_0.57          bslib_0.10.0       htmlwidgets_1.6.4 
+#>  [1] gtable_0.3.6       xfun_0.58          bslib_0.11.0       htmlwidgets_1.6.4 
 #>  [5] lattice_0.22-9     vctrs_0.7.3        tools_4.6.0        generics_0.1.4    
 #>  [9] parallel_4.6.0     tibble_3.3.1       proxy_0.4-29       pkgconfig_2.0.3   
 #> [13] Matrix_1.7-5       KernSmooth_2.23-26 RColorBrewer_1.1-3 S7_0.2.2          
@@ -518,7 +518,7 @@ sessionInfo()
 #> [45] listenv_0.10.1     labeling_0.4.3     magic_1.6-1        fastmap_1.2.0     
 #> [49] grid_4.6.0         cli_3.6.6          magrittr_2.0.5     e1071_1.7-17      
 #> [53] withr_3.0.2        scales_1.4.0       rmarkdown_2.31     globals_0.19.1    
-#> [57] igraph_2.3.1       otel_0.2.0         gridExtra_2.3      ragg_1.5.2        
+#> [57] igraph_2.3.2       otel_0.2.0         gridExtra_2.3      ragg_1.5.2        
 #> [61] evaluate_1.0.5     knitr_1.51         geometry_0.5.2     rlang_1.2.0       
 #> [65] glue_1.8.1         DBI_1.3.0          jsonlite_2.0.0     R6_2.6.1          
 #> [69] systemfonts_1.3.2  fs_2.1.0           units_1.0-1
