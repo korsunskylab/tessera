@@ -76,7 +76,7 @@ init_scores = function(aggs, agg_mode, ...) {
         
         
         # GMM to decide which distances are good or bad 
-        d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
+        d = sqrt(rowSums((aggs$pcs[aggs$edges$from,,drop=FALSE] - aggs$pcs[aggs$edges$to,,drop=FALSE])^2))
         mres = mclust::Mclust(d, G=2)
         ord = order(mres$parameters$mean)
         stopifnot(mres$parameters$mean[ord[1]] < mres$parameters$mean[ord[2]])
@@ -97,7 +97,7 @@ init_scores = function(aggs, agg_mode, ...) {
         a0 = aggs$meta_data$npts[aggs$edges$from]
         a1 = aggs$meta_data$npts[aggs$edges$to]
         atot = a0 + a1
-        aggs$pcs_merged = sweep(aggs$pcs[aggs$edges$from, ], 1, a0, '*') + sweep(aggs$pcs[aggs$edges$to, ], 1, a1, '*')
+        aggs$pcs_merged = sweep(aggs$pcs[aggs$edges$from,,drop=FALSE], 1, a0, '*') + sweep(aggs$pcs[aggs$edges$to,,drop=FALSE], 1, a1, '*')
         aggs$pcs_merged = sweep(aggs$pcs_merged, 1, atot, '/')
         aggs$edges$perimeter_merge = aggs$meta_data$perimeter[aggs$edges$from] + aggs$meta_data$perimeter[aggs$edges$to] - 2 * aggs$edges$edge_length
         # aggs$edges$nedges_internal_merge = 1
@@ -133,7 +133,7 @@ init_scores = function(aggs, agg_mode, ...) {
         atot = a0 + a1
 
         # GMM to decide which distances are good or bad 
-        d = sqrt(rowSums((aggs$pcs[aggs$edges$from, ] - aggs$pcs[aggs$edges$to, ])^2))
+        d = sqrt(rowSums((aggs$pcs[aggs$edges$from,,drop=FALSE] - aggs$pcs[aggs$edges$to,,drop=FALSE])^2))
         mres = mclust::Mclust(d, G=2)
         ord = order(mres$parameters$mean)
         stopifnot(mres$parameters$mean[ord[1]] < mres$parameters$mean[ord[2]])
@@ -446,10 +446,10 @@ merge_aggs = function(
     
     e_keep = which(!is.infinite(aggs$edges$dscore))
     aggs$edges = aggs$edges[e_keep, ]
-    aggs$pcs_merged = aggs$pcs_merged[e_keep, ]
+    aggs$pcs_merged = aggs$pcs_merged[e_keep,,drop=FALSE]
     aggs$edges$from = aggmap[aggs$edges$from]
     aggs$edges$to = aggmap[aggs$edges$to]
-    aggs$pcs = aggs$pcs[aggs_keep, ]
+    aggs$pcs = aggs$pcs[aggs_keep,,drop=FALSE]
     
     return(aggs)
 

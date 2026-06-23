@@ -70,7 +70,7 @@ scale_data = function (A, margin = 1, thresh = 10) {
 do_pca = function(counts, npcs) {
     logcpx = normalize_data(counts)
     Z = scale_data(logcpx)
-    Z = Z[which(is.na(Matrix::rowSums(Z)) == 0), ]
+    Z = Z[which(is.na(Matrix::rowSums(Z)) == 0),,drop=FALSE]
     pres = RSpectra::svds(Z, npcs)
     V = sweep(pres$v, 2, pres$d, '*')
     colnames(V) = paste0('PC', 1:npcs)

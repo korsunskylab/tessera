@@ -544,7 +544,7 @@ GetTiles.default = function(
 
         ## STEP 0: PREPARE DATA STRUCTURES
         if (verbose) message('STEP 0: PREPARE DATA STRUCTURES')
-        dmt = init_data(X[idx], Y[idx], counts[,idx], meta_data[idx,], meta_vars_include)
+        dmt = init_data(X[idx], Y[idx], counts[,idx,drop=FALSE], meta_data[idx,,drop=FALSE], meta_vars_include)
         dmt = prune_graph(dmt, thresh_quantile = prune_thresh_quantile,
                         mincells = prune_min_cells, thresh = prune_thresh)
         dmt = add_exterior_triangles(dmt)
@@ -554,7 +554,7 @@ GetTiles.default = function(
         } else {
             dmt$udv_cells = list(
                 loadings = loadings,
-                embeddings = embeddings[idx,][as.integer(dmt$pts$ORIG_ID),]
+                embeddings = embeddings[idx,,drop=FALSE][as.integer(dmt$pts$ORIG_ID),,drop=FALSE]
             )
         }
         if (any(smooth_emb > 0)) {
