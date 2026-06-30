@@ -333,11 +333,12 @@ dmt_init_tiles = function(dmt) {
 #' @export
 dmt_assign_tiles = function(dmt) {
     e = setdiff(seq_len(nrow(dmt$edges)), dmt$e_sep)
-    # igraph::components(igraph::from_edgelist()$fun(as.matrix(dmt$edges)[e, c("from_pt", "to_pt")], FALSE))$membership
-    g = Matrix::sparseMatrix(i = dmt$edges$from_pt[e], j = dmt$edges$to_pt[e], x = 1, dims = c(nrow(dmt$pts), nrow(dmt$pts)))
-    g = igraph::from_adjacency()$fun(g, 'undirected')
+    n_pts = nrow(dmt$pts)
+    el = cbind(dmt$edges$from_pt[e], dmt$edges$to_pt[e])
+    g = igraph::make_empty_graph(n = n_pts, directed = FALSE)
+    g = igraph::add_edges(g, as.vector(t(el)))
     dmt$pts$agg_id = igraph::components(g)$membership
     dmt$edges$agg_from = dmt$pts$agg_id[dmt$edges$from_pt]
-    dmt$edges$agg_to = dmt$pts$agg_id[dmt$edges$to_pt]    
+    dmt$edges$agg_to = dmt$pts$agg_id[dmt$edges$to_pt]
     return(dmt)
 }
