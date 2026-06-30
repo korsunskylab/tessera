@@ -52,15 +52,15 @@ dmt_get_separatrices = function(dmt) {
 #' @export
 dmt_set_f = function(dmt, field, f_norm = FALSE) {
     if (f_norm) {
-        dmt$pts$f = norm(field$pts_svd[, 5:6], type = "F")
-        dmt$tris$f = norm(field$tris_svd[, 5:6], type = "F")
-        dmt$edges$f_prim = norm(field$edges_pts_svd[, 5:6], type = "F")
-        dmt$edges$f_dual = norm(field$edges_tris_svd[, 5:6], type = "F")
+        dmt$pts$f = norm(field$pts_svd[, 5:6, drop=FALSE], type = "F")
+        dmt$tris$f = norm(field$tris_svd[, 5:6, drop=FALSE], type = "F")
+        dmt$edges$f_prim = norm(field$edges_pts_svd[, 5:6, drop=FALSE], type = "F")
+        dmt$edges$f_dual = norm(field$edges_tris_svd[, 5:6, drop=FALSE], type = "F")
     } else {
-        dmt$pts$f = rowSums(field$pts_svd[, 5:6])
-        dmt$tris$f = rowSums(field$tris_svd[, 5:6])
-        dmt$edges$f_prim = rowSums(field$edges_pts_svd[, 5:6])
-        dmt$edges$f_dual = rowSums(field$edges_tris_svd[, 5:6])
+        dmt$pts$f = rowSums(field$pts_svd[, 5:6, drop=FALSE])
+        dmt$tris$f = rowSums(field$tris_svd[, 5:6, drop=FALSE])
+        dmt$edges$f_prim = rowSums(field$edges_pts_svd[, 5:6, drop=FALSE])
+        dmt$edges$f_dual = rowSums(field$edges_tris_svd[, 5:6, drop=FALSE])
     }
     return(dmt)
 }
@@ -333,11 +333,12 @@ dmt_init_tiles = function(dmt) {
 #' @export
 dmt_assign_tiles = function(dmt) {
     e = setdiff(seq_len(nrow(dmt$edges)), dmt$e_sep)
-    # igraph::components(igraph::from_edgelist()$fun(as.matrix(dmt$edges)[e, c("from_pt", "to_pt")], FALSE))$membership
-    g = Matrix::sparseMatrix(i = dmt$edges$from_pt[e], j = dmt$edges$to_pt[e], x = 1, dims = c(nrow(dmt$pts), nrow(dmt$pts)))
-    g = igraph::from_adjacency()$fun(g, 'undirected')
+    n_pts = nrow(dmt$pts)
+    el = cbind(dmt$edges$from_pt[e], dmt$edges$to_pt[e])
+    g = igraph::make_empty_graph(n = n_pts, directed = FALSE)
+    g = igraph::add_edges(g, as.vector(t(el)))
     dmt$pts$agg_id = igraph::components(g)$membership
     dmt$edges$agg_from = dmt$pts$agg_id[dmt$edges$from_pt]
-    dmt$edges$agg_to = dmt$pts$agg_id[dmt$edges$to_pt]    
+    dmt$edges$agg_to = dmt$pts$agg_id[dmt$edges$to_pt]
     return(dmt)
 }

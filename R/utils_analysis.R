@@ -36,7 +36,7 @@ RunUMAPCustom = function(
 
     embeddings = Seurat::Embeddings(obj, reduction)
     if (!is.null(dims)) {
-        embeddings = embeddings[,dims]
+        embeddings = embeddings[,dims,drop=FALSE]
     }
 
     if (fgraph_only) {
@@ -182,9 +182,9 @@ MakeSubClusterObj = function(
     # counts = obj[["RNA"]]$counts[,subset_idx]
     # colnames(counts) = NULL
     obj_sub = Seurat::CreateSeuratObject(
-        counts = obj[[assay]]$counts[,subset_idx],
+        counts = obj[[assay]]$counts[,subset_idx,drop=FALSE],
         # counts = counts,
-        meta.data = obj@meta.data[subset_idx, meta.vars.include]
+        meta.data = obj@meta.data[subset_idx, meta.vars.include, drop=FALSE]
     )
 
     if (is.null(use.existing.embeddings)) {
@@ -198,7 +198,7 @@ MakeSubClusterObj = function(
         reduction = "pca"
     } else {
         obj_sub[[use.existing.embeddings]] <- Seurat::CreateDimReducObject(
-            embeddings = Seurat::Embeddings(obj, use.existing.embeddings)[subset_idx,],
+            embeddings = Seurat::Embeddings(obj, use.existing.embeddings)[subset_idx,,drop=FALSE],
             loadings = Seurat::Loadings(obj, use.existing.embeddings),
             key = use.existing.embeddings
         )
@@ -270,7 +270,7 @@ MakeTileSubClusterObj = function(
     subset_idx = which(tile_obj@meta.data[[clusters.name]] == cluster)
     meta.vars.include = unique(c(meta.vars.include, harmony.group.by.vars))
     tile_obj_sub = Seurat::CreateSeuratObject(
-        counts = tile_obj[[tile_assay]]$counts[,subset_idx],
+        counts = tile_obj[[tile_assay]]$counts[,subset_idx,drop=FALSE],
         meta.data = tile_obj@meta.data[subset_idx, meta.vars.include, drop=FALSE]
     )
     
@@ -283,7 +283,7 @@ MakeTileSubClusterObj = function(
         meta.vars.include = unique(c(meta.vars.include, harmony.group.by.vars, 'tile_id'))
         
         cell_obj_sub = Seurat::CreateSeuratObject(
-            counts = cell_obj[[cell_assay]]$counts[,cell_subset_idx],
+            counts = cell_obj[[cell_assay]]$counts[,cell_subset_idx,drop=FALSE],
             meta.data = cell_obj@meta.data[cell_subset_idx, meta.vars.include, drop=FALSE]
         )
         
@@ -309,7 +309,7 @@ MakeTileSubClusterObj = function(
         embeddings = Seurat::Embeddings(cell_obj_sub, reduction)
         loadings = Seurat::Loadings(cell_obj_sub, reduction)
         if (!all(smooth_emb == 0)) {
-            adj = Seurat::as.sparse(cell_obj[[graph.name.cells]])[cell_subset_idx,cell_subset_idx]
+            adj = Seurat::as.sparse(cell_obj[[graph.name.cells]])[cell_subset_idx,cell_subset_idx,drop=FALSE]
             diag(adj) = 1
             adj = adj / Matrix::colSums(adj)  # normalize
 
@@ -336,13 +336,13 @@ MakeTileSubClusterObj = function(
         tile_obj_sub[[reduction]] <- Seurat::CreateDimReducObject(
             embeddings = aggregate_embeddings(
                 embeddings, droplevels(cell_obj_sub$tile_id)
-            )[colnames(tile_obj_sub),],
+            )[colnames(tile_obj_sub),,drop=FALSE],
             loadings = loadings,
             key = reduction
         )
     } else {
         tile_obj_sub[[use.existing.embeddings]] <- Seurat::CreateDimReducObject(
-            embeddings = Seurat::Embeddings(tile_obj, use.existing.embeddings)[subset_idx,],
+            embeddings = Seurat::Embeddings(tile_obj, use.existing.embeddings)[subset_idx,,drop=FALSE],
             loadings = Seurat::Loadings(tile_obj, use.existing.embeddings),
             key = use.existing.embeddings
         )
