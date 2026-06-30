@@ -479,7 +479,7 @@ head(dmt$pts[, .(ORIG_ID, agg_id)])
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -501,24 +501,24 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] patchwork_1.3.2   viridis_0.6.5     viridisLite_0.4.3 ggthemes_5.2.0   
-#> [5] ggplot2_4.0.3     tessera_0.1.12    Rcpp_1.1.1-1.1    data.table_1.18.4
+#> [5] ggplot2_4.0.3     tessera_0.1.13    Rcpp_1.1.1-1.1    data.table_1.18.4
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6       xfun_0.58          bslib_0.11.0       htmlwidgets_1.6.4 
-#>  [5] lattice_0.22-9     vctrs_0.7.3        tools_4.6.0        generics_0.1.4    
-#>  [9] parallel_4.6.0     tibble_3.3.1       proxy_0.4-29       pkgconfig_2.0.3   
+#>  [1] gtable_0.3.6       xfun_0.59          bslib_0.11.0       htmlwidgets_1.6.4 
+#>  [5] lattice_0.22-9     vctrs_0.7.3        tools_4.6.1        generics_0.1.4    
+#>  [9] parallel_4.6.1     tibble_3.3.1       proxy_0.4-29       pkgconfig_2.0.3   
 #> [13] Matrix_1.7-5       KernSmooth_2.23-26 RColorBrewer_1.1-3 S7_0.2.2          
-#> [17] desc_1.4.3         lifecycle_1.0.5    compiler_4.6.0     farver_2.1.2      
+#> [17] desc_1.4.3         lifecycle_1.0.5    compiler_4.6.1     farver_2.1.2      
 #> [21] stringr_1.6.0      textshaping_1.0.5  codetools_0.2-20   htmltools_0.5.9   
 #> [25] class_7.3-23       sass_0.4.10        yaml_2.3.12        pkgdown_2.2.0     
 #> [29] pillar_1.11.1      furrr_0.4.0        jquerylib_0.1.4    classInt_0.4-11   
 #> [33] cachem_1.1.0       abind_1.4-8        mclust_6.1.2       RSpectra_0.16-2   
-#> [37] parallelly_1.47.0  tidyselect_1.2.1   digest_0.6.39      stringi_1.8.7     
+#> [37] parallelly_1.48.0  tidyselect_1.2.1   digest_0.6.39      stringi_1.8.7     
 #> [41] future_1.70.0      sf_1.1-1           dplyr_1.2.1        purrr_1.2.2       
-#> [45] listenv_0.10.1     labeling_0.4.3     magic_1.6-1        fastmap_1.2.0     
-#> [49] grid_4.6.0         cli_3.6.6          magrittr_2.0.5     e1071_1.7-17      
-#> [53] withr_3.0.2        scales_1.4.0       rmarkdown_2.31     globals_0.19.1    
-#> [57] igraph_2.3.2       otel_0.2.0         gridExtra_2.3      ragg_1.5.2        
+#> [45] listenv_1.0.0      labeling_0.4.3     magic_1.6-1        fastmap_1.2.0     
+#> [49] grid_4.6.1         cli_3.6.6          magrittr_2.0.5     e1071_1.7-17      
+#> [53] withr_3.0.3        scales_1.4.0       rmarkdown_2.31     globals_0.19.1    
+#> [57] igraph_2.3.3       otel_0.2.0         gridExtra_2.3.1    ragg_1.5.2        
 #> [61] evaluate_1.0.5     knitr_1.51         geometry_0.5.2     rlang_1.2.0       
 #> [65] glue_1.8.1         DBI_1.3.0          jsonlite_2.0.0     R6_2.6.1          
 #> [69] systemfonts_1.3.2  fs_2.1.0           units_1.0-1
